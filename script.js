@@ -70,7 +70,11 @@ async function loadCompetitionsFromSupabase(){
       sold: Number(r.sold || 0),
       status: r.status || 'live',
     description: r.description || '',
-skill_question: r.skill_question || ''
+skill_question: r.skill_question || '',
+skill_option_a: r.skill_option_a || '',
+skill_option_b: r.skill_option_b || '',
+skill_option_c: r.skill_option_c || '',
+skill_correct_answer: r.skill_correct_answer || ''
     }));
 
     renderDraws();
