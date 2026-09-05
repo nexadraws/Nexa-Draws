@@ -115,16 +115,22 @@ function openSkillQuestion(id){
   `;
   $('#skillError').textContent='';
 
-  $$('[data-skill]').forEach(b=>b.onclick=()=>{
-    if(b.dataset.skill==='96'){
-      skillPassed=true;
-      addToCart(id,qty);
-      closeModals();
-      openCart();
-    }else{
-      $('#skillError').textContent='Incorrect answer. Please try again.';
-    }
+ $$('[data-skill]').forEach(b=>b.onclick=async()=>{
+  $('#skillError').textContent='Checking answer...';
+
+  const {data,error}=await supabaseClient.functions.invoke('check-skill-answer',{
+    body:{answer:b.dataset.skill}
   });
+
+  if(!error && data?.correct){
+    skillPassed=true;
+    addToCart(id,qty);
+    closeModals();
+    openCart();
+  }else{
+    $('#skillError').textContent='Incorrect answer. Please try again.';
+  }
+});
 
   closeModals();
   openModal('#skillModal');
