@@ -124,7 +124,10 @@ function openSkillQuestion(id){
   $('#skillError').textContent='Checking answer...';
 
   const {data,error}=await supabaseClient.functions.invoke('check-skill-answer',{
-    body:{answer:b.dataset.skill}
+    body:{
+  competition_id:id,
+  answer:b.dataset.skill
+}
   });
 
   if(!error && data?.correct){
