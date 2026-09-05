@@ -112,12 +112,23 @@ function openSkillQuestion(id){
 
   const qty=Math.max(1,Math.min(100,Number($('#entryQty').value)||1));
 
-  $('#skillQuestion').textContent='Which number is the result of 12 × 8?';
-  $('#skillAnswers').innerHTML=`
-    <button class="btn outline full" data-skill="84">84</button>
-    <button class="btn outline full" data-skill="96">96</button>
-    <button class="btn outline full" data-skill="108">108</button>
-  `;
+  $('#skillQuestion').textContent=c.skill_question||'Skill question unavailable.';
+
+const options=[
+  c.skill_option_a,
+  c.skill_option_b,
+  c.skill_option_c
+].filter(Boolean);
+
+$('#skillAnswers').innerHTML='';
+
+options.forEach(option=>{
+  const button=document.createElement('button');
+  button.className='btn outline full';
+  button.dataset.skill=option;
+  button.textContent=option;
+  $('#skillAnswers').appendChild(button);
+});
   $('#skillError').textContent='';
 
  $$('[data-skill]').forEach(b=>b.onclick=async()=>{
