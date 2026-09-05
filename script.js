@@ -69,7 +69,8 @@ async function loadCompetitionsFromSupabase(){
       max: Number(r.max_entries),
       sold: Number(r.sold || 0),
       status: r.status || 'live',
-      description: r.description || ''
+    description: r.description || '',
+skill_question: r.skill_question || ''
     }));
 
     renderDraws();
