@@ -7,8 +7,8 @@ const store = {
 
 const defaults = [
   {id:'g63', title:'Mercedes-Benz G63', price:2.99, image:'g63.jpg', closes:'2026-09-18T20:00:00', max:10000, sold:7300, status:'live', description:'A premium Mercedes-Benz G63 prize package. Exact specification and prize terms must be confirmed before launch.'},
-  {id:'iphone16', title:'iPhone 16 Pro Max', price:1.99, image'iphone.jpg', closes:'2026-09-12T20:00:00', max:10000, sold:8200, status:'live', description:'Latest-generation smartphone prize package. Replace demo details with your final prize specification.'},
-  {id:'ps5', title:'PlayStation 5 Pro', price:1.49, image'ps5.jpg', closes:'2026-09-15T20:00:00', max:10000, sold:6800, status:'live', description:'Console prize package. Demo competition content only.'},
+  {id:'iphone16', title:'iPhone 16 Pro Max', price:1.99, image:'iphone.jpg', closes:'2026-09-12T20:00:00', max:10000, sold:8200, status:'live', description:'Latest-generation smartphone prize package. Replace demo details with your final prize specification.'},
+  {id:'ps5', title:'PlayStation 5 Pro', price:1.49, image:'ps5.jpg', closes:'2026-09-15T20:00:00', max:10000, sold:6800, status:'live', description:'Console prize package. Demo competition content only.'},
   {id:'rolex', title:'Rolex Submariner', price:4.99, image:'rolex.jpg', closes:'2026-09-20T20:00:00', max:10000, sold:6100, status:'live', description:'Luxury watch prize package. Verify provenance, value and exact model before publishing.'}
 ];
 if(!localStorage.getItem('nexa_competitions')) store.set('nexa_competitions', defaults);
