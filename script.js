@@ -93,14 +93,42 @@ function renderDraws(){
   $$('[data-open-comp]').forEach(b=>b.onclick=()=>showCompetition(b.dataset.openComp));
 }
 
+let skillPassed = false;
 function showCompetition(id){
   const c=competitions.find(x=>x.id===id); if(!c) return;
   const remaining=Math.max(0,c.max-c.sold);
   $('#competitionContent').innerHTML=`<div class="competition-detail"><img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.title)}"><div><p class="eyebrow">LIVE COMPETITION</p><h2>${escapeHtml(c.title)}</h2><p>${escapeHtml(c.description)}</p><div class="detail-price">${money(c.price)} <small>per entry</small></div><p><strong>${remaining.toLocaleString()}</strong> entries remaining · closes ${new Date(c.closes).toLocaleString('en-GB')}</p><label class="field">Number of entries<input id="entryQty" type="number" min="1" max="100" value="1"></label><button class="btn gold full" id="addToCart">ADD TO BASKET</button><p class="micro">Demo only. No payment is processed.</p></div></div>`;
-  $('#addToCart').onclick=()=>{ const qty=Math.max(1,Math.min(100,Number($('#entryQty').value)||1)); addToCart(id,qty); closeModals(); openCart(); };
+$('#addToCart').onclick=()=>openSkillQuestion(id);
   openModal('#competitionModal');
 }
+function openSkillQuestion(id){
+  const c=competitions.find(x=>x.id===id);
+  if(!c) return;
 
+  const qty=Math.max(1,Math.min(100,Number($('#entryQty').value)||1));
+
+  $('#skillQuestion').textContent='Which number is the result of 12 × 8?';
+  $('#skillAnswers').innerHTML=`
+    <button class="btn outline full" data-skill="84">84</button>
+    <button class="btn outline full" data-skill="96">96</button>
+    <button class="btn outline full" data-skill="108">108</button>
+  `;
+  $('#skillError').textContent='';
+
+  $$('[data-skill]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.skill==='96'){
+      skillPassed=true;
+      addToCart(id,qty);
+      closeModals();
+      openCart();
+    }else{
+      $('#skillError').textContent='Incorrect answer. Please try again.';
+    }
+  });
+
+  closeModals();
+  openModal('#skillModal');
+}
 function addToCart(id,qty){
   const found=cart.find(x=>x.id===id); if(found) found.qty+=qty; else cart.push({id,qty});
   store.set('nexa_cart',cart); updateCartCount(); toast('Entries added to your basket');
