@@ -195,7 +195,11 @@ $('#competitionForm').onsubmit=async e=>{
     sold:Number(f.get('sold')||0),
     status:f.get('status')||'live',
     description:f.get('description')||'',
-skill_question:f.get('skill_question')||''
+skill_question:f.get('skill_question')||'',
+skill_option_a:f.get('skill_option_a')||'',
+skill_option_b:f.get('skill_option_b')||'',
+skill_option_c:f.get('skill_option_c')||'',
+skill_correct_answer:f.get('skill_correct_answer')||''
   };
   const {error}=await supabaseClient.from('competitions').insert(row);
   if(error){alert('Save failed: '+error.message);return;}
