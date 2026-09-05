@@ -251,7 +251,22 @@ const {error}=await query;
   alert('Competition saved!');
 };
   $$('[data-edit]').forEach(b=>b.onclick=()=>adminView(b.dataset.edit));
-  $$('[data-delete]').forEach(b=>b.onclick=()=>{if(confirm('Delete this demo competition?')){store.set('nexa_competitions',competitions.filter(c=>c.id!==b.dataset.delete));renderDraws();adminView();}});
+$$('[data-delete]').forEach(b=>b.onclick=async()=>{
+  if(!confirm('Delete this competition?')) return;
+
+  const {error}=await supabaseClient
+    .from('competitions')
+    .delete()
+    .eq('id',b.dataset.delete);
+
+  if(error){
+    alert('Delete failed: '+error.message);
+    return;
+  }
+
+  await loadCompetitionsFromSupabase();
+  adminView();
+});
   $$('[data-winner]').forEach(b=>b.onclick=()=>publishWinner(b.dataset.winner));
 }
 function publishWinner(id){
