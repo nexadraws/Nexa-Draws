@@ -14,7 +14,7 @@
 <body>
   <header class="topbar">
     <a class="brand" href="#home" aria-label="Nexa Draw home"><img src="logo.png" alt="Nexa Draw" /></a>
-    <button class="menu-btn" id="menuBtn" aria-label="Open menu">☰</button>
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Open menu" onclick="document.getElementById('nav').classList.toggle('open')">☰</button>
     <nav id="nav">
       <a class="active" href="#home">Home</a><a href="#draws">Current Draws</a><a href="#winners">Winners</a><a href="#how">How It Works</a><a href="#about">About Us</a><a href="#faqs">FAQs</a><a href="#contact">Contact</a>
     </nav>
