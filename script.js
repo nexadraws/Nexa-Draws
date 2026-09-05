@@ -152,4 +152,4 @@ $('#viewAllBtn').onclick=()=>document.querySelector('#draws').scrollIntoView({be
 $$('[data-legal]').forEach(b=>b.onclick=()=>openLegal(b.dataset.legal));
 $$('[data-close]').forEach(b=>b.onclick=closeModals); $$('.modal').forEach(m=>m.onclick=e=>{if(e.target===m)closeModals();}); document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModals();});
 
-renderDraws(); renderWinners(); updateCartCount(); updateAccountLabel();
+renderDraws(); renderWinners(); updateCartCount(); updateAccountLabel();loadCompetitionsFromSupabase();
