@@ -1,3 +1,6 @@
+const SUPABASE_URL = 'https://hkxegnjlxuscusygckqm.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_kO22Zj703int4nZp8ha9jg_hwgz5f9X';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = (s, root=document) => root.querySelector(s);
 const $$ = (s, root=document) => [...root.querySelectorAll(s)];
 const store = {
