@@ -193,7 +193,8 @@ $('#competitionForm').onsubmit=async e=>{
     max_entries:Number(f.get('max')),
     sold:Number(f.get('sold')||0),
     status:f.get('status')||'live',
-    description:f.get('description')||''
+    description:f.get('description')||'',
+skill_question:f.get('skill_question')||''
   };
   const {error}=await supabaseClient.from('competitions').insert(row);
   if(error){alert('Save failed: '+error.message);return;}
