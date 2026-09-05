@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Nexa Draw — premium prize competitions." />
+  <meta name="theme-color" content="#080808" />
+  <title>Nexa Draw</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#home" aria-label="Nexa Draw home"><img src="assets/logo.png" alt="Nexa Draw" /></a>
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu">☰</button>
+    <nav id="nav">
+      <a class="active" href="#home">Home</a><a href="#draws">Current Draws</a><a href="#winners">Winners</a><a href="#how">How It Works</a><a href="#about">About Us</a><a href="#faqs">FAQs</a><a href="#contact">Contact</a>
+    </nav>
+    <div class="account">
+      <button class="text-btn" id="accountBtn">👤 <span id="accountLabel">My Account</span></button>
+      <button class="text-btn" id="cartBtn">🛒 <b id="cartCount">0</b></button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <p class="eyebrow">YOUR CHANCE. BIGGER EXPERIENCES.</p>
+        <h1><span>NEXA</span> DRAW</h1>
+        <p class="sub">Amazing Prizes. Real People. Real Winners.</p>
+        <div class="mini-features"><div><i>🎁</i><b>Incredible<br>Prizes</b></div><div><i>🛡️</i><b>Secure<br>&amp; Fair</b></div><div><i>👥</i><b>Real<br>Winners</b></div></div>
+        <div class="hero-actions"><a class="btn gold" href="#draws">VIEW CURRENT DRAWS →</a><a class="btn outline" href="#how">HOW IT WORKS</a></div>
+        <div class="trust">★ <strong>Excellent</strong> ★★★★★ <b>4.8/5</b><small>Demo rating — replace with verified reviews before launch</small></div>
+      </div>
+      <img class="hero-prizes" src="assets/hero-prizes.jpg" alt="Luxury prizes including a Mercedes, phone, console and watch" />
+    </section>
+
+    <section class="draws" id="draws">
+      <div class="section-head"><div><h2>FEATURED <span>DRAWS</span></h2><p>Choose a competition and add entries to your basket.</p></div><button class="btn outline small" id="viewAllBtn">VIEW ALL DRAWS</button></div>
+      <div class="cards" id="drawCards"></div>
+    </section>
+
+    <section class="reasons" id="how">
+      <div><i>🏆</i><h3>Massive Prizes</h3><p>Luxury cars, technology, watches and cash-style prize packages.</p></div>
+      <div><i>🔒</i><h3>Account Ready</h3><p>Create a demo customer account and keep orders in this browser.</p></div>
+      <div><i>★</i><h3>Transparent Results</h3><p>Publish winners from the admin dashboard when a draw is complete.</p></div>
+      <div><i>⚙️</i><h3>Your Admin</h3><p>Add, edit, pause and remove competitions without editing code.</p></div>
+    </section>
+
+    <section class="info-grid" id="about">
+      <div><p class="eyebrow">MORE THAN A DRAW</p><h2>A working prototype you control.</h2><p>This version stores competitions, accounts, baskets and demo orders in your browser. It is ideal for testing your customer journey before connecting a production database, email service and approved payment provider.</p></div>
+      <div class="steps"><div><b>01</b><span>Choose a live draw</span></div><div><b>02</b><span>Select entry quantity</span></div><div><b>03</b><span>Review your basket</span></div><div><b>04</b><span>Complete demo checkout</span></div></div>
+    </section>
+
+    <section class="winner-section" id="winners"><div class="section-head"><div><h2>LATEST <span>WINNERS</span></h2><p>Published results appear here.</p></div></div><div class="winner-grid" id="winnerGrid"></div></section>
+
+    <section class="faq" id="faqs"><h2>FAQs</h2>
+      <details><summary>Is this connected to real payments?</summary><p>No. Checkout is deliberately demo-only. Connect a payment provider only after they approve your exact prize-competition model.</p></details>
+      <details><summary>Where is the data stored?</summary><p>For this prototype, data is saved with localStorage in this browser. Production use needs a real server-side database, authentication and backups.</p></details>
+      <details><summary>Can I edit competitions myself?</summary><p>Yes. Open the Admin button in the footer to create, edit, pause, publish winners or delete demo competitions.</p></details>
+      <details><summary>What about a free-entry route and legal pages?</summary><p>Templates are included as placeholders. Have the final wording reviewed for your business model and jurisdiction before accepting real entries.</p></details>
+    </section>
+  </main>
+
+  <footer id="contact">
+    <img src="assets/logo.png" alt="Nexa Draw" />
+    <div class="footer-links"><button class="link-btn" data-legal="terms">Terms &amp; Conditions</button><button class="link-btn" data-legal="privacy">Privacy Policy</button><button class="link-btn" data-legal="free">Free Entry Route</button><button class="link-btn" data-legal="responsible">Responsible Play</button><a href="mailto:hello@nexadraw.co.uk">Contact Us</a><button class="link-btn" id="adminBtn">Admin</button></div>
+    <p>© 2026 Nexa Draw. Prototype build.</p><strong>DREAM · PLAY · WIN</strong>
+  </footer>
+
+  <div class="modal" id="competitionModal" aria-hidden="true"><div class="modal-card wide"><button class="close" data-close>×</button><div id="competitionContent"></div></div></div>
+  <div class="modal" id="cartModal" aria-hidden="true"><div class="modal-card"><button class="close" data-close>×</button><h2>Your Basket</h2><div id="cartItems"></div><div class="cart-total"><span>Total</span><strong id="cartTotal">£0.00</strong></div><button class="btn gold full" id="checkoutBtn">DEMO CHECKOUT</button><p class="micro">No real payment is taken.</p></div></div>
+  <div class="modal" id="accountModal" aria-hidden="true"><div class="modal-card"><button class="close" data-close>×</button><div id="accountContent"></div></div></div>
+  <div class="modal" id="adminModal" aria-hidden="true"><div class="modal-card admin-card"><button class="close" data-close>×</button><div id="adminContent"></div></div></div>
+  <div class="modal" id="legalModal" aria-hidden="true"><div class="modal-card wide"><button class="close" data-close>×</button><div id="legalContent"></div></div></div>
+  <div class="toast" id="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>
