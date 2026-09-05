@@ -204,10 +204,32 @@ $('#adminContent').innerHTML=`<p class="eyebrow">NEXA DRAW ADMIN</p><h2>Competit
 $('#competitionForm').onsubmit=async e=>{
   e.preventDefault();
   const f=new FormData(e.target);
+  let imageUrl=f.get('image');
+const imageFile=f.get('image_file');
+
+if(imageFile && imageFile.size){
+  const ext=imageFile.name.split('.').pop();
+  const fileName=`${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+  const {error:uploadError}=await supabaseClient.storage
+    .from('competition-images')
+    .upload(fileName,imageFile);
+
+  if(uploadError){
+    alert('Image upload failed: '+uploadError.message);
+    return;
+  }
+
+  const {data:publicData}=supabaseClient.storage
+    .from('competition-images')
+    .getPublicUrl(fileName);
+
+  imageUrl=publicData.publicUrl;
+}
   const row={
     title:f.get('title'),
     price:Number(f.get('price')),
-    image_url:f.get('image'),
+    image_url:imageUrl,
     closes_at:f.get('closes'),
     max_entries:Number(f.get('max')),
     sold:Number(f.get('sold')||0),
