@@ -121,10 +121,28 @@ function renderWinners(){
 }
 
 function adminView(editId=''){
-  competitions=store.get('nexa_competitions',defaults); orders=store.get('nexa_orders',[]); winners=store.get('nexa_winners',[]);
+orders=store.get('nexa_orders',[]); winners=store.get('nexa_winners',[]);
   const edit=competitions.find(c=>c.id===editId);
   $('#adminContent').innerHTML=`<p class="eyebrow">NEXA DRAW ADMIN</p><h2>Competition Dashboard</h2><div class="admin-stats"><div><b>${competitions.length}</b><span>Competitions</span></div><div><b>${orders.length}</b><span>Demo orders</span></div><div><b>${winners.length}</b><span>Published winners</span></div></div><div class="admin-layout"><div><h3>${edit?'Edit':'Add'} competition</h3><form id="competitionForm"><input type="hidden" name="existingId" value="${escapeHtml(edit?.id||'')}"><label class="field">Title<input name="title" required value="${escapeHtml(edit?.title||'')}"></label><div class="field-row"><label class="field">Price (£)<input name="price" type="number" step="0.01" min="0" required value="${edit?.price??''}"></label><label class="field">Max entries<input name="max" type="number" min="1" required value="${edit?.max??10000}"></label></div><div class="field-row"><label class="field">Entries sold<input name="sold" type="number" min="0" required value="${edit?.sold??0}"></label><label class="field">Closing date<input name="closes" type="datetime-local" required value="${edit?edit.closes.slice(0,16):''}"></label></div><label class="field">Image path / URL<input name="image" required value="${escapeHtml(edit?.image||'assets/g63.jpg')}"></label><label class="field">Description<textarea name="description" rows="3">${escapeHtml(edit?.description||'')}</textarea></label><label class="field">Status<select name="status"><option value="live" ${edit?.status==='live'?'selected':''}>Live</option><option value="paused" ${edit?.status==='paused'?'selected':''}>Paused</option></select></label><button class="btn gold full" type="submit">${edit?'SAVE CHANGES':'ADD COMPETITION'}</button></form></div><div><h3>Manage draws</h3><div class="admin-list">${competitions.map(c=>`<div class="admin-row"><div><strong>${escapeHtml(c.title)}</strong><small>${money(c.price)} · ${escapeHtml(c.status)} · ${c.sold}/${c.max}</small></div><div><button data-edit="${escapeHtml(c.id)}">Edit</button><button data-winner="${escapeHtml(c.id)}">Winner</button><button class="danger" data-delete="${escapeHtml(c.id)}">Delete</button></div></div>`).join('')}</div></div></div>`;
-  $('#competitionForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);const existing=f.get('existingId');const obj={id:existing||('draw-'+Date.now()),title:f.get('title'),price:Number(f.get('price')),max:Number(f.get('max')),sold:Number(f.get('sold')),closes:new Date(f.get('closes')).toISOString(),image:f.get('image'),description:f.get('description'),status:f.get('status')};let cs=store.get('nexa_competitions',defaults);if(existing) cs=cs.map(c=>c.id===existing?obj:c);else cs.push(obj);store.set('nexa_competitions',cs);renderDraws();adminView();toast('Competition saved');};
+$('#competitionForm').onsubmit=async e=>{
+  e.preventDefault();
+  const f=new FormData(e.target);
+  const row={
+    title:f.get('title'),
+    price:Number(f.get('price')),
+    image_url:f.get('image'),
+    closes_at:f.get('closes'),
+    max_entries:Number(f.get('max')),
+    sold:Number(f.get('sold')||0),
+    status:f.get('status')||'live',
+    description:f.get('description')||''
+  };
+  const {error}=await supabaseClient.from('competitions').insert(row);
+  if(error){alert('Save failed: '+error.message);return;}
+  await loadCompetitionsFromSupabase();
+  adminView();
+  alert('Competition saved!');
+};
   $$('[data-edit]').forEach(b=>b.onclick=()=>adminView(b.dataset.edit));
   $$('[data-delete]').forEach(b=>b.onclick=()=>{if(confirm('Delete this demo competition?')){store.set('nexa_competitions',competitions.filter(c=>c.id!==b.dataset.delete));renderDraws();adminView();}});
   $$('[data-winner]').forEach(b=>b.onclick=()=>publishWinner(b.dataset.winner));
