@@ -200,7 +200,7 @@ function renderWinners(){
 function adminView(editId=''){
 orders=store.get('nexa_orders',[]); winners=store.get('nexa_winners',[]);
   const edit=competitions.find(c=>c.id===editId);
-$('#adminContent').innerHTML=`<p class="eyebrow">NEXA DRAW ADMIN</p><h2>Competition Dashboard</h2><div class="admin-stats"><div><b>${competitions.length}</b><span>Competitions</span></div><div><b>${orders.length}</b><span>Demo orders</span></div><div><b>${winners.length}</b><span>Published winners</span></div></div><div class="admin-layout"><div><h3>${edit?'Edit':'Add'} competition</h3><form id="competitionForm"><input type="hidden" name="existingId" value="${escapeHtml(edit?.id||'')}"><label class="field">Title<input name="title" required value="${escapeHtml(edit?.title||'')}"></label><label class="field">Price<input name="price" type="number" step="0.01" required value="${edit?.price||''}"></label><label class="field">Maximum entries<input name="max" type="number" required value="${edit?.max||''}"></label><label class="field">Entries sold<input name="sold" type="number" value="${edit?.sold??0}"></label><label class="field">Closing date<input name="closes" type="datetime-local" required value="${edit?edit.closes.slice(0,16):''}"></label><label class="field">Image path / URL<input name="image" value="${escapeHtml(edit?.image||'')}"></label><label class="field">Upload image<input name="image_file" type="file" accept="image/jpeg,image/png,image/webp"></label><label class="field">Description<textarea name="description" rows="3">${escapeHtml(edit?.description||'')}</textarea></label><label class="field">Skill Question<textarea name="skill_question" rows="2">${escapeHtml(edit?.skill_question||'')}</textarea></label><label class="field">Option A<input name="skill_option_a" value="${escapeHtml(edit?.skill_option_a||'')}"></label><label class="field">Option B<input name="skill_option_b" value="${escapeHtml(edit?.skill_option_b||'')}"></label><label class="field">Option C<input name="skill_option_c" value="${escapeHtml(edit?.skill_option_c||'')}"></label><label class="field">Status<select name="status"><option value="live" ${edit?.status==='live'?'selected':''}>Live</option><option value="paused" ${edit?.status==='paused'?'selected':''}>Paused</option></select></label><button class="btn gold full" type="submit">${edit?'SAVE CHANGES':'ADD COMPETITION'}</button></form></div><div><h3>Manage draws</h3><div class="admin-list">${competitions.map(c=>`<div class="admin-row"><div><strong>${escapeHtml(c.title)}</strong><small>${money(c.price)} · ${escapeHtml(c.status)} · ${c.sold}/${c.max}</small></div><div><button data-edit="${escapeHtml(c.id)}">Edit</button><button data-winner="${escapeHtml(c.id)}">Winner</button><button class="danger" data-delete="${escapeHtml(c.id)}">Delete</button></div></div>`).join('')}</div></div></div>`;
+$('#adminContent').innerHTML=`<p class="eyebrow">NEXA DRAW ADMIN</p><h2>Competition Dashboard</h2><div class="admin-stats"><div><strong>${competitions.length}</strong><span>Competitions</span></div><div><strong>${orders.length}</strong><span>Orders</span></div><div><strong>${winners.length}</strong><span>Winners</span></div></div><div class="admin-layout"><div><h3>${edit?'Edit':'Add'} competition</h3><form id="competitionForm"><input type="hidden" name="existingId" value="${escapeHtml(edit?.id||'')}"><label class="field">Title<input name="title" value="${escapeHtml(edit?.title||'')}" required></label><label class="field">Price<input name="price" type="number" step="0.01" value="${edit?.price||''}" required></label><label class="field">Maximum entries<input name="max" type="number" value="${edit?.max||''}" required></label><label class="field">Sold<input name="sold" type="number" value="${edit?.sold||0}"></label><label class="field">Closing date<input name="closes" type="datetime-local" value="${edit?.closes?String(edit.closes).slice(0,16):''}" required></label><label class="field">Image path / URL<input name="image" value="${escapeHtml(edit?.image||'')}"></label><label class="field">Upload image<input name="image_file" type="file" accept="image/jpeg,image/png,image/webp"></label><label class="field">Description<textarea name="description">${escapeHtml(edit?.description||'')}</textarea></label><label class="field">Skill Question<textarea name="skill_question">${escapeHtml(edit?.skill_question||'')}</textarea></label><label class="field">Option A<input name="skill_option_a" value="${escapeHtml(edit?.skill_option_a||'')}"></label><label class="field">Option B<input name="skill_option_b" value="${escapeHtml(edit?.skill_option_b||'')}"></label><label class="field">Option C<input name="skill_option_c" value="${escapeHtml(edit?.skill_option_c||'')}"></label><label class="field">Correct Answer<select name="correct_answer" required><option value="">Choose correct answer</option><option value="A">Option A</option><option value="B">Option B</option><option value="C">Option C</option></select></label><label class="field">Status<select name="status"><option value="live" ${edit?.status==='live'?'selected':''}>Live</option><option value="paused" ${edit?.status==='paused'?'selected':''}>Paused</option></select></label><button class="btn gold full" type="submit">${edit?'SAVE CHANGES':'ADD COMPETITION'}</button></form></div><div><h3>Manage draws</h3><div class="admin-list">${competitions.map(c=>`<div class="admin-row"><div><strong>${escapeHtml(c.title)}</strong><small>${money(c.price)} · ${c.sold}/${c.max}</small></div><div><button class="btn outline" data-edit="${c.id}">Edit</button><button class="btn outline" data-winner="${c.id}">Winner</button><button class="btn outline" data-delete="${c.id}">Delete</button></div></div>`).join('')}</div></div></div>`;
 $('#competitionForm').onsubmit=async e=>{
   e.preventDefault();
   const f=new FormData(e.target);
@@ -240,15 +240,78 @@ skill_option_a:f.get('skill_option_a')||'',
 skill_option_b:f.get('skill_option_b')||'',
 skill_option_c:f.get('skill_option_c')||'',
   };
-  const existing=f.get('existingId');
-let query=existing
-  ? supabaseClient.from('competitions').update(row).eq('id',existing)
-  : supabaseClient.from('competitions').insert(row);
-const {error}=await query;
-  if(error){alert('Save failed: '+error.message);return;}
-  await loadCompetitionsFromSupabase();
-  adminView();
-  alert('Competition saved!');
+const existing=f.get('existingId');
+const correctChoice=f.get('correct_answer');
+
+const answerMap={
+  A:f.get('skill_option_a'),
+  B:f.get('skill_option_b'),
+  C:f.get('skill_option_c')
+};
+
+const correctAnswer=answerMap[correctChoice];
+
+let competitionId=existing;
+
+if(existing){
+  const {error}=await supabaseClient
+    .from('competitions')
+    .update(row)
+    .eq('id',existing);
+
+  if(error){
+    alert('Save failed: '+error.message);
+    return;
+  }
+}else{
+  const {data,error}=await supabaseClient
+    .from('competitions')
+    .insert(row)
+    .select('id')
+    .single();
+
+  if(error){
+    alert('Save failed: '+error.message);
+    return;
+  }
+
+  competitionId=data.id;
+}
+
+const {data:answerRow}=await supabaseClient
+  .from('competition_skill_answers')
+  .select('competition_id')
+  .eq('competition_id',competitionId)
+  .maybeSingle();
+
+let answerError;
+
+if(answerRow){
+  const {error}=await supabaseClient
+    .from('competition_skill_answers')
+    .update({correct_answer:correctAnswer})
+    .eq('competition_id',competitionId);
+
+  answerError=error;
+}else{
+  const {error}=await supabaseClient
+    .from('competition_skill_answers')
+    .insert({
+      competition_id:competitionId,
+      correct_answer:correctAnswer
+    });
+
+  answerError=error;
+}
+
+if(answerError){
+  alert('Competition saved, but correct answer failed: '+answerError.message);
+  return;
+}
+
+await loadCompetitionsFromSupabase();
+adminView();
+alert('Competition saved!');
 };
   $$('[data-edit]').forEach(b=>b.onclick=()=>adminView(b.dataset.edit));
 $$('[data-delete]').forEach(b=>b.onclick=async()=>{
