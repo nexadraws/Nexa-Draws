@@ -218,7 +218,11 @@ skill_option_a:f.get('skill_option_a')||'',
 skill_option_b:f.get('skill_option_b')||'',
 skill_option_c:f.get('skill_option_c')||'',
   };
-  const {error}=await supabaseClient.from('competitions').insert(row);
+  const existing=f.get('existingId');
+let query=existing
+  ? supabaseClient.from('competitions').update(row).eq('id',existing)
+  : supabaseClient.from('competitions').insert(row);
+const {error}=await query;
   if(error){alert('Save failed: '+error.message);return;}
   await loadCompetitionsFromSupabase();
   adminView();
