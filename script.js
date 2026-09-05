@@ -1,6 +1,30 @@
 const SUPABASE_URL = 'https://hkxegnjlxuscusygckqm.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_kO22Zj703int4nZp8ha9jg_hwgz5f9X';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+async function openSecureAdmin(){
+  const {data:{session}} = await supabaseClient.auth.getSession();
+
+  if(!session){
+    const email = prompt('Admin email:');
+    if(!email) return;
+
+    const password = prompt('Admin password:');
+    if(!password) return;
+
+    const {error} = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if(error){
+      alert('Admin login failed: ' + error.message);
+      return;
+    }
+  }
+
+  adminView();
+  openModal('#adminModal');
+}
 const $ = (s, root=document) => root.querySelector(s);
 const $$ = (s, root=document) => [...root.querySelectorAll(s)];
 const store = {
@@ -165,7 +189,7 @@ $('#menuBtn').onclick=()=>$('#nav').classList.toggle('open');
 $$('nav a').forEach(a=>a.onclick=()=>$('#nav').classList.remove('open'));
 $('#cartBtn').onclick=openCart; $('#checkoutBtn').onclick=checkout;
 $('#accountBtn').onclick=()=>{renderAccount(false);openModal('#accountModal');};
-$('#adminBtn').onclick=()=>{adminView();openModal('#adminModal');};
+$('#adminBtn').onclick=openSecureAdmin;
 $('#viewAllBtn').onclick=()=>document.querySelector('#draws').scrollIntoView({behavior:'smooth'});
 $$('[data-legal]').forEach(b=>b.onclick=()=>openLegal(b.dataset.legal));
 $$('[data-close]').forEach(b=>b.onclick=closeModals); $$('.modal').forEach(m=>m.onclick=e=>{if(e.target===m)closeModals();}); document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModals();});
