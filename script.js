@@ -24,6 +24,33 @@ let cart = store.get('nexa_cart', []);
 let user = store.get('nexa_user', null);
 let orders = store.get('nexa_orders', []);
 let winners = store.get('nexa_winners', []);
+async function loadCompetitionsFromSupabase(){
+  const { data, error } = await supabaseClient
+    .from('competitions')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if(error){
+    console.error('Supabase competitions error:', error);
+    return;
+  }
+
+  if(data && data.length){
+    competitions = data.map(r => ({
+      id: String(r.id),
+      title: r.title,
+      price: Number(r.price),
+      image: r.image_url,
+      closes: r.closes_at,
+      max: Number(r.max_entries),
+      sold: Number(r.sold || 0),
+      status: r.status || 'live',
+      description: r.description || ''
+    }));
+
+    renderDraws();
+  }
+}
 
 function money(n){ return new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP'}).format(n); }
 function escapeHtml(v=''){ return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
@@ -33,7 +60,7 @@ function openModal(id){ $(id).classList.add('show'); $(id).setAttribute('aria-hi
 function closeModals(){ $$('.modal').forEach(m=>{m.classList.remove('show');m.setAttribute('aria-hidden','true')}); document.body.classList.remove('modal-open'); }
 
 function renderDraws(){
-  competitions = store.get('nexa_competitions', defaults);
+  
   const live = competitions.filter(c=>c.status==='live');
   $('#drawCards').innerHTML = live.length ? live.map(c=>{
     const pct=Math.min(100, Math.round((c.sold/c.max)*100));
