@@ -342,4 +342,5 @@ $$('[data-delete]').forEach(b=>b.onclick=async()=>{
   await loadCompetitionsFromSupabase();
   adminView();
 });
-
+$$('[data-winner]').forEach(b=>b.onclick=()=>publishWinner(b.dataset.winner));
+}
