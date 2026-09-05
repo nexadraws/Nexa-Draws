@@ -317,6 +317,32 @@ alert('Competition saved!');
 $$('[data-delete]').forEach(b=>b.onclick=async()=>{
   if(!confirm('Delete this competition?')) return;
 
+  const competitionId=b.dataset.delete;
+
+  const {error:answerDeleteError}=await supabaseClient
+    .from('competition_skill_answers')
+    .delete()
+    .eq('competition_id',competitionId);
+
+  if(answerDeleteError){
+    alert('Delete failed: '+answerDeleteError.message);
+    return;
+  }
+
+  const {error}=await supabaseClient
+    .from('competitions')
+    .delete()
+    .eq('id',competitionId);
+
+  if(error){
+    alert('Delete failed: '+error.message);
+    return;
+  }
+
+  await loadCompetitionsFromSupabase();
+  adminView();
+});
+
   const {error}=await supabaseClient
     .from('competitions')
     .delete()
