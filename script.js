@@ -342,5 +342,18 @@ $$('[data-delete]').forEach(b=>b.onclick=async()=>{
   await loadCompetitionsFromSupabase();
   adminView();
 });
+
 $$('[data-winner]').forEach(b=>b.onclick=()=>publishWinner(b.dataset.winner));
 }
+
+$('#adminBtn').onclick=openSecureAdmin;
+$('#accountBtn').onclick=()=>{renderAccount(false);openModal('#accountModal');};
+$('#cartBtn').onclick=openCart;
+$('#checkoutBtn').onclick=checkout;
+
+$$('[data-close]').forEach(b=>b.onclick=closeModals);
+
+updateCartCount();
+updateAccountLabel();
+renderWinners();
+loadCompetitionsFromSupabase();
