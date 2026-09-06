@@ -1888,7 +1888,7 @@ if (
 
   const items = cart.map(item => ({
     competition_id: Number(item.id),
-    quantity: Number(item.quantity)
+    quantity: Number(item.qty)
   }));
 
   const {
