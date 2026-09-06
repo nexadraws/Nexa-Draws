@@ -1624,7 +1624,6 @@ async function renderAccount(
 
 
             return;
-
           }
 
 
@@ -1633,6 +1632,8 @@ async function renderAccount(
           );
 
         };
+     return;
+}
 
 
 const {
