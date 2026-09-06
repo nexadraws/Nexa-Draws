@@ -1635,28 +1635,61 @@ async function renderAccount(
         };
 
 
-    return;
+const {
+  data: dbOrders,
+  error: ordersError
+} = await supabaseClient
+  .from('orders')
+  .select(
+    'id, total, status, created_at, paid_at'
+  )
+  .eq('user_id', user.id)
+  .order('created_at', {
+    ascending: false
+  });
 
-  }
+if (ordersError) {
+  console.error(
+    'Customer orders error:',
+    ordersError
+  );
+}
 
+const customerOrders =
+  await Promise.all(
+    (dbOrders || []).map(
+      async order => {
+        const {
+          data: ticketRows,
+          error: ticketError
+        } = await supabaseClient
+          .from('tickets')
+          .select(
+            'ticket_number, competition_id, status'
+          )
+          .eq('order_id', order.id)
+          .order('id', {
+            ascending: true
+          });
 
-  orders =
-    store.get(
-      'nexa_orders',
-      []
-    );
+        if (ticketError) {
+          console.error(
+            'Customer tickets error:',
+            ticketError
+          );
+        }
 
-
-  const customerOrders =
-    orders.filter(
-      order =>
-        String(
-          order.email || ''
-        ).toLowerCase() ===
-        user.email.toLowerCase()
-    );
-
-
+        return {
+          ...order,
+          date:
+            order.paid_at ||
+            order.created_at,
+          tickets:
+            ticketRows || []
+        };
+      }
+    )
+  );
   host.innerHTML = `
 
     <p class="eyebrow">
@@ -1715,44 +1748,33 @@ async function renderAccount(
 
 
                   <details>
+  <summary>
+    View tickets
+  </summary>
 
-                    <summary>
-                      View tickets
-                    </summary>
-
-
-                    ${
-                      (order.items || [])
-                        .map(
-                          item => `
-
-                            <p>
-
-                              ${escapeHtml(
-                                item.title
-                              )}
-
-                              —
-
-                              ${
-                                (
-                                  item.tickets ||
-                                  []
-                                )
-                                  .map(
-                                    escapeHtml
-                                  )
-                                  .join(', ')
-                              }
-
-                            </p>
-
-                          `
-                        )
-                        .join('')
-                    }
-
-                  </details>
+  ${
+    order.tickets?.length
+      ? order.tickets
+          .map(
+            ticket => `
+              <p>
+                Ticket:
+                <strong>
+                  ${escapeHtml(
+                    ticket.ticket_number
+                  )}
+                </strong>
+              </p>
+            `
+          )
+          .join('')
+      : `
+          <p class="empty">
+            No tickets issued yet.
+          </p>
+        `
+  }
+</details>
 
                 </div>
 
