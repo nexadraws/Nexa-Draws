@@ -1,232 +1,544 @@
-const SUPABASE_URL = 'https://hkxegnjlxuscusygckqm.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_kO22Zj703int4nZp8ha9jg_hwgz5f9X';
+'use strict';
 
-const ADMIN_UID = '2b4b64c6-b96f-4b85-bce3-be28c141311e';
+/* =========================================================
+   NEXA DRAW — CLEAN FRONT-END
+   =========================================================
+   Real charging stays OFF until the secure payment backend
+   is connected.
+   ========================================================= */
 
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const SUPABASE_URL =
+  'https://hkxegnjlxuscusygckqm.supabase.co';
 
-const $ = (s, root = document) => root.querySelector(s);
-const $$ = (s, root = document) => [...root.querySelectorAll(s)];
+const SUPABASE_KEY =
+  'sb_publishable_kO22Zj703int4nZp8ha9jg_hwgz5f9X';
+
+const ADMIN_UID =
+  '2b4b64c6-b96f-4b85-bce3-be28c141311e';
+
+const PAYMENT_MODE = 'disabled';
+const PAYMENT_PROVIDER = 'DNA Payments';
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+const $ = (
+  selector,
+  root = document
+) => root.querySelector(selector);
+
+const $$ = (
+  selector,
+  root = document
+) => [...root.querySelectorAll(selector)];
 
 const store = {
+
   get(key, fallback) {
+
     try {
-      return JSON.parse(localStorage.getItem(key)) ?? fallback;
+
+      return (
+        JSON.parse(
+          localStorage.getItem(key)
+        ) ?? fallback
+      );
+
     } catch {
+
       return fallback;
+
     }
+
   },
 
   set(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
+
+    localStorage.setItem(
+      key,
+      JSON.stringify(value)
+    );
+
   }
+
 };
 
 
-/* =========================
-   APP DATA
-========================= */
+if (
+  !localStorage.getItem(
+    'nexa_cart'
+  )
+) {
 
-if (!localStorage.getItem('nexa_cart')) {
-  store.set('nexa_cart', []);
+  store.set(
+    'nexa_cart',
+    []
+  );
+
 }
 
-if (!localStorage.getItem('nexa_orders')) {
-  store.set('nexa_orders', []);
+
+if (
+  !localStorage.getItem(
+    'nexa_orders'
+  )
+) {
+
+  store.set(
+    'nexa_orders',
+    []
+  );
+
 }
 
-if (!localStorage.getItem('nexa_winners')) {
-  store.set('nexa_winners', []);
+
+if (
+  !localStorage.getItem(
+    'nexa_winners'
+  )
+) {
+
+  store.set(
+    'nexa_winners',
+    []
+  );
+
 }
+
 
 let competitions = [];
-let cart = store.get('nexa_cart', []);
-let orders = store.get('nexa_orders', []);
-let winners = store.get('nexa_winners', []);
+
+let cart =
+  store.get(
+    'nexa_cart',
+    []
+  );
+
+let orders =
+  store.get(
+    'nexa_orders',
+    []
+  );
+
+let winners =
+  store.get(
+    'nexa_winners',
+    []
+  );
+
 let user = null;
 
+let checkoutPending = false;
 
-/* =========================
-   HELPERS
-========================= */
 
-function money(n) {
-  return new Intl.NumberFormat('en-GB', {
-    style: 'currency',
-    currency: 'GBP'
-  }).format(Number(n) || 0);
-}
+/* =========================================================
+   GENERAL HELPERS
+   ========================================================= */
 
-function escapeHtml(v = '') {
-  return String(v).replace(
-    /[&<>'"]/g,
-    c => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      "'": '&#39;',
-      '"': '&quot;'
-    }[c])
+
+function money(value) {
+
+  return new Intl.NumberFormat(
+    'en-GB',
+    {
+      style: 'currency',
+      currency: 'GBP'
+    }
+  ).format(
+    Number(value) || 0
   );
+
 }
+
+
+function escapeHtml(
+  value = ''
+) {
+
+  return String(value)
+    .replace(
+      /[&<>'"]/g,
+      character => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      })[character]
+    );
+
+}
+
 
 function daysLeft(date) {
-  const d = Math.ceil(
-    (new Date(date) - new Date()) / 86400000
+
+  if (!date) {
+
+    return 'CLOSING DATE TBC';
+
+  }
+
+  const difference =
+    Math.ceil(
+      (
+        new Date(date) -
+        new Date()
+      ) / 86400000
+    );
+
+  if (difference > 0) {
+
+    return (
+      `ENDS IN ${difference} DAY` +
+      (
+        difference === 1
+          ? ''
+          : 'S'
+      )
+    );
+
+  }
+
+  return 'CLOSED';
+
+}
+
+
+function toast(message) {
+
+  const element =
+    $('#toast');
+
+  if (!element) {
+
+    return;
+
+  }
+
+  element.textContent =
+    message;
+
+  element.classList.add(
+    'show'
   );
 
-  return d > 0
-    ? `ENDS IN ${d} DAY${d === 1 ? '' : 'S'}`
-    : 'CLOSING / CLOSED';
+  setTimeout(
+    () => {
+
+      element.classList.remove(
+        'show'
+      );
+
+    },
+    2200
+  );
+
 }
 
-function toast(msg) {
-  const t = $('#toast');
-
-  if (!t) return;
-
-  t.textContent = msg;
-  t.classList.add('show');
-
-  setTimeout(() => {
-    t.classList.remove('show');
-  }, 2200);
-}
 
 function openModal(id) {
-  const modal = $(id);
 
-  if (!modal) return;
+  const modal =
+    $(id);
 
-  modal.classList.add('show');
-  modal.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('modal-open');
+  if (!modal) {
+
+    return;
+
+  }
+
+  modal.classList.add(
+    'show'
+  );
+
+  modal.setAttribute(
+    'aria-hidden',
+    'false'
+  );
+
+  document.body.classList.add(
+    'modal-open'
+  );
+
 }
+
 
 function closeModals() {
-  $$('.modal').forEach(modal => {
-    modal.classList.remove('show');
-    modal.setAttribute('aria-hidden', 'true');
-  });
 
-  document.body.classList.remove('modal-open');
+  $$('.modal')
+    .forEach(
+      modal => {
+
+        modal.classList.remove(
+          'show'
+        );
+
+        modal.setAttribute(
+          'aria-hidden',
+          'true'
+        );
+
+      }
+    );
+
+  document.body.classList.remove(
+    'modal-open'
+  );
+
 }
 
 
-/* =========================
-   SUPABASE COMPETITIONS
-========================= */
+async function isAdminSession() {
+
+  const {
+    data: {
+      session
+    }
+  } =
+    await supabaseClient
+      .auth
+      .getSession();
+
+  return (
+    session?.user?.id ===
+    ADMIN_UID
+  );
+
+}
+
+
+/* =========================================================
+   LOAD COMPETITIONS
+   ========================================================= */
+
 
 async function loadCompetitionsFromSupabase() {
 
-  const { data, error } = await supabaseClient
-    .from('competitions')
-    .select('*')
-    .order('created_at', { ascending: false });
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from(
+        'competitions'
+      )
+      .select('*')
+      .order(
+        'created_at',
+        {
+          ascending: false
+        }
+      );
+
 
   if (error) {
+
     console.error(
       'Supabase competitions error:',
       error
     );
 
+    toast(
+      'Could not load competitions'
+    );
+
     return;
+
   }
 
-  competitions = (data || []).map(r => ({
-    id: String(r.id),
-    title: r.title || '',
-    price: Number(r.price || 0),
-    image: r.image_url || '',
-    closes: r.closes_at,
-    max: Number(r.max_entries || 0),
-    sold: Number(r.sold || 0),
-    status: r.status || 'live',
-    description: r.description || '',
-    skill_question: r.skill_question || '',
-    skill_option_a: r.skill_option_a || '',
-    skill_option_b: r.skill_option_b || '',
-    skill_option_c: r.skill_option_c || ''
-  }));
+
+  competitions =
+    (data || [])
+      .map(
+        row => ({
+
+          id:
+            String(
+              row.id
+            ),
+
+          title:
+            row.title || '',
+
+          price:
+            Number(
+              row.price || 0
+            ),
+
+          image:
+            row.image_url || '',
+
+          closes:
+            row.closes_at || '',
+
+          max:
+            Number(
+              row.max_entries || 0
+            ),
+
+          sold:
+            Number(
+              row.sold || 0
+            ),
+
+          status:
+            row.status || 'live',
+
+          description:
+            row.description || '',
+
+          skill_question:
+            row.skill_question || '',
+
+          skill_option_a:
+            row.skill_option_a || '',
+
+          skill_option_b:
+            row.skill_option_b || '',
+
+          skill_option_c:
+            row.skill_option_c || ''
+
+        })
+      );
+
 
   renderDraws();
+
 }
 
 
-/* =========================
-   PUBLIC DRAW CARDS
-========================= */
+/* =========================================================
+   DISPLAY COMPETITIONS
+   ========================================================= */
+
 
 function renderDraws() {
 
-  const drawCards = $('#drawCards');
+  const host =
+    $('#drawCards');
 
-  if (!drawCards) return;
+  if (!host) {
 
-  const live = competitions.filter(
-    c => c.status === 'live'
-  );
+    return;
 
-  drawCards.innerHTML = live.length
-    ? live.map(c => {
+  }
 
-        const pct = c.max > 0
-          ? Math.min(
-              100,
-              Math.round((c.sold / c.max) * 100)
-            )
-          : 0;
+
+  const live =
+    competitions.filter(
+      competition =>
+        competition.status ===
+        'live'
+    );
+
+
+  if (!live.length) {
+
+    host.innerHTML =
+      '<p class="empty">' +
+      'No live competitions right now.' +
+      '</p>';
+
+    return;
+
+  }
+
+
+  host.innerHTML =
+    live.map(
+      competition => {
+
+        const percentage =
+          competition.max > 0
+            ? Math.min(
+                100,
+                Math.round(
+                  (
+                    competition.sold /
+                    competition.max
+                  ) * 100
+                )
+              )
+            : 0;
+
 
         return `
-          <article class="card" data-id="${escapeHtml(c.id)}">
+          <article
+            class="card"
+            data-id="${escapeHtml(
+              competition.id
+            )}"
+          >
 
             <div class="card-img">
 
               <img
-                src="${escapeHtml(c.image)}"
-                alt="${escapeHtml(c.title)}"
+                src="${escapeHtml(
+                  competition.image
+                )}"
+                alt="${escapeHtml(
+                  competition.title
+                )}"
               >
 
               <span>
-                ${daysLeft(c.closes)}
+                ${daysLeft(
+                  competition.closes
+                )}
               </span>
 
             </div>
 
+
             <div class="card-body">
 
               <h3>
-                ${escapeHtml(c.title)}
+                ${escapeHtml(
+                  competition.title
+                )}
               </h3>
 
               <p>
-                ${money(c.price)} per entry
+                ${money(
+                  competition.price
+                )}
+                per entry
               </p>
 
+
               <div class="bar">
-                <i style="width:${pct}%"></i>
+
+                <i
+                  style="width:${percentage}%"
+                ></i>
+
               </div>
+
 
               <div class="stats">
 
                 <b>
-                  ${pct}% sold
+                  ${percentage}% sold
                 </b>
 
                 <span>
-                  ${c.sold.toLocaleString()}
+                  ${competition.sold.toLocaleString()}
                   /
-                  ${c.max.toLocaleString()}
+                  ${competition.max.toLocaleString()}
                 </span>
 
               </div>
 
+
               <button
                 class="enter"
-                data-open-comp="${escapeHtml(c.id)}"
+                data-open-comp="${escapeHtml(
+                  competition.id
+                )}"
               >
                 ENTER NOW
               </button>
@@ -236,507 +548,835 @@ function renderDraws() {
           </article>
         `;
 
-      }).join('')
+      }
+    )
+    .join('');
 
-    : `
-        <p class="empty">
-          No live competitions right now.
-        </p>
-      `;
 
-  $$('[data-open-comp]').forEach(button => {
-    button.onclick = () => {
-      showCompetition(
-        button.dataset.openComp
-      );
-    };
-  });
+  $$('[data-open-comp]')
+    .forEach(
+      button => {
+
+        button.onclick =
+          () => {
+
+            showCompetition(
+              button.dataset.openComp
+            );
+
+          };
+
+      }
+    );
+
 }
 
 
-/* =========================
-   COMPETITION ENTRY
-========================= */
+/* =========================================================
+   COMPETITION DETAILS
+   ========================================================= */
+
 
 function showCompetition(id) {
 
-  const c = competitions.find(
-    x => x.id === id
-  );
+  const competition =
+    competitions.find(
+      item =>
+        item.id ===
+        String(id)
+    );
 
-  if (!c) return;
 
-  const remaining = Math.max(
-    0,
-    c.max - c.sold
-  );
+  if (!competition) {
 
-  const maximumChoice = Math.max(
-    1,
-    Math.min(100, remaining)
-  );
+    return;
 
-  $('#competitionContent').innerHTML = `
-    <div class="competition-detail">
+  }
 
-      <img
-        src="${escapeHtml(c.image)}"
-        alt="${escapeHtml(c.title)}"
-      >
 
-      <div>
+  const remaining =
+    Math.max(
+      0,
+      competition.max -
+      competition.sold
+    );
 
-        <p class="eyebrow">
-          LIVE COMPETITION
-        </p>
 
-        <h2>
-          ${escapeHtml(c.title)}
-        </h2>
+  const maximumChoice =
+    Math.max(
+      1,
+      Math.min(
+        100,
+        remaining
+      )
+    );
 
-        <p>
-          ${escapeHtml(c.description)}
-        </p>
 
-        <div class="detail-price">
-          ${money(c.price)}
-          <small>per entry</small>
-        </div>
+  $('#competitionContent')
+    .innerHTML = `
 
-        <p>
-          <strong>
-            ${remaining.toLocaleString()}
-          </strong>
+      <div class="competition-detail">
 
-          entries remaining
+        <img
+          src="${escapeHtml(
+            competition.image
+          )}"
+          alt="${escapeHtml(
+            competition.title
+          )}"
+        >
 
-          · closes
+
+        <div>
+
+          <p class="eyebrow">
+            LIVE COMPETITION
+          </p>
+
+          <h2>
+            ${escapeHtml(
+              competition.title
+            )}
+          </h2>
+
+          <p>
+            ${escapeHtml(
+              competition.description
+            )}
+          </p>
+
+
+          <div class="detail-price">
+
+            ${money(
+              competition.price
+            )}
+
+            <small>
+              per entry
+            </small>
+
+          </div>
+
+
+          <p>
+
+            <strong>
+              ${remaining.toLocaleString()}
+            </strong>
+
+            entries remaining
+
+          </p>
+
 
           ${
-            c.closes
-              ? new Date(c.closes)
-                  .toLocaleString('en-GB')
-              : 'TBC'
-          }
-        </p>
+            remaining > 0
+              ? `
 
-        ${
-          remaining > 0
+                <label class="field">
 
-            ? `
-              <label class="field">
-                Number of entries
+                  Number of entries
 
-                <input
-                  id="entryQty"
-                  type="number"
-                  min="1"
-                  max="${maximumChoice}"
-                  value="1"
+                  <input
+                    id="entryQty"
+                    type="number"
+                    min="1"
+                    max="${maximumChoice}"
+                    value="1"
+                  >
+
+                </label>
+
+
+                <button
+                  class="btn gold full"
+                  id="addToCart"
                 >
-              </label>
+                  ADD TO BASKET
+                </button>
 
-              <button
-                class="btn gold full"
-                id="addToCart"
-              >
-                ADD TO BASKET
-              </button>
-            `
+              `
+              : `
 
-            : `
-              <p>
-                This competition has no entries remaining.
-              </p>
-            `
-        }
+                <p>
+                  This competition
+                  has no entries
+                  remaining.
+                </p>
 
-        <p class="micro">
-          Demo checkout only.
-          No real payment is processed.
-        </p>
+              `
+          }
+
+
+          <p class="micro">
+
+            Checkout is currently
+            disabled while secure
+            payment processing is
+            being prepared.
+
+          </p>
+
+        </div>
 
       </div>
 
-    </div>
-  `;
+    `;
 
-  const addButton = $('#addToCart');
 
-  if (addButton) {
-    addButton.onclick = () => {
-      openSkillQuestion(id);
-    };
-  }
+  $('#addToCart')
+    ?.addEventListener(
+      'click',
+      () => {
 
-  openModal('#competitionModal');
+        openSkillQuestion(
+          competition.id
+        );
+
+      }
+    );
+
+
+  openModal(
+    '#competitionModal'
+  );
+
 }
-
-
-/* =========================
+/* =========================================================
    SKILL QUESTION
-========================= */
+   ========================================================= */
 
 function openSkillQuestion(id) {
 
-  const c = competitions.find(
-    x => x.id === id
-  );
+  const competition =
+    competitions.find(
+      item =>
+        item.id ===
+        String(id)
+    );
 
-  if (!c) return;
+  if (!competition) {
 
-  const remaining = Math.max(
-    0,
-    c.max - c.sold
-  );
+    return;
 
-  const qty = Math.max(
-    1,
-    Math.min(
-      100,
-      remaining,
-      Number($('#entryQty')?.value) || 1
-    )
-  );
+  }
 
-  $('#skillQuestion').textContent =
-    c.skill_question ||
-    'Skill question unavailable.';
 
-  const options = [
-    c.skill_option_a,
-    c.skill_option_b,
-    c.skill_option_c
-  ].filter(Boolean);
+  const remaining =
+    Math.max(
+      0,
+      competition.max -
+      competition.sold
+    );
 
-  const answerContainer =
+
+  const quantity =
+    Math.max(
+      1,
+      Math.min(
+        100,
+        remaining,
+        Number(
+          $('#entryQty')?.value
+        ) || 1
+      )
+    );
+
+
+  $('#skillQuestion')
+    .textContent =
+      competition.skill_question ||
+      'Skill question unavailable.';
+
+
+  $('#skillError')
+    .textContent = '';
+
+
+  const answers =
     $('#skillAnswers');
 
-  answerContainer.innerHTML = '';
 
-  options.forEach(option => {
+  answers.innerHTML = '';
 
-    const button =
-      document.createElement('button');
 
-    button.className =
-      'btn outline full';
+  [
+    competition.skill_option_a,
+    competition.skill_option_b,
+    competition.skill_option_c
+  ]
+    .filter(Boolean)
+    .forEach(
+      option => {
 
-    button.dataset.skill = option;
-    button.textContent = option;
+        const button =
+          document.createElement(
+            'button'
+          );
 
-    answerContainer.appendChild(button);
-  });
+        button.className =
+          'btn outline full';
 
-  $('#skillError').textContent = '';
+        button.type =
+          'button';
 
-  $$('[data-skill]').forEach(button => {
+        button.dataset.skill =
+          option;
 
-    button.onclick = async () => {
+        button.textContent =
+          option;
 
-      $('#skillError').textContent =
-        'Checking answer...';
+        answers.appendChild(
+          button
+        );
 
-      const { data, error } =
-        await supabaseClient.functions.invoke(
-          'check-skill-answer',
-          {
-            body: {
-              competition_id: id,
-              answer: button.dataset.skill
+      }
+    );
+
+
+  $$('[data-skill]')
+    .forEach(
+      button => {
+
+        button.onclick =
+          async () => {
+
+            $('#skillError')
+              .textContent =
+                'Checking answer...';
+
+
+            $$('[data-skill]')
+              .forEach(
+                item => {
+
+                  item.disabled =
+                    true;
+
+                }
+              );
+
+
+            const {
+              data,
+              error
+            } =
+              await supabaseClient
+                .functions
+                .invoke(
+                  'check-skill-answer',
+                  {
+                    body: {
+
+                      competition_id:
+                        competition.id,
+
+                      answer:
+                        button.dataset.skill
+
+                    }
+                  }
+                );
+
+
+            $$('[data-skill]')
+              .forEach(
+                item => {
+
+                  item.disabled =
+                    false;
+
+                }
+              );
+
+
+            if (error) {
+
+              console.error(
+                'Skill answer check failed:',
+                error
+              );
+
+              $('#skillError')
+                .textContent =
+                  'Unable to check your answer. Please try again.';
+
+              return;
+
             }
-          }
-        );
 
-      if (error) {
 
-        console.error(
-          'Skill answer check failed:',
-          error
-        );
+            if (!data?.correct) {
 
-        $('#skillError').textContent =
-          'Unable to check your answer. Please try again.';
+              $('#skillError')
+                .textContent =
+                  'Incorrect answer. Please try again.';
 
-        return;
+              return;
+
+            }
+
+
+            addToCart(
+              competition.id,
+              quantity
+            );
+
+
+            closeModals();
+
+            openCart();
+
+          };
+
       }
+    );
 
-      if (data?.correct) {
-
-        addToCart(id, qty);
-
-        closeModals();
-
-        openCart();
-
-      } else {
-
-        $('#skillError').textContent =
-          'Incorrect answer. Please try again.';
-      }
-    };
-  });
 
   closeModals();
-  openModal('#skillModal');
+
+
+  openModal(
+    '#skillModal'
+  );
+
 }
 
 
-/* =========================
+/* =========================================================
    BASKET
-========================= */
+   ========================================================= */
 
-function addToCart(id, qty) {
 
-  cart = store.get(
-    'nexa_cart',
-    []
-  );
+function addToCart(
+  id,
+  quantity
+) {
 
-  const c = competitions.find(
-    x => x.id === id
-  );
+  cart =
+    store.get(
+      'nexa_cart',
+      []
+    );
 
-  if (!c) return;
 
-  const remaining = Math.max(
-    0,
-    c.max - c.sold
-  );
+  const competition =
+    competitions.find(
+      item =>
+        item.id ===
+        String(id)
+    );
+
+
+  if (!competition) {
+
+    return;
+
+  }
+
+
+  const remaining =
+    Math.max(
+      0,
+      competition.max -
+      competition.sold
+    );
+
 
   if (remaining <= 0) {
+
     toast(
       'No entries remaining for this competition.'
     );
 
     return;
+
   }
 
-  qty = Math.max(
-    1,
-    Math.min(
-      Number(qty) || 1,
-      100,
-      remaining
-    )
-  );
 
-  const found = cart.find(
-    x => x.id === id
-  );
+  quantity =
+    Math.max(
+      1,
+      Math.min(
+        Number(quantity) || 1,
+        100,
+        remaining
+      )
+    );
+
+
+  const found =
+    cart.find(
+      item =>
+        item.id ===
+        String(id)
+    );
+
 
   if (found) {
 
-    found.qty = Math.min(
-      found.qty + qty,
-      100,
-      remaining
-    );
+    found.qty =
+      Math.min(
+        Number(found.qty || 0) +
+        quantity,
+        100,
+        remaining
+      );
 
   } else {
 
     cart.push({
-      id,
-      qty
+      id:
+        String(id),
+      qty:
+        quantity
     });
+
   }
+
 
   store.set(
     'nexa_cart',
     cart
   );
 
+
   updateCartCount();
+
 
   toast(
     'Entries added to your basket'
   );
+
 }
 
 
 function updateCartCount() {
 
-  cart = store.get(
-    'nexa_cart',
-    []
-  );
+  cart =
+    store.get(
+      'nexa_cart',
+      []
+    );
 
-  const count = cart.reduce(
-    (total, item) =>
-      total + Number(item.qty || 0),
-    0
-  );
 
-  if ($('#cartCount')) {
-    $('#cartCount').textContent =
-      count;
+  const count =
+    cart.reduce(
+      (
+        total,
+        item
+      ) =>
+        total +
+        Number(
+          item.qty || 0
+        ),
+      0
+    );
+
+
+  if (
+    $('#cartCount')
+  ) {
+
+    $('#cartCount')
+      .textContent =
+        count;
+
   }
+
 }
 
 
 function openCart() {
 
-  cart = store.get(
-    'nexa_cart',
-    []
-  );
-
-  /*
-    Remove basket items for competitions
-    that no longer exist.
-  */
-
-  cart = cart.filter(item =>
-    competitions.some(
-      c => c.id === item.id
+  cart =
+    store.get(
+      'nexa_cart',
+      []
     )
-  );
+    .filter(
+      item =>
+        competitions.some(
+          competition =>
+            competition.id ===
+            String(item.id)
+        )
+    );
+
 
   store.set(
     'nexa_cart',
     cart
   );
 
+
   let total = 0;
 
-  const cartItems =
+
+  const host =
     $('#cartItems');
 
-  cartItems.innerHTML = cart.length
 
-    ? cart.map((item, i) => {
+  host.innerHTML =
+    cart.length
+      ? cart
+          .map(
+            (
+              item,
+              index
+            ) => {
 
-        const c = competitions.find(
-          x => x.id === item.id
-        );
+              const competition =
+                competitions.find(
+                  competition =>
+                    competition.id ===
+                    String(item.id)
+                );
 
-        if (!c) return '';
 
-        const line =
-          c.price * item.qty;
+              if (!competition) {
 
-        total += line;
+                return '';
 
-        return `
-          <div class="cart-line">
+              }
 
-            <div>
 
-              <strong>
-                ${escapeHtml(c.title)}
-              </strong>
+              const lineTotal =
+                competition.price *
+                Number(
+                  item.qty || 0
+                );
 
-              <small>
-                ${item.qty}
-                ×
-                ${money(c.price)}
-              </small>
 
-            </div>
+              total +=
+                lineTotal;
 
-            <div>
 
-              <b>
-                ${money(line)}
-              </b>
+              return `
 
-              <button
-                class="remove"
-                data-remove="${i}"
-              >
-                Remove
-              </button>
+                <div class="cart-line">
 
-            </div>
+                  <div>
 
-          </div>
+                    <strong>
+                      ${escapeHtml(
+                        competition.title
+                      )}
+                    </strong>
+
+                    <small>
+                      ${item.qty}
+                      ×
+                      ${money(
+                        competition.price
+                      )}
+                    </small>
+
+                  </div>
+
+
+                  <div>
+
+                    <b>
+                      ${money(
+                        lineTotal
+                      )}
+                    </b>
+
+                    <button
+                      class="remove"
+                      data-remove="${index}"
+                    >
+                      Remove
+                    </button>
+
+                  </div>
+
+                </div>
+
+              `;
+
+            }
+          )
+          .join('')
+      : `
+
+          <p class="empty">
+            Your basket is empty.
+          </p>
+
         `;
 
-      }).join('')
 
-    : `
-        <p class="empty">
-          Your basket is empty.
-        </p>
-      `;
+  $('#cartTotal')
+    .textContent =
+      money(total);
 
-  $('#cartTotal').textContent =
-    money(total);
 
-  $$('[data-remove]').forEach(button => {
+  $$('[data-remove]')
+    .forEach(
+      button => {
 
-    button.onclick = () => {
+        button.onclick =
+          () => {
 
-      cart.splice(
-        Number(button.dataset.remove),
-        1
-      );
+            cart.splice(
+              Number(
+                button.dataset.remove
+              ),
+              1
+            );
 
-      store.set(
-        'nexa_cart',
-        cart
-      );
 
-      updateCartCount();
-      openCart();
-    };
-  });
+            store.set(
+              'nexa_cart',
+              cart
+            );
 
-  $('#checkoutBtn').disabled =
-    !cart.length;
 
-  openModal('#cartModal');
+            updateCartCount();
+
+
+            openCart();
+
+          };
+
+      }
+    );
+
+
+  $('#checkoutBtn')
+    .disabled =
+      !cart.length;
+
+
+  $('#checkoutBtn')
+    .textContent =
+      PAYMENT_MODE === 'live'
+        ? 'SECURE CHECKOUT'
+        : 'CHECKOUT — COMING SOON';
+
+
+  const micro =
+    $('#cartModal .micro');
+
+
+  if (micro) {
+
+    micro.innerHTML =
+      PAYMENT_MODE === 'live'
+        ? `Secure payment powered by ${escapeHtml(
+            PAYMENT_PROVIDER
+          )}.`
+        : `Payment setup is being prepared. No card or wallet can be charged yet.`;
+
+  }
+
+
+  openModal(
+    '#cartModal'
+  );
+
 }
 
 
-/* =========================
-   CUSTOMER AUTH
-========================= */
+/* =========================================================
+   CUSTOMER ACCOUNT
+   ========================================================= */
+
 
 async function getCurrentCustomer() {
 
   const {
-    data: { user: authUser }
-  } = await supabaseClient.auth.getUser();
+    data: {
+      session
+    }
+  } =
+    await supabaseClient
+      .auth
+      .getSession();
+
+
+  const authUser =
+    session?.user || null;
+
 
   if (!authUser) {
+
     user = null;
+
     return null;
+
   }
 
+
   user = {
-    id: authUser.id,
-    email: authUser.email,
+
+    id:
+      authUser.id,
+
+    email:
+      authUser.email || '',
+
     name:
-      authUser.user_metadata?.name ||
+      authUser
+        .user_metadata
+        ?.name ||
       'Customer'
+
   };
 
+
   return user;
+
 }
 
 
 async function renderAccount(
-  forceSignup = false
+  fromCheckout = false
 ) {
 
-  const authUser =
-    await getCurrentCustomer();
+  await getCurrentCustomer();
 
-  if (!authUser || forceSignup) {
 
-    $('#accountContent').innerHTML = `
+  const host =
+    $('#accountContent');
+
+
+  if (!host) {
+
+    return;
+
+  }
+
+
+  if (!user) {
+
+    host.innerHTML = `
+
       <p class="eyebrow">
-        CUSTOMER ACCOUNT
+        MY NEXA
       </p>
 
-      <h2>My Nexa</h2>
+      <h2>
+        ${
+          fromCheckout
+            ? 'Sign in to continue'
+            : 'Customer Account'
+        }
+      </h2>
 
-      <h3>Create Account</h3>
+
+      <h3>
+        Create Account
+      </h3>
+
 
       <form id="signupForm">
 
         <label class="field">
+
           Name
 
           <input
@@ -744,9 +1384,12 @@ async function renderAccount(
             required
             autocomplete="name"
           >
+
         </label>
 
+
         <label class="field">
+
           Email
 
           <input
@@ -755,9 +1398,12 @@ async function renderAccount(
             required
             autocomplete="email"
           >
+
         </label>
 
+
         <label class="field">
+
           Password
 
           <input
@@ -767,7 +1413,9 @@ async function renderAccount(
             required
             autocomplete="new-password"
           >
+
         </label>
+
 
         <button
           class="btn gold full"
@@ -778,15 +1426,19 @@ async function renderAccount(
 
       </form>
 
+
       <hr>
+
 
       <h3>
         Already have an account?
       </h3>
 
+
       <form id="loginForm">
 
         <label class="field">
+
           Email
 
           <input
@@ -795,9 +1447,12 @@ async function renderAccount(
             required
             autocomplete="email"
           >
+
         </label>
 
+
         <label class="field">
+
           Password
 
           <input
@@ -806,7 +1461,9 @@ async function renderAccount(
             required
             autocomplete="current-password"
           >
+
         </label>
+
 
         <button
           class="btn outline full"
@@ -816,181 +1473,301 @@ async function renderAccount(
         </button>
 
       </form>
+
     `;
 
 
-    $('#signupForm').onsubmit =
-      async e => {
+    $('#signupForm')
+      .onsubmit =
+        async event => {
 
-        e.preventDefault();
+          event.preventDefault();
 
-        const fd =
-          new FormData(e.target);
 
-        const { error } =
-          await supabaseClient.auth.signUp({
-            email: fd.get('email'),
-            password: fd.get('password'),
-            options: {
-              data: {
-                name: fd.get('name')
-              },
+          const formData =
+            new FormData(
+              event.target
+            );
 
-              emailRedirectTo:
-                'http://nexadraw.co.uk/'
-            }
-          });
 
-        if (error) {
+          const {
+            error
+          } =
+            await supabaseClient
+              .auth
+              .signUp({
+
+                email:
+                  String(
+                    formData.get(
+                      'email'
+                    ) || ''
+                  ).trim(),
+
+                password:
+                  String(
+                    formData.get(
+                      'password'
+                    ) || ''
+                  ),
+
+                options: {
+
+                  data: {
+
+                    name:
+                      String(
+                        formData.get(
+                          'name'
+                        ) || ''
+                      ).trim()
+
+                  },
+
+                  emailRedirectTo:
+                    window.location.origin +
+                    '/'
+
+                }
+
+              });
+
+
+          if (error) {
+
+            alert(
+              'Sign up failed: ' +
+              error.message
+            );
+
+            return;
+
+          }
+
 
           alert(
-            'Sign up failed: ' +
-            error.message
+            'Account created. Please check your email if confirmation is required.'
           );
 
-          return;
-        }
-
-        alert(
-          'Account created. Please check your email and confirm your account.'
-        );
-      };
-
-
-    $('#loginForm').onsubmit =
-      async e => {
-
-        e.preventDefault();
-
-        const fd =
-          new FormData(e.target);
-
-        const { data, error } =
-          await supabaseClient.auth
-            .signInWithPassword({
-              email: fd.get('email'),
-              password:
-                fd.get('password')
-            });
-
-        if (error) {
-
-          alert(
-            'Login failed: ' +
-            error.message
-          );
-
-          return;
-        }
-
-        user = {
-          id: data.user.id,
-          email: data.user.email,
-          name:
-            data.user.user_metadata?.name ||
-            'Customer'
         };
 
-        await updateAccountLabel();
 
-        renderAccount(false);
-      };
+    $('#loginForm')
+      .onsubmit =
+        async event => {
+
+          event.preventDefault();
+
+
+          const formData =
+            new FormData(
+              event.target
+            );
+
+
+          const {
+            error
+          } =
+            await supabaseClient
+              .auth
+              .signInWithPassword({
+
+                email:
+                  String(
+                    formData.get(
+                      'email'
+                    ) || ''
+                  ).trim(),
+
+                password:
+                  String(
+                    formData.get(
+                      'password'
+                    ) || ''
+                  )
+
+              });
+
+
+          if (error) {
+
+            alert(
+              'Login failed: ' +
+              error.message
+            );
+
+            return;
+
+          }
+
+
+          await updateAccountLabel();
+
+
+          if (
+            checkoutPending
+          ) {
+
+            checkoutPending =
+              false;
+
+
+            closeModals();
+
+
+            openCart();
+
+
+            toast(
+              'Logged in — you can continue checkout'
+            );
+
+
+            return;
+
+          }
+
+
+          await renderAccount(
+            false
+          );
+
+        };
+
 
     return;
+
   }
 
 
-  orders = store.get(
-    'nexa_orders',
-    []
-  );
+  orders =
+    store.get(
+      'nexa_orders',
+      []
+    );
 
-  const mine = orders.filter(
-    o => o.userEmail === user.email
-  );
 
-  $('#accountContent').innerHTML = `
+  const customerOrders =
+    orders.filter(
+      order =>
+        String(
+          order.email || ''
+        ).toLowerCase() ===
+        user.email.toLowerCase()
+    );
+
+
+  host.innerHTML = `
+
     <p class="eyebrow">
       MY NEXA
     </p>
 
+
     <h2>
       Welcome,
-      ${escapeHtml(user.name)}
+      ${escapeHtml(
+        user.name
+      )}
     </h2>
 
+
     <p>
-      ${escapeHtml(user.email)}
+      ${escapeHtml(
+        user.email
+      )}
     </p>
 
-    <div class="account-orders">
 
-      <h3>
-        Your orders
-      </h3>
+    <h3>
+      Your orders
+    </h3>
 
-      ${
-        mine.length
 
-          ? mine.map(order => `
-              <div class="order">
+    ${
+      customerOrders.length
+        ? customerOrders
+            .map(
+              order => `
 
-                <div>
+                <div class="order-card">
 
                   <strong>
-                    ${escapeHtml(order.id)}
+                    ${escapeHtml(
+                      order.id
+                    )}
                   </strong>
 
+
+                  <p>
+                    ${money(
+                      order.total
+                    )}
+                  </p>
+
+
                   <small>
+                    ${escapeHtml(
+                      order.status ||
+                      'TEST'
+                    )}
+                  </small>
+
+
+                  <details>
+
+                    <summary>
+                      View tickets
+                    </summary>
+
+
                     ${
-                      new Date(order.date)
-                        .toLocaleString('en-GB')
+                      (order.items || [])
+                        .map(
+                          item => `
+
+                            <p>
+
+                              ${escapeHtml(
+                                item.title
+                              )}
+
+                              —
+
+                              ${
+                                (
+                                  item.tickets ||
+                                  []
+                                )
+                                  .map(
+                                    escapeHtml
+                                  )
+                                  .join(', ')
+                              }
+
+                            </p>
+
+                          `
+                        )
+                        .join('')
                     }
 
-                    ·
-
-                    ${escapeHtml(order.status)}
-                  </small>
+                  </details>
 
                 </div>
 
-                <b>
-                  ${money(order.total)}
-                </b>
+              `
+            )
+            .join('')
+        : `
 
-                <details>
+            <p class="empty">
+              No orders yet.
+            </p>
 
-                  <summary>
-                    View tickets
-                  </summary>
+          `
+    }
 
-                  ${
-                    order.items.map(item => `
-                      <p>
-                        ${escapeHtml(item.title)}
-                        —
-                        ${
-                          item.tickets
-                            .map(escapeHtml)
-                            .join(', ')
-                        }
-                      </p>
-                    `).join('')
-                  }
-
-                </details>
-
-              </div>
-            `).join('')
-
-          : `
-              <p class="empty">
-                No orders yet.
-              </p>
-            `
-      }
-
-    </div>
 
     <button
       class="btn outline full"
@@ -998,21 +1775,36 @@ async function renderAccount(
     >
       LOG OUT
     </button>
+
   `;
 
 
-  $('#logoutBtn').onclick =
-    async () => {
+  $('#logoutBtn')
+    .onclick =
+      async () => {
 
-      await supabaseClient.auth
-        .signOut();
+        await supabaseClient
+          .auth
+          .signOut();
 
-      user = null;
 
-      await updateAccountLabel();
+        user =
+          null;
 
-      renderAccount(false);
-    };
+
+        checkoutPending =
+          false;
+
+
+        await updateAccountLabel();
+
+
+        await renderAccount(
+          false
+        );
+
+      };
+
 }
 
 
@@ -1020,283 +1812,525 @@ async function updateAccountLabel() {
 
   await getCurrentCustomer();
 
-  if (!$('#accountLabel')) return;
 
-  if (user) {
+  if (
+    !$('#accountLabel')
+  ) {
 
-    $('#accountLabel').textContent =
-      user.name
-        .split(' ')[0];
+    return;
 
-  } else {
-
-    $('#accountLabel').textContent =
-      'My Account';
   }
+
+
+  $('#accountLabel')
+    .textContent =
+      user
+        ? (
+            user.name ||
+            'Customer'
+          )
+            .split(' ')[0]
+        : 'My Account';
+
 }
-
-
-/* =========================
-   DEMO CHECKOUT
-========================= */
-
-function randomTicket() {
-
-  return (
-    'NX-' +
-    Math.random()
-      .toString(36)
-      .slice(2, 8)
-      .toUpperCase()
-  );
-}
-
+/* =========================================================
+   CHECKOUT / PAYMENT-READY STATE
+   ========================================================= */
 
 async function checkout() {
 
-  cart = store.get(
-    'nexa_cart',
-    []
-  );
+  cart =
+    store.get(
+      'nexa_cart',
+      []
+    );
 
-  if (!cart.length) return;
+
+  if (!cart.length) {
+
+    return;
+
+  }
+
 
   const authUser =
     await getCurrentCustomer();
 
+
   if (!authUser) {
+
+    checkoutPending =
+      true;
+
 
     closeModals();
 
-    await renderAccount(true);
+
+    await renderAccount(
+      true
+    );
+
 
     openModal(
       '#accountModal'
     );
 
+
     return;
+
   }
 
-  const items = cart
-    .map(item => {
 
-      const c =
-        competitions.find(
-          x => x.id === item.id
+  if (
+    PAYMENT_MODE !== 'live'
+  ) {
+
+    const cartItems =
+      $('#cartItems');
+
+
+    if (
+      cartItems &&
+      !$('#paymentNotice')
+    ) {
+
+      cartItems
+        .insertAdjacentHTML(
+          'afterbegin',
+          `
+
+            <div
+              class="order-card"
+              id="paymentNotice"
+            >
+
+              <strong>
+                Secure payments
+                are being prepared
+              </strong>
+
+
+              <p>
+                This checkout is
+                structured for
+                ${escapeHtml(
+                  PAYMENT_PROVIDER
+                )},
+                but real charging
+                is switched off.
+              </p>
+
+
+              <p class="micro">
+                Card and supported
+                digital-wallet
+                options will appear
+                here only after the
+                merchant account,
+                HTTPS and secure
+                server-side payment
+                confirmation are
+                connected.
+              </p>
+
+            </div>
+
+          `
         );
 
-      if (!c) return null;
+    }
 
-      return {
-        ...item,
-        title: c.title,
-        price: c.price,
-        tickets:
-          Array.from(
-            {
-              length: item.qty
-            },
-            randomTicket
-          )
-      };
 
-    })
-    .filter(Boolean);
-
-  if (!items.length) return;
-
-  const total =
-    items.reduce(
-      (sum, item) =>
-        sum +
-        item.price * item.qty,
-      0
+    toast(
+      'Real payments are currently disabled'
     );
 
-  const order = {
-    id:
-      'ORD-' +
-      Date.now()
-        .toString()
-        .slice(-8),
 
-    date:
-      new Date()
-        .toISOString(),
+    return;
 
-    userEmail:
-      user.email,
+  }
 
-    items,
 
-    total,
+  /*
+    IMPORTANT:
 
-    status:
-      'DEMO — NOT PAID'
-  };
+    Real payments must NOT be
+    created or confirmed directly
+    inside this browser script.
 
-  orders = store.get(
-    'nexa_orders',
-    []
+    Production flow:
+
+    1. Customer presses checkout.
+
+    2. Browser calls a secure
+       Supabase Edge Function.
+
+    3. Server re-reads prices from
+       the database.
+
+    4. Server checks remaining
+       competition entries.
+
+    5. Server creates a pending
+       order.
+
+    6. Server creates the payment
+       session with the approved
+       payment provider.
+
+    7. Payment provider confirms
+       payment through a secure
+       webhook.
+
+    8. Only after confirmed payment
+       are ticket numbers allocated.
+
+    9. Sold counts are updated
+       atomically on the server.
+
+    10. The paid tickets become
+        eligible for the eventual
+        winner draw.
+  */
+
+
+  alert(
+    'Payment backend is not connected yet.'
   );
 
-  orders.unshift(order);
-
-  store.set(
-    'nexa_orders',
-    orders
-  );
-
-  store.set(
-    'nexa_cart',
-    []
-  );
-
-  cart = [];
-
-  updateCartCount();
-
-  closeModals();
-
-  toast(
-    `Demo order ${order.id} created`
-  );
-
-  await renderAccount(false);
-
-  openModal(
-    '#accountModal'
-  );
 }
 
 
-/* =========================
+/* =========================================================
    WINNERS
-========================= */
+   ========================================================= */
+
 
 function renderWinners() {
 
-  winners = store.get(
-    'nexa_winners',
-    []
-  );
+  winners =
+    store.get(
+      'nexa_winners',
+      []
+    );
 
-  const winnerGrid =
+
+  const host =
     $('#winnerGrid');
 
-  if (!winnerGrid) return;
 
-  winnerGrid.innerHTML =
+  if (!host) {
+
+    return;
+
+  }
+
+
+  host.innerHTML =
     winners.length
+      ? winners
+          .map(
+            winner => `
 
-      ? winners.map(w => `
-          <article class="winner-card">
+              <article
+                class="winner-card"
+              >
 
-            <span>🏆</span>
+                <span>
+                  🏆
+                </span>
 
-            <h3>
-              ${escapeHtml(w.prize)}
-            </h3>
 
-            <p>
-              Winner:
-              <strong>
-                ${escapeHtml(w.name)}
-              </strong>
-            </p>
+                <h3>
+                  ${escapeHtml(
+                    winner.prize
+                  )}
+                </h3>
 
-            <small>
-              ${
-                new Date(w.date)
-                  .toLocaleDateString(
-                    'en-GB'
-                  )
-              }
-            </small>
 
-          </article>
-        `).join('')
+                <p>
 
+                  Winner:
+
+                  <strong>
+                    ${escapeHtml(
+                      winner.name
+                    )}
+                  </strong>
+
+                </p>
+
+
+                ${
+                  winner.ticket
+                    ? `
+
+                        <p>
+
+                          Ticket:
+
+                          <strong>
+                            ${escapeHtml(
+                              winner.ticket
+                            )}
+                          </strong>
+
+                        </p>
+
+                      `
+                    : ''
+                }
+
+
+                <small>
+
+                  ${
+                    new Date(
+                      winner.date
+                    )
+                      .toLocaleDateString(
+                        'en-GB'
+                      )
+                  }
+
+                </small>
+
+              </article>
+
+            `
+          )
+          .join('')
       : `
+
           <p class="empty">
-            No winners have been published yet.
+            No winners have been
+            published yet.
           </p>
+
         `;
+
 }
 
 
-function publishWinner(id) {
+/* =========================================================
+   SECURE WINNER DRAW
+   ========================================================= */
 
-  const c = competitions.find(
-    x => x.id === id
-  );
 
-  if (!c) return;
+async function drawWinnerSecurely(
+  id
+) {
 
-  const name = prompt(
-    `Winner name for ${c.title}:`
-  );
+  if (
+    !(await isAdminSession())
+  ) {
 
-  if (!name) return;
+    alert(
+      'Administrator access required.'
+    );
 
-  winners = store.get(
-    'nexa_winners',
-    []
-  );
+    return;
+
+  }
+
+
+  const competition =
+    competitions.find(
+      item =>
+        item.id ===
+        String(id)
+    );
+
+
+  if (!competition) {
+
+    return;
+
+  }
+
+
+  const confirmed =
+    window.confirm(
+
+      `Draw a winner for "${competition.title}"?\n\n` +
+
+      'Only confirmed paid tickets should be eligible. ' +
+
+      'The winner must be selected by the secure server-side draw function.'
+
+    );
+
+
+  if (!confirmed) {
+
+    return;
+
+  }
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .functions
+      .invoke(
+        'draw-winner',
+        {
+
+          body: {
+
+            competition_id:
+              competition.id
+
+          }
+
+        }
+      );
+
+
+  if (error) {
+
+    console.error(
+      'Winner draw error:',
+      error
+    );
+
+
+    alert(
+
+      'Secure winner drawing is not connected yet. ' +
+
+      'No winner has been selected.'
+
+    );
+
+
+    return;
+
+  }
+
+
+  if (!data?.winner) {
+
+    alert(
+      data?.message ||
+      'No eligible paid entries were found.'
+    );
+
+    return;
+
+  }
+
+
+  winners =
+    store.get(
+      'nexa_winners',
+      []
+    );
+
 
   winners.unshift({
-    competitionId: c.id,
-    prize: c.title,
-    name,
+
+    competitionId:
+      competition.id,
+
+    prize:
+      competition.title,
+
+    name:
+      data.winner
+        .display_name ||
+      'Winner',
+
+    ticket:
+      data.winner
+        .ticket_number ||
+      '',
+
     date:
+      data.drawn_at ||
       new Date()
         .toISOString()
+
   });
+
 
   store.set(
     'nexa_winners',
     winners
   );
 
+
   renderWinners();
 
+
   toast(
-    'Winner published'
+    'Winner drawn and published'
   );
+
 }
 
 
-/* =========================
-   ADMIN AUTH
-========================= */
+/* =========================================================
+   ADMIN LOGIN
+   ========================================================= */
+
 
 async function openSecureAdmin() {
 
   let {
-    data: { session }
+    data: {
+      session
+    }
   } =
-    await supabaseClient.auth
+    await supabaseClient
+      .auth
       .getSession();
 
 
   if (!session) {
 
     const email =
-      prompt('Admin email:');
+      prompt(
+        'Admin email:'
+      );
 
-    if (!email) return;
+
+    if (!email) {
+
+      return;
+
+    }
+
 
     const password =
-      prompt('Admin password:');
+      prompt(
+        'Admin password:'
+      );
 
-    if (!password) return;
+
+    if (!password) {
+
+      return;
+
+    }
 
 
-    const { data, error } =
-      await supabaseClient.auth
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .auth
         .signInWithPassword({
-          email,
-          password
+
+          email:
+            email,
+
+          password:
+            password
+
         });
 
 
@@ -1308,809 +2342,1358 @@ async function openSecureAdmin() {
       );
 
       return;
+
     }
 
-    session = data.session;
+
+    session =
+      data.session;
+
   }
 
 
-  const uid =
-    session?.user?.id;
-
-
-  if (uid !== ADMIN_UID) {
+  if (
+    session?.user?.id !==
+    ADMIN_UID
+  ) {
 
     alert(
       'This account does not have administrator access.'
     );
 
     return;
+
   }
 
 
-  adminView();
+  await adminView();
+
 
   openModal(
     '#adminModal'
   );
+
 }
 
 
-/* =========================
+/* =========================================================
    ADMIN DASHBOARD
-========================= */
+   ========================================================= */
 
-function adminView(editId = '') {
 
-  orders = store.get(
-    'nexa_orders',
-    []
-  );
+async function adminView(
+  editId = null
+) {
 
-  winners = store.get(
-    'nexa_winners',
-    []
-  );
+  if (
+    !(await isAdminSession())
+  ) {
+
+    $('#adminContent')
+      .innerHTML = `
+
+        <p class="empty">
+          Administrator access
+          required.
+        </p>
+
+      `;
+
+
+    return;
+
+  }
+
 
   const edit =
-    competitions.find(
-      c => c.id === editId
+    editId
+      ? competitions.find(
+          competition =>
+            competition.id ===
+            String(editId)
+        )
+      : null;
+
+
+  let selectedCorrect =
+    '';
+
+
+  if (edit) {
+
+    const {
+      data
+    } =
+      await supabaseClient
+        .from(
+          'competition_skill_answers'
+        )
+        .select(
+          'correct_answer'
+        )
+        .eq(
+          'competition_id',
+          edit.id
+        )
+        .maybeSingle();
+
+
+    if (
+      data?.correct_answer ===
+      edit.skill_option_a
+    ) {
+
+      selectedCorrect =
+        'A';
+
+    }
+
+
+    if (
+      data?.correct_answer ===
+      edit.skill_option_b
+    ) {
+
+      selectedCorrect =
+        'B';
+
+    }
+
+
+    if (
+      data?.correct_answer ===
+      edit.skill_option_c
+    ) {
+
+      selectedCorrect =
+        'C';
+
+    }
+
+  }
+
+
+  const totalMaximum =
+    competitions.reduce(
+      (
+        total,
+        competition
+      ) =>
+        total +
+        competition.max,
+      0
     );
 
 
-  $('#adminContent').innerHTML = `
-    <p class="eyebrow">
-      NEXA DRAW ADMIN
-    </p>
-
-    <h2>
-      Competition Dashboard
-    </h2>
-
-
-    <div class="admin-stats">
-
-      <div>
-        <strong>
-          ${competitions.length}
-        </strong>
-        <span>
-          Competitions
-        </span>
-      </div>
-
-      <div>
-        <strong>
-          ${orders.length}
-        </strong>
-        <span>
-          Orders
-        </span>
-      </div>
-
-      <div>
-        <strong>
-          ${winners.length}
-        </strong>
-        <span>
-          Winners
-        </span>
-      </div>
-
-    </div>
+  const totalSold =
+    competitions.reduce(
+      (
+        total,
+        competition
+      ) =>
+        total +
+        competition.sold,
+      0
+    );
 
 
-    <div class="admin-layout">
+  $('#adminContent')
+    .innerHTML = `
 
-      <div>
-
-        <h3>
-          ${edit ? 'Edit' : 'Add'}
-          competition
-        </h3>
-
-        <form id="competitionForm">
-
-          <input
-            type="hidden"
-            name="existingId"
-            value="${escapeHtml(edit?.id || '')}"
-          >
+      <p class="eyebrow">
+        ADMIN
+      </p>
 
 
-          <label class="field">
-            Title
-
-            <input
-              name="title"
-              value="${escapeHtml(edit?.title || '')}"
-              required
-            >
-          </label>
+      <h2>
+        Nexa Draw Dashboard
+      </h2>
 
 
-          <label class="field">
-            Price
+      <div class="admin-stats">
 
-            <input
-              name="price"
-              type="number"
-              step="0.01"
-              min="0"
-              value="${edit?.price ?? ''}"
-              required
-            >
-          </label>
+        <div>
 
+          <strong>
+            ${competitions.length}
+          </strong>
 
-          <label class="field">
-            Maximum entries
+          <span>
+            Competitions
+          </span>
 
-            <input
-              name="max"
-              type="number"
-              min="1"
-              value="${edit?.max ?? ''}"
-              required
-            >
-          </label>
+        </div>
 
 
-          <label class="field">
+        <div>
+
+          <strong>
+            ${totalSold.toLocaleString()}
+          </strong>
+
+          <span>
             Sold
+          </span>
 
-            <input
-              name="sold"
-              type="number"
-              min="0"
-              value="${edit?.sold ?? 0}"
-            >
-          </label>
+        </div>
 
 
-          <label class="field">
-            Closing date
+        <div>
 
-            <input
-              name="closes"
-              type="datetime-local"
-              value="${
-                edit?.closes
-                  ? String(edit.closes)
-                      .slice(0, 16)
-                  : ''
-              }"
-              required
-            >
-          </label>
+          <strong>
+            ${totalMaximum.toLocaleString()}
+          </strong>
 
-
-          <label class="field">
-            Image path / URL
-
-            <input
-              name="image"
-              value="${escapeHtml(edit?.image || '')}"
-            >
-          </label>
-
-
-          <label class="field">
-            Upload image
-
-            <input
-              name="image_file"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-            >
-          </label>
-
-
-          <label class="field">
-            Description
-
-            <textarea
-              name="description"
-            >${escapeHtml(edit?.description || '')}</textarea>
-          </label>
-
-
-          <label class="field">
-            Skill Question
-
-            <textarea
-              name="skill_question"
-              required
-            >${escapeHtml(edit?.skill_question || '')}</textarea>
-          </label>
-
-
-          <label class="field">
-            Option A
-
-            <input
-              name="skill_option_a"
-              value="${escapeHtml(edit?.skill_option_a || '')}"
-              required
-            >
-          </label>
-
-
-          <label class="field">
-            Option B
-
-            <input
-              name="skill_option_b"
-              value="${escapeHtml(edit?.skill_option_b || '')}"
-              required
-            >
-          </label>
-
-
-          <label class="field">
-            Option C
-
-            <input
-              name="skill_option_c"
-              value="${escapeHtml(edit?.skill_option_c || '')}"
-              required
-            >
-          </label>
-
-
-          <label class="field">
-            Correct Answer
-
-            <select
-              name="correct_answer"
-              required
-            >
-
-              <option value="">
-                Choose correct answer
-              </option>
-
-              <option value="A">
-                Option A
-              </option>
-
-              <option value="B">
-                Option B
-              </option>
-
-              <option value="C">
-                Option C
-              </option>
-
-            </select>
-          </label>
-
-
-          <label class="field">
-            Status
-
-            <select name="status">
-
-              <option
-                value="live"
-                ${
-                  edit?.status === 'live'
-                    ? 'selected'
-                    : ''
-                }
-              >
-                Live
-              </option>
-
-              <option
-                value="paused"
-                ${
-                  edit?.status === 'paused'
-                    ? 'selected'
-                    : ''
-                }
-              >
-                Paused
-              </option>
-
-            </select>
-          </label>
-
-
-          <button
-            class="btn gold full"
-            type="submit"
-          >
-            ${
-              edit
-                ? 'SAVE CHANGES'
-                : 'ADD COMPETITION'
-            }
-          </button>
-
-        </form>
-
-      </div>
-
-
-      <div>
-
-        <h3>
-          Manage draws
-        </h3>
-
-        <div class="admin-list">
-
-          ${
-            competitions.length
-
-              ? competitions.map(c => `
-                  <div class="admin-row">
-
-                    <div>
-
-                      <strong>
-                        ${escapeHtml(c.title)}
-                      </strong>
-
-                      <small>
-                        ${money(c.price)}
-                        ·
-                        ${c.sold}/${c.max}
-                      </small>
-
-                    </div>
-
-                    <div>
-
-                      <button
-                        class="btn outline"
-                        data-edit="${c.id}"
-                      >
-                        Edit
-                      </button>
-
-                      <button
-                        class="btn outline"
-                        data-winner="${c.id}"
-                      >
-                        Winner
-                      </button>
-
-                      <button
-                        class="btn outline"
-                        data-delete="${c.id}"
-                      >
-                        Delete
-                      </button>
-
-                    </div>
-
-                  </div>
-                `).join('')
-
-              : `
-                  <p class="empty">
-                    No competitions.
-                  </p>
-                `
-          }
+          <span>
+            Capacity
+          </span>
 
         </div>
 
       </div>
 
-    </div>
-  `;
+
+      <button
+        class="btn outline"
+        id="adminLogout"
+      >
+        Admin logout
+      </button>
 
 
-  $('#competitionForm').onsubmit =
-    async e => {
-
-      e.preventDefault();
-
-      const f =
-        new FormData(e.target);
+      <div class="admin-grid">
 
 
-      let imageUrl =
-        f.get('image');
+        <div>
+
+          <h3>
+            ${
+              edit
+                ? 'Edit'
+                : 'Add'
+            }
+            competition
+          </h3>
 
 
-      const imageFile =
-        f.get('image_file');
+          <form
+            id="competitionForm"
+          >
 
 
-      if (
-        imageFile &&
-        imageFile.size
-      ) {
-
-        const ext =
-          imageFile.name
-            .split('.')
-            .pop();
+            <input
+              type="hidden"
+              name="existingId"
+              value="${escapeHtml(
+                edit?.id || ''
+              )}"
+            >
 
 
-        const fileName =
-          `${Date.now()}-${Math.random()
-            .toString(36)
-            .slice(2)}.${ext}`;
+            <label class="field">
+
+              Title
+
+              <input
+                name="title"
+                value="${escapeHtml(
+                  edit?.title || ''
+                )}"
+                required
+              >
+
+            </label>
 
 
-        const {
-          error: uploadError
-        } =
-          await supabaseClient.storage
-            .from('competition-images')
-            .upload(
-              fileName,
-              imageFile
-            );
+            <label class="field">
+
+              Price
+
+              <input
+                name="price"
+                type="number"
+                step="0.01"
+                min="0"
+                value="${
+                  edit?.price ?? ''
+                }"
+                required
+              >
+
+            </label>
 
 
-        if (uploadError) {
+            <label class="field">
 
-          alert(
-            'Image upload failed: ' +
-            uploadError.message
-          );
+              Maximum entries
 
-          return;
-        }
+              <input
+                name="max"
+                type="number"
+                min="1"
+                value="${
+                  edit?.max ?? ''
+                }"
+                required
+              >
 
-
-        const {
-          data: publicData
-        } =
-          supabaseClient.storage
-            .from('competition-images')
-            .getPublicUrl(fileName);
+            </label>
 
 
-        imageUrl =
-          publicData.publicUrl;
-      }
+            <label class="field">
+
+              Sold
+
+              <input
+                name="sold"
+                type="number"
+                min="0"
+                value="${
+                  edit?.sold ?? 0
+                }"
+              >
+
+            </label>
 
 
-      const row = {
+            <label class="field">
 
-        title:
-          f.get('title'),
+              Closing date
 
-        price:
-          Number(f.get('price')),
+              <input
+                name="closes"
+                type="datetime-local"
+                value="${
+                  edit?.closes
+                    ? String(
+                        edit.closes
+                      ).slice(
+                        0,
+                        16
+                      )
+                    : ''
+                }"
+                required
+              >
 
-        image_url:
-          imageUrl,
+            </label>
 
-        closes_at:
-          f.get('closes'),
 
-        max_entries:
-          Number(f.get('max')),
+            <label class="field">
 
-        sold:
-          Number(f.get('sold') || 0),
+              Image path / URL
 
-        status:
-          f.get('status') || 'live',
+              <input
+                name="image"
+                value="${escapeHtml(
+                  edit?.image || ''
+                )}"
+              >
 
-        description:
-          f.get('description') || '',
+            </label>
 
-        skill_question:
-          f.get('skill_question') || '',
 
-        skill_option_a:
-          f.get('skill_option_a') || '',
+            <label class="field">
 
-        skill_option_b:
-          f.get('skill_option_b') || '',
+              Upload image
 
-        skill_option_c:
-          f.get('skill_option_c') || ''
+              <input
+                name="image_file"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+              >
+
+            </label>
+
+
+            <label class="field">
+
+              Description
+
+              <textarea
+                name="description"
+              >${escapeHtml(
+                edit?.description || ''
+              )}</textarea>
+
+            </label>
+
+
+            <label class="field">
+
+              Skill Question
+
+              <input
+                name="skill_question"
+                value="${escapeHtml(
+                  edit?.skill_question || ''
+                )}"
+                required
+              >
+
+            </label>
+
+
+            <label class="field">
+
+              Option A
+
+              <input
+                name="skill_option_a"
+                value="${escapeHtml(
+                  edit?.skill_option_a || ''
+                )}"
+                required
+              >
+
+            </label>
+
+
+            <label class="field">
+
+              Option B
+
+              <input
+                name="skill_option_b"
+                value="${escapeHtml(
+                  edit?.skill_option_b || ''
+                )}"
+                required
+              >
+
+            </label>
+
+
+            <label class="field">
+
+              Option C
+
+              <input
+                name="skill_option_c"
+                value="${escapeHtml(
+                  edit?.skill_option_c || ''
+                )}"
+                required
+              >
+
+            </label>
+
+
+            <label class="field">
+
+              Correct Answer
+
+              <select
+                name="correct_answer"
+                required
+              >
+
+                <option value="">
+                  Choose correct answer
+                </option>
+
+                <option
+                  value="A"
+                  ${
+                    selectedCorrect ===
+                    'A'
+                      ? 'selected'
+                      : ''
+                  }
+                >
+                  Option A
+                </option>
+
+                <option
+                  value="B"
+                  ${
+                    selectedCorrect ===
+                    'B'
+                      ? 'selected'
+                      : ''
+                  }
+                >
+                  Option B
+                </option>
+
+                <option
+                  value="C"
+                  ${
+                    selectedCorrect ===
+                    'C'
+                      ? 'selected'
+                      : ''
+                  }
+                >
+                  Option C
+                </option>
+
+              </select>
+
+            </label>
+
+
+            <label class="field">
+
+              Status
+
+              <select
+                name="status"
+              >
+
+                <option
+                  value="live"
+                  ${
+                    edit?.status ===
+                    'live'
+                      ? 'selected'
+                      : ''
+                  }
+                >
+                  Live
+                </option>
+
+                <option
+                  value="paused"
+                  ${
+                    edit?.status ===
+                    'paused'
+                      ? 'selected'
+                      : ''
+                  }
+                >
+                  Paused
+                </option>
+
+                <option
+                  value="closed"
+                  ${
+                    edit?.status ===
+                    'closed'
+                      ? 'selected'
+                      : ''
+                  }
+                >
+                  Closed
+                </option>
+
+              </select>
+
+            </label>
+
+
+            <button
+              class="btn gold full"
+              type="submit"
+            >
+
+              ${
+                edit
+                  ? 'SAVE CHANGES'
+                  : 'ADD COMPETITION'
+              }
+
+            </button>
+
+          </form>
+
+        </div>
+
+
+        <div>
+
+          <h3>
+            Manage draws
+          </h3>
+
+
+          <div class="admin-list">
+
+            ${
+              competitions.length
+                ? competitions
+                    .map(
+                      competition => `
+
+                        <div
+                          class="admin-row"
+                        >
+
+                          <div>
+
+                            <strong>
+                              ${escapeHtml(
+                                competition.title
+                              )}
+                            </strong>
+
+                            <small>
+
+                              ${money(
+                                competition.price
+                              )}
+
+                              ·
+
+                              ${competition.sold}
+
+                              /
+
+                              ${competition.max}
+
+                            </small>
+
+                          </div>
+
+
+                          <div>
+
+                            <button
+                              class="btn outline"
+                              data-edit="${competition.id}"
+                            >
+                              Edit
+                            </button>
+
+
+                            <button
+                              class="btn outline"
+                              data-winner="${competition.id}"
+                            >
+                              Draw Winner
+                            </button>
+
+
+                            <button
+                              class="btn outline"
+                              data-delete="${competition.id}"
+                            >
+                              Delete
+                            </button>
+
+                          </div>
+
+                        </div>
+
+                      `
+                    )
+                    .join('')
+                : `
+
+                    <p class="empty">
+                      No competitions.
+                    </p>
+
+                  `
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+  $('#adminLogout')
+    .onclick =
+      async () => {
+
+        await supabaseClient
+          .auth
+          .signOut();
+
+
+        closeModals();
+
+
+        await updateAccountLabel();
+
+
+        toast(
+          'Admin logged out'
+        );
+
       };
 
 
-      const existing =
-        f.get('existingId');
+  $('#competitionForm')
+    .onsubmit =
+      saveCompetition;
 
 
-      const correctChoice =
-        f.get('correct_answer');
+  $$('[data-edit]')
+    .forEach(
+      button => {
 
-
-      const answerMap = {
-
-        A:
-          f.get('skill_option_a'),
-
-        B:
-          f.get('skill_option_b'),
-
-        C:
-          f.get('skill_option_c')
-      };
-
-
-      const correctAnswer =
-        answerMap[correctChoice];
-
-
-      if (!correctAnswer) {
-
-        alert(
-          'Please choose the correct answer.'
-        );
-
-        return;
-      }
-
-
-      let competitionId =
-        existing;
-
-
-      if (existing) {
-
-        const { error } =
-          await supabaseClient
-            .from('competitions')
-            .update(row)
-            .eq(
-              'id',
-              existing
+        button.onclick =
+          () =>
+            adminView(
+              button.dataset.edit
             );
 
-
-        if (error) {
-
-          alert(
-            'Save failed: ' +
-            error.message
-          );
-
-          return;
-        }
-
-      } else {
-
-        const { data, error } =
-          await supabaseClient
-            .from('competitions')
-            .insert(row)
-            .select('id')
-            .single();
-
-
-        if (error) {
-
-          alert(
-            'Save failed: ' +
-            error.message
-          );
-
-          return;
-        }
-
-
-        competitionId =
-          data.id;
       }
+    );
 
 
-      const {
-        data: answerRow,
-        error: answerLookupError
-      } =
-        await supabaseClient
-          .from(
-            'competition_skill_answers'
-          )
-          .select('competition_id')
-          .eq(
-            'competition_id',
-            competitionId
-          )
-          .maybeSingle();
+  $$('[data-delete]')
+    .forEach(
+      button => {
 
-
-      if (answerLookupError) {
-
-        alert(
-          'Competition saved, but answer lookup failed: ' +
-          answerLookupError.message
-        );
-
-        return;
-      }
-
-
-      let answerError = null;
-
-
-      if (answerRow) {
-
-        const { error } =
-          await supabaseClient
-            .from(
-              'competition_skill_answers'
-            )
-            .update({
-              correct_answer:
-                correctAnswer
-            })
-            .eq(
-              'competition_id',
-              competitionId
+        button.onclick =
+          () =>
+            deleteCompetition(
+              button.dataset.delete
             );
 
-
-        answerError = error;
-
-      } else {
-
-        const { error } =
-          await supabaseClient
-            .from(
-              'competition_skill_answers'
-            )
-            .insert({
-              competition_id:
-                competitionId,
-
-              correct_answer:
-                correctAnswer
-            });
-
-
-        answerError = error;
       }
+    );
 
 
-      if (answerError) {
+  $$('[data-winner]')
+    .forEach(
+      button => {
 
-        alert(
-          'Competition saved, but correct answer failed: ' +
-          answerError.message
-        );
+        button.onclick =
+          () =>
+            drawWinnerSecurely(
+              button.dataset.winner
+            );
 
-        return;
       }
+    );
+
+}
+/* =========================================================
+   IMAGE UPLOAD
+   ========================================================= */
+
+async function uploadCompetitionImage(file) {
+
+  if (
+    !file ||
+    !file.size
+  ) {
+
+    return '';
+
+  }
 
 
-      await loadCompetitionsFromSupabase();
-
-      adminView();
-
-      alert(
-        'Competition saved!'
-      );
-    };
-
-
-  $$('[data-edit]').forEach(button => {
-
-    button.onclick = () => {
-      adminView(
-        button.dataset.edit
-      );
-    };
-  });
+  const extension =
+    (
+      file.name
+        .split('.')
+        .pop() ||
+      'jpg'
+    )
+      .toLowerCase();
 
 
-  $$('[data-delete]').forEach(button => {
-
-    button.onclick = async () => {
-
-      if (
-        !confirm(
-          'Delete this competition?'
-        )
-      ) {
-        return;
-      }
-
-
-      const competitionId =
-        button.dataset.delete;
+  const safeExtension =
+    [
+      'jpg',
+      'jpeg',
+      'png',
+      'webp'
+    ]
+      .includes(
+        extension
+      )
+      ? extension
+      : 'jpg';
 
 
-      const {
-        error: answerDeleteError
-      } =
-        await supabaseClient
-          .from(
-            'competition_skill_answers'
-          )
-          .delete()
-          .eq(
-            'competition_id',
-            competitionId
-          );
+  const filename =
+    `${Date.now()}-${crypto.randomUUID()}.${safeExtension}`;
 
 
-      if (answerDeleteError) {
+  const {
+    error
+  } =
+    await supabaseClient
+      .storage
+      .from(
+        'competition-images'
+      )
+      .upload(
+        filename,
+        file,
+        {
+          cacheControl:
+            '3600',
 
-        alert(
-          'Delete failed: ' +
-          answerDeleteError.message
-        );
-
-        return;
-      }
-
-
-      const { error } =
-        await supabaseClient
-          .from('competitions')
-          .delete()
-          .eq(
-            'id',
-            competitionId
-          );
-
-
-      if (error) {
-
-        alert(
-          'Delete failed: ' +
-          error.message
-        );
-
-        return;
-      }
-
-
-      /*
-        Remove deleted competition
-        from the current browser basket.
-      */
-
-      cart = store
-        .get('nexa_cart', [])
-        .filter(
-          item =>
-            item.id !==
-            competitionId
-        );
-
-
-      store.set(
-        'nexa_cart',
-        cart
+          upsert:
+            false
+        }
       );
 
 
-      updateCartCount();
+  if (error) {
 
-      await loadCompetitionsFromSupabase();
+    throw error;
 
-      adminView();
-    };
-  });
+  }
 
 
-  $$('[data-winner]').forEach(button => {
-
-    button.onclick = () => {
-
-      publishWinner(
-        button.dataset.winner
+  const {
+    data
+  } =
+    supabaseClient
+      .storage
+      .from(
+        'competition-images'
+      )
+      .getPublicUrl(
+        filename
       );
-    };
-  });
+
+
+  return data.publicUrl;
+
 }
 
 
-/* =========================
-   LEGAL MODAL
-========================= */
+/* =========================================================
+   SAVE COMPETITION
+   ========================================================= */
+
+async function saveCompetition(
+  event
+) {
+
+  event.preventDefault();
+
+
+  if (
+    !(await isAdminSession())
+  ) {
+
+    alert(
+      'Administrator access required.'
+    );
+
+    return;
+
+  }
+
+
+  const form =
+    event.target;
+
+
+  const formData =
+    new FormData(
+      form
+    );
+
+
+  let image =
+    String(
+      formData.get(
+        'image'
+      ) || ''
+    )
+      .trim();
+
+
+  const file =
+    form.elements
+      .image_file
+      ?.files?.[0];
+
+
+  if (file) {
+
+    try {
+
+      image =
+        await uploadCompetitionImage(
+          file
+        );
+
+    } catch (
+      error
+    ) {
+
+      alert(
+        'Image upload failed: ' +
+        error.message
+      );
+
+      return;
+
+    }
+
+  }
+
+
+  const closesValue =
+    String(
+      formData.get(
+        'closes'
+      ) || ''
+    );
+
+
+  const row = {
+
+    title:
+      String(
+        formData.get(
+          'title'
+        ) || ''
+      )
+        .trim(),
+
+    price:
+      Number(
+        formData.get(
+          'price'
+        ) || 0
+      ),
+
+    image_url:
+      image,
+
+    closes_at:
+      new Date(
+        closesValue
+      )
+        .toISOString(),
+
+    max_entries:
+      Number(
+        formData.get(
+          'max'
+        ) || 0
+      ),
+
+    sold:
+      Number(
+        formData.get(
+          'sold'
+        ) || 0
+      ),
+
+    status:
+      String(
+        formData.get(
+          'status'
+        ) || 'live'
+      ),
+
+    description:
+      String(
+        formData.get(
+          'description'
+        ) || ''
+      )
+        .trim(),
+
+    skill_question:
+      String(
+        formData.get(
+          'skill_question'
+        ) || ''
+      )
+        .trim(),
+
+    skill_option_a:
+      String(
+        formData.get(
+          'skill_option_a'
+        ) || ''
+      )
+        .trim(),
+
+    skill_option_b:
+      String(
+        formData.get(
+          'skill_option_b'
+        ) || ''
+      )
+        .trim(),
+
+    skill_option_c:
+      String(
+        formData.get(
+          'skill_option_c'
+        ) || ''
+      )
+        .trim()
+
+  };
+
+
+  const answerMap = {
+
+    A:
+      row.skill_option_a,
+
+    B:
+      row.skill_option_b,
+
+    C:
+      row.skill_option_c
+
+  };
+
+
+  const correctAnswer =
+    answerMap[
+      String(
+        formData.get(
+          'correct_answer'
+        ) || ''
+      )
+    ];
+
+
+  if (!correctAnswer) {
+
+    alert(
+      'Please choose the correct answer.'
+    );
+
+    return;
+
+  }
+
+
+  const existingId =
+    String(
+      formData.get(
+        'existingId'
+      ) || ''
+    );
+
+
+  let competitionId =
+    existingId;
+
+
+  if (existingId) {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from(
+          'competitions'
+        )
+        .update(
+          row
+        )
+        .eq(
+          'id',
+          existingId
+        );
+
+
+    if (error) {
+
+      alert(
+        'Save failed: ' +
+        error.message
+      );
+
+      return;
+
+    }
+
+  } else {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from(
+          'competitions'
+        )
+        .insert(
+          row
+        )
+        .select(
+          'id'
+        )
+        .single();
+
+
+    if (error) {
+
+      alert(
+        'Save failed: ' +
+        error.message
+      );
+
+      return;
+
+    }
+
+
+    competitionId =
+      String(
+        data.id
+      );
+
+  }
+
+
+  const {
+    data: answerRow,
+    error: lookupError
+  } =
+    await supabaseClient
+      .from(
+        'competition_skill_answers'
+      )
+      .select(
+        'competition_id'
+      )
+      .eq(
+        'competition_id',
+        competitionId
+      )
+      .maybeSingle();
+
+
+  if (lookupError) {
+
+    alert(
+      'Competition saved, but private answer lookup failed: ' +
+      lookupError.message
+    );
+
+    return;
+
+  }
+
+
+  if (answerRow) {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from(
+          'competition_skill_answers'
+        )
+        .update({
+
+          correct_answer:
+            correctAnswer
+
+        })
+        .eq(
+          'competition_id',
+          competitionId
+        );
+
+
+    if (error) {
+
+      alert(
+        'Competition saved, but private answer update failed: ' +
+        error.message
+      );
+
+      return;
+
+    }
+
+  } else {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from(
+          'competition_skill_answers'
+        )
+        .insert({
+
+          competition_id:
+            competitionId,
+
+          correct_answer:
+            correctAnswer
+
+        });
+
+
+    if (error) {
+
+      alert(
+        'Competition saved, but private answer save failed: ' +
+        error.message
+      );
+
+      return;
+
+    }
+
+  }
+
+
+  await loadCompetitionsFromSupabase();
+
+
+  await adminView();
+
+
+  toast(
+    existingId
+      ? 'Competition updated'
+      : 'Competition added'
+  );
+
+}
+
+
+/* =========================================================
+   DELETE COMPETITION
+   ========================================================= */
+
+async function deleteCompetition(
+  id
+) {
+
+  if (
+    !(await isAdminSession())
+  ) {
+
+    alert(
+      'Administrator access required.'
+    );
+
+    return;
+
+  }
+
+
+  const competition =
+    competitions.find(
+      item =>
+        item.id ===
+        String(id)
+    );
+
+
+  if (!competition) {
+
+    return;
+
+  }
+
+
+  if (
+    !confirm(
+      `Delete "${competition.title}"?`
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  const {
+    error: answerError
+  } =
+    await supabaseClient
+      .from(
+        'competition_skill_answers'
+      )
+      .delete()
+      .eq(
+        'competition_id',
+        id
+      );
+
+
+  if (answerError) {
+
+    alert(
+      'Delete failed: ' +
+      answerError.message
+    );
+
+    return;
+
+  }
+
+
+  const {
+    error
+  } =
+    await supabaseClient
+      .from(
+        'competitions'
+      )
+      .delete()
+      .eq(
+        'id',
+        id
+      );
+
+
+  if (error) {
+
+    alert(
+      'Delete failed: ' +
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  cart =
+    store.get(
+      'nexa_cart',
+      []
+    )
+      .filter(
+        item =>
+          item.id !==
+          String(id)
+      );
+
+
+  store.set(
+    'nexa_cart',
+    cart
+  );
+
+
+  updateCartCount();
+
+
+  await loadCompetitionsFromSupabase();
+
+
+  await adminView();
+
+
+  toast(
+    'Competition deleted'
+  );
+
+}
+
+
+/* =========================================================
+   LEGAL PLACEHOLDERS
+   ========================================================= */
 
 const legalPages = {
 
   terms: `
+
     <p class="eyebrow">
       LEGAL
     </p>
@@ -2121,11 +3704,16 @@ const legalPages = {
 
     <p>
       Draft terms placeholder.
-      Final competition terms must be reviewed before launch.
+      Final competition terms
+      must be reviewed before
+      launch.
     </p>
+
   `,
 
+
   privacy: `
+
     <p class="eyebrow">
       LEGAL
     </p>
@@ -2135,12 +3723,18 @@ const legalPages = {
     </h2>
 
     <p>
-      Draft privacy information placeholder.
-      A complete privacy notice will be required before launch.
+      Draft privacy information
+      placeholder.
+      A complete privacy notice
+      will be required before
+      launch.
     </p>
+
   `,
 
+
   free: `
+
     <p class="eyebrow">
       LEGAL
     </p>
@@ -2150,11 +3744,16 @@ const legalPages = {
     </h2>
 
     <p>
-      Free-entry information will be published here where applicable.
+      Free-entry information
+      will be published here
+      where applicable.
     </p>
+
   `,
 
+
   responsible: `
+
     <p class="eyebrow">
       CUSTOMER CARE
     </p>
@@ -2164,105 +3763,211 @@ const legalPages = {
     </h2>
 
     <p>
-      Responsible participation information,
-      account controls and support information
-      will be published here before launch.
+      Customer protection,
+      age controls and
+      responsible participation
+      information will be
+      published before launch.
     </p>
+
   `
+
 };
 
 
-function openLegal(type) {
+function openLegalPage(
+  key
+) {
 
-  const content =
-    legalPages[type];
+  $('#legalContent')
+    .innerHTML =
+      legalPages[key] ||
+      '<p>Page unavailable.</p>';
 
-  if (!content) return;
-
-  $('#legalContent').innerHTML =
-    content;
 
   openModal(
     '#legalModal'
   );
+
 }
 
 
-/* =========================
-   BUTTON EVENTS
-========================= */
+/* =========================================================
+   PAGE EVENTS
+   ========================================================= */
 
-if ($('#adminBtn')) {
-
-  $('#adminBtn').onclick =
-    openSecureAdmin;
-}
-
-
-if ($('#accountBtn')) {
-
-  $('#accountBtn').onclick =
-    async () => {
-
-      await renderAccount(false);
-
-      openModal(
-        '#accountModal'
-      );
-    };
-}
+document
+  .addEventListener(
+    'click',
+    event => {
 
 
-if ($('#cartBtn')) {
+      if (
+        event.target.matches(
+          '[data-close]'
+        )
+      ) {
 
-  $('#cartBtn').onclick =
-    openCart;
-}
+        closeModals();
 
-
-if ($('#checkoutBtn')) {
-
-  $('#checkoutBtn').onclick =
-    checkout;
-}
+      }
 
 
-$$('[data-close]').forEach(button => {
+      if (
+        event.target
+          .classList
+          ?.contains(
+            'modal'
+          )
+      ) {
 
-  button.onclick =
-    closeModals;
-});
+        closeModals();
 
-
-$$('[data-legal]').forEach(button => {
-
-  button.onclick = () => {
-
-    openLegal(
-      button.dataset.legal
-    );
-  };
-});
+      }
 
 
-/* =========================
-   AUTH EVENTS
-========================= */
+      const legal =
+        event.target
+          .closest(
+            '[data-legal]'
+          );
 
-supabaseClient.auth
-  .onAuthStateChange(
-    async () => {
 
-      await updateAccountLabel();
+      if (legal) {
+
+        openLegalPage(
+          legal.dataset.legal
+        );
+
+      }
+
+
+      const navItem =
+        event.target
+          .closest(
+            '#nav a, #nav button'
+          );
+
+
+      if (navItem) {
+
+        $('#nav')
+          ?.classList
+          .remove(
+            'open'
+          );
+
+      }
+
     }
   );
 
 
-/* =========================
-   START APP
-========================= */
+$('#cartBtn')
+  ?.addEventListener(
+    'click',
+    openCart
+  );
 
-updateCartCount();
-updateAccountLabel();
-renderWinners();
-loadCompetitionsFromSupabase();
+
+$('#accountBtn')
+  ?.addEventListener(
+    'click',
+    async () => {
+
+      await renderAccount(
+        false
+      );
+
+
+      openModal(
+        '#accountModal'
+      );
+
+    }
+  );
+
+
+$('#checkoutBtn')
+  ?.addEventListener(
+    'click',
+    checkout
+  );
+
+
+$('#viewAllBtn')
+  ?.addEventListener(
+    'click',
+    () => {
+
+      document
+        .querySelector(
+          '#draws'
+        )
+        ?.scrollIntoView({
+
+          behavior:
+            'smooth'
+
+        });
+
+    }
+  );
+
+
+/* =========================================================
+   AUTH CHANGES
+   ========================================================= */
+
+supabaseClient
+  .auth
+  .onAuthStateChange(
+    async () => {
+
+      await updateAccountLabel();
+
+    }
+  );
+
+
+/* =========================================================
+   FUNCTIONS USED BY HTML BUTTONS
+   ========================================================= */
+
+window.openCart =
+  openCart;
+
+
+window.renderAccount =
+  renderAccount;
+
+
+window.openModal =
+  openModal;
+
+
+window.openSecureAdmin =
+  openSecureAdmin;
+
+
+/* =========================================================
+   START SITE
+   ========================================================= */
+
+async function startNexaDraw() {
+
+  updateCartCount();
+
+
+  renderWinners();
+
+
+  await updateAccountLabel();
+
+
+  await loadCompetitionsFromSupabase();
+
+}
+
+
+startNexaDraw();
