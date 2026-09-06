@@ -2020,41 +2020,54 @@ if (
    WINNERS
    ========================================================= */
 
-
-function renderWinners() {
-
-  winners =
-    store.get(
-      'nexa_winners',
-      []
-    );
-
+async function renderWinners() {
 
   const host =
     $('#winnerGrid');
 
-
   if (!host) {
-
     return;
-
   }
 
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.rpc(
+      'get_public_winners'
+    );
+
+  if (error) {
+    console.error(
+      'Public winners error:',
+      error
+    );
+
+    host.innerHTML = `
+      <p class="empty">
+        Winners could not be loaded.
+      </p>
+    `;
+
+    return;
+  }
+
+  const publicWinners =
+    Array.isArray(data)
+      ? data
+      : [];
 
   host.innerHTML =
-    winners.length
-      ? winners
+    publicWinners.length
+      ? publicWinners
           .map(
             winner => `
-
               <article
                 class="winner-card"
               >
-
                 <span>
                   🏆
                 </span>
-
 
                 <h3>
                   ${escapeHtml(
@@ -2062,69 +2075,43 @@ function renderWinners() {
                   )}
                 </h3>
 
-
                 <p>
-
                   Winner:
-
                   <strong>
-                    ${escapeHtml(
-                      winner.name
-                    )}
+                    Winner
                   </strong>
-
                 </p>
 
-
-                ${
-                  winner.ticket
-                    ? `
-
-                        <p>
-
-                          Ticket:
-
-                          <strong>
-                            ${escapeHtml(
-                              winner.ticket
-                            )}
-                          </strong>
-
-                        </p>
-
-                      `
-                    : ''
-                }
-
+                <p>
+                  Ticket:
+                  <strong>
+                    ${escapeHtml(
+                      winner.ticket_number
+                    )}
+                  </strong>
+                </p>
 
                 <small>
-
                   ${
                     new Date(
-                      winner.date
+                      winner.drawn_at
                     )
                       .toLocaleDateString(
                         'en-GB'
                       )
                   }
-
                 </small>
-
               </article>
-
             `
           )
           .join('')
       : `
-
           <p class="empty">
-            No winners have been
-            published yet.
+            No winners have been published yet.
           </p>
-
         `;
-
 }
+
 
 
 /* =========================================================
