@@ -160,7 +160,7 @@ function addToCart(id,qty){
 }
 function updateCartCount(){ cart=store.get('nexa_cart',[]); $('#cartCount').textContent=cart.reduce((a,b)=>a+b.qty,0); }
 function openCart(){
-  cart=store.get('nexa_cart',[]); competitions=store.get('nexa_competitions',defaults);
+  cart=store.get('nexa_cart',[]);
   let total=0;
   $('#cartItems').innerHTML=cart.length ? cart.map((item,i)=>{ const c=competitions.find(x=>x.id===item.id); if(!c) return ''; const line=c.price*item.qty; total+=line; return `<div class="cart-line"><div><strong>${escapeHtml(c.title)}</strong><small>${item.qty} × ${money(c.price)}</small></div><div><b>${money(line)}</b><button class="remove" data-remove="${i}">Remove</button></div></div>`; }).join('') : '<p class="empty">Your basket is empty.</p>';
   $('#cartTotal').textContent=money(total);
