@@ -3984,47 +3984,6 @@ async function startNexaDraw() {
 
 }
 
-window.confirmTestPayment = async function () {
-
-  if (!(await isAdminSession())) {
-    alert('Administrator access required.');
-    return;
-  }
-
-  const orderId =
-    prompt('Enter the TEST order ID:');
-
-  if (!orderId) return;
-
-  const { data, error } =
-    await supabaseClient.functions.invoke(
-      'confirm-test-payment',
-      {
-        body: {
-          order_id: orderId.trim()
-        }
-      }
-    );
-
-  if (error) {
-    console.error(
-      'Test payment confirmation error:',
-      error
-    );
-
-    alert(
-      'Test payment confirmation failed.'
-    );
-
-    return;
-  }
-
-  alert(
-    `TEST payment confirmed.\n\n` +
-    `Tickets created: ${data.tickets_created}\n\n` +
-    `No real payment was processed.`
-  );
-
-};
+ 
 
 startNexaDraw();
