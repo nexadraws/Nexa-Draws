@@ -4026,4 +4026,21 @@ window.confirmTestPayment = async function () {
   );
 
 };
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!(await isAdminSession())) return;
+
+  const button = document.createElement('button');
+
+  button.textContent = 'TEST PAYMENT';
+  button.style.position = 'fixed';
+  button.style.bottom = '20px';
+  button.style.right = '20px';
+  button.style.zIndex = '99999';
+
+  button.onclick = () => {
+    confirmTestPayment();
+  };
+
+  document.body.appendChild(button);
+});
 startNexaDraw();
