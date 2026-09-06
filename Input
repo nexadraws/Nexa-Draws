@@ -676,11 +676,11 @@ function showCompetition(id) {
 
                 <label class="field">
 
-                  Number of entries
+                  Number of entries: <strong id="entryQtyValue">1</strong>
 
                   <input
                     id="entryQty"
-                    type="number"
+                    type="range"
                     min="1"
                     max="${maximumChoice}"
                     value="1"
@@ -724,7 +724,14 @@ function showCompetition(id) {
 
     `;
 
+const entryQty = $('#entryQty');
+const entryQtyValue = $('#entryQtyValue');
 
+entryQty?.addEventListener('input', () => {
+  if (entryQtyValue) {
+    entryQtyValue.textContent = entryQty.value;
+  }
+});
   $('#addToCart')
     ?.addEventListener(
       'click',
