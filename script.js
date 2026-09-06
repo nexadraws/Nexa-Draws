@@ -59,7 +59,7 @@ async function loadCompetitionsFromSupabase(){
     return;
   }
 
-  if(data && data.length){
+  if(data){
     competitions = data.map(r => ({
       id: String(r.id),
       title: r.title,
