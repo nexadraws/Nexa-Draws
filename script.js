@@ -1881,76 +1881,91 @@ async function checkout() {
   }
 
 
-  if (
-    PAYMENT_MODE !== 'live'
-  ) {
+  
+if (
+  PAYMENT_MODE !== 'live'
+) {
 
-    const cartItems =
-      $('#cartItems');
+  const items = cart.map(item => ({
+    competition_id: Number(item.id),
+    quantity: Number(item.quantity)
+  }));
 
-
-    if (
-      cartItems &&
-      !$('#paymentNotice')
-    ) {
-
-      cartItems
-        .insertAdjacentHTML(
-          'afterbegin',
-          `
-
-            <div
-              class="order-card"
-              id="paymentNotice"
-            >
-
-              <strong>
-                Secure payments
-                are being prepared
-              </strong>
-
-
-              <p>
-                This checkout is
-                structured for
-                ${escapeHtml(
-                  PAYMENT_PROVIDER
-                )},
-                but real charging
-                is switched off.
-              </p>
-
-
-              <p class="micro">
-                Card and supported
-                digital-wallet
-                options will appear
-                here only after the
-                merchant account,
-                HTTPS and secure
-                server-side payment
-                confirmation are
-                connected.
-              </p>
-
-            </div>
-
-          `
-        );
-
+  const {
+    data,
+    error
+  } = await supabaseClient.functions.invoke(
+    'create-order',
+    {
+      body: {
+        items
+      }
     }
+  );
 
-
-    toast(
-      'Real payments are currently disabled'
+  if (error) {
+    console.error(
+      'Create order error:',
+      error
     );
 
+    alert(
+      'The secure order could not be created.'
+    );
 
     return;
-
   }
 
+  if (!data?.success) {
+    alert(
+      data?.error ||
+      'The secure order could not be created.'
+    );
 
+    return;
+  }
+
+  const cartItems =
+    $('#cartItems');
+
+  if (
+    cartItems &&
+    !$('#paymentNotice')
+  ) {
+
+    cartItems.insertAdjacentHTML(
+      'afterbegin',
+      `
+        <div
+          class="order-card"
+          id="paymentNotice"
+        >
+          <strong>
+            Secure test order created
+          </strong>
+
+          <p>
+            Order total:
+            £${Number(
+              data.order.total
+            ).toFixed(2)}
+          </p>
+
+          <p class="micro">
+            No payment has been taken.
+            No tickets have been issued.
+          </p>
+        </div>
+      `
+    );
+  }
+
+  toast(
+    'Secure test order created'
+  );
+
+  return;
+}
   /*
     IMPORTANT:
 
