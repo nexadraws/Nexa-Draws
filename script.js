@@ -2,9 +2,7 @@
 
 /* =========================================================
    NEXA DRAW — CLEAN FRONT-END
-   =========================================================
-   Real charging stays OFF until the secure payment backend
-   is connected.
+   Full replacement script
    ========================================================= */
 
 const SUPABASE_URL =
@@ -36,149 +34,65 @@ const $$ = (
 ) => [...root.querySelectorAll(selector)];
 
 const store = {
-
   get(key, fallback) {
-
     try {
-
       return (
         JSON.parse(
           localStorage.getItem(key)
         ) ?? fallback
       );
-
     } catch {
-
       return fallback;
-
     }
-
   },
 
   set(key, value) {
-
     localStorage.setItem(
       key,
       JSON.stringify(value)
     );
-
   }
-
 };
 
-
-if (
-  !localStorage.getItem(
-    'nexa_cart'
-  )
-) {
-
-  store.set(
-    'nexa_cart',
-    []
-  );
-
+if (!localStorage.getItem('nexa_cart')) {
+  store.set('nexa_cart', []);
 }
-
-
-if (
-  !localStorage.getItem(
-    'nexa_orders'
-  )
-) {
-
-  store.set(
-    'nexa_orders',
-    []
-  );
-
-}
-
-
-if (
-  !localStorage.getItem(
-    'nexa_winners'
-  )
-) {
-
-  store.set(
-    'nexa_winners',
-    []
-  );
-
-}
-
 
 let competitions = [];
-
-let cart =
-  store.get(
-    'nexa_cart',
-    []
-  );
-
-let orders =
-  store.get(
-    'nexa_orders',
-    []
-  );
-
-let winners =
-  store.get(
-    'nexa_winners',
-    []
-  );
-
+let cart = store.get('nexa_cart', []);
 let user = null;
-
 let checkoutPending = false;
-
 
 /* =========================================================
    GENERAL HELPERS
    ========================================================= */
 
-
 function money(value) {
-
   return new Intl.NumberFormat(
     'en-GB',
     {
       style: 'currency',
       currency: 'GBP'
     }
-  ).format(
-    Number(value) || 0
+  ).format(Number(value) || 0);
+}
+
+function escapeHtml(value = '') {
+  return String(value).replace(
+    /[&<>'"]/g,
+    character => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    })[character]
   );
-
 }
-
-
-function escapeHtml(
-  value = ''
-) {
-
-  return String(value)
-    .replace(
-      /[&<>'"]/g,
-      character => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        "'": '&#39;',
-        '"': '&quot;'
-      })[character]
-    );
-
-}
-
 
 function daysLeft(date) {
-
   if (!date) {
-
     return 'CLOSING DATE TBC';
-
   }
 
   const difference =
@@ -190,32 +104,42 @@ function daysLeft(date) {
     );
 
   if (difference > 0) {
-
     return (
       `ENDS IN ${difference} DAY` +
-      (
-        difference === 1
-          ? ''
-          : 'S'
-      )
+      (difference === 1 ? '' : 'S')
     );
-
   }
 
   return 'CLOSED';
-
 }
 
+function formatDate(date) {
+  if (!date) {
+    return '';
+  }
+
+  const parsed =
+    new Date(date);
+
+  if (
+    Number.isNaN(
+      parsed.getTime()
+    )
+  ) {
+    return '';
+  }
+
+  return parsed.toLocaleDateString(
+    'en-GB'
+  );
+}
 
 function toast(message) {
-
   const element =
     $('#toast');
 
   if (!element) {
-
     return;
-
   }
 
   element.textContent =
@@ -227,27 +151,19 @@ function toast(message) {
 
   setTimeout(
     () => {
-
       element.classList.remove(
         'show'
       );
-
     },
     2200
   );
-
 }
 
-
 function openModal(id) {
-
-  const modal =
-    $(id);
+  const modal = $(id);
 
   if (!modal) {
-
     return;
-
   }
 
   modal.classList.add(
@@ -262,16 +178,12 @@ function openModal(id) {
   document.body.classList.add(
     'modal-open'
   );
-
 }
 
-
 function closeModals() {
-
   $$('.modal')
     .forEach(
       modal => {
-
         modal.classList.remove(
           'show'
         );
@@ -280,23 +192,17 @@ function closeModals() {
           'aria-hidden',
           'true'
         );
-
       }
     );
 
   document.body.classList.remove(
     'modal-open'
   );
-
 }
 
-
 async function isAdminSession() {
-
   const {
-    data: {
-      session
-    }
+    data: { session }
   } =
     await supabaseClient
       .auth
@@ -306,25 +212,52 @@ async function isAdminSession() {
     session?.user?.id ===
     ADMIN_UID
   );
-
 }
 
+async function functionErrorMessage(
+  error,
+  fallback
+) {
+  try {
+    const response =
+      error?.context;
+
+    if (
+      response &&
+      typeof response.clone ===
+        'function'
+    ) {
+      const body =
+        await response
+          .clone()
+          .json();
+
+      if (body?.error) {
+        return body.error;
+      }
+
+      if (body?.message) {
+        return body.message;
+      }
+    }
+  } catch {
+    // Use fallback.
+  }
+
+  return fallback;
+}
 
 /* =========================================================
-   LOAD COMPETITIONS
+   COMPETITIONS
    ========================================================= */
 
-
 async function loadCompetitionsFromSupabase() {
-
   const {
     data,
     error
   } =
     await supabaseClient
-      .from(
-        'competitions'
-      )
+      .from('competitions')
       .select('*')
       .order(
         'created_at',
@@ -333,9 +266,7 @@ async function loadCompetitionsFromSupabase() {
         }
       );
 
-
   if (error) {
-
     console.error(
       'Supabase competitions error:',
       error
@@ -346,87 +277,68 @@ async function loadCompetitionsFromSupabase() {
     );
 
     return;
-
   }
 
-
   competitions =
-    (data || [])
-      .map(
-        row => ({
+    (data || []).map(
+      row => ({
+        id:
+          String(row.id),
 
-          id:
-            String(
-              row.id
-            ),
+        title:
+          row.title || '',
 
-          title:
-            row.title || '',
+        price:
+          Number(
+            row.price || 0
+          ),
 
-          price:
-            Number(
-              row.price || 0
-            ),
+        image:
+          row.image_url || '',
 
-          image:
-            row.image_url || '',
+        closes:
+          row.closes_at || '',
 
-          closes:
-            row.closes_at || '',
+        max:
+          Number(
+            row.max_entries || 0
+          ),
 
-          max:
-            Number(
-              row.max_entries || 0
-            ),
+        sold:
+          Number(
+            row.sold || 0
+          ),
 
-          sold:
-            Number(
-              row.sold || 0
-            ),
+        status:
+          row.status || 'live',
 
-          status:
-            row.status || 'live',
+        description:
+          row.description || '',
 
-          description:
-            row.description || '',
+        skill_question:
+          row.skill_question || '',
 
-          skill_question:
-            row.skill_question || '',
+        skill_option_a:
+          row.skill_option_a || '',
 
-          skill_option_a:
-            row.skill_option_a || '',
+        skill_option_b:
+          row.skill_option_b || '',
 
-          skill_option_b:
-            row.skill_option_b || '',
-
-          skill_option_c:
-            row.skill_option_c || ''
-
-        })
-      );
-
+        skill_option_c:
+          row.skill_option_c || ''
+      })
+    );
 
   renderDraws();
-
 }
 
-
-/* =========================================================
-   DISPLAY COMPETITIONS
-   ========================================================= */
-
-
 function renderDraws() {
-
   const host =
     $('#drawCards');
 
   if (!host) {
-
     return;
-
   }
-
 
   const live =
     competitions.filter(
@@ -435,23 +347,19 @@ function renderDraws() {
         'live'
     );
 
-
   if (!live.length) {
-
-    host.innerHTML =
-      '<p class="empty">' +
-      'No live competitions right now.' +
-      '</p>';
+    host.innerHTML = `
+      <p class="empty">
+        No live competitions right now.
+      </p>
+    `;
 
     return;
-
   }
-
 
   host.innerHTML =
     live.map(
       competition => {
-
         const percentage =
           competition.max > 0
             ? Math.min(
@@ -465,7 +373,6 @@ function renderDraws() {
               )
             : 0;
 
-
         return `
           <article
             class="card"
@@ -473,9 +380,7 @@ function renderDraws() {
               competition.id
             )}"
           >
-
             <div class="card-img">
-
               <img
                 src="${escapeHtml(
                   competition.image
@@ -484,18 +389,14 @@ function renderDraws() {
                   competition.title
                 )}"
               >
-
               <span>
                 ${daysLeft(
                   competition.closes
                 )}
               </span>
-
             </div>
 
-
             <div class="card-body">
-
               <h3>
                 ${escapeHtml(
                   competition.title
@@ -509,20 +410,15 @@ function renderDraws() {
                 per entry
               </p>
 
-
               <div class="bar">
-
                 <i
                   style="width:${percentage}%"
                 ></i>
-
               </div>
 
-
               <div class="stats">
-
                 <b>
-                  ${percentage}% sold
+                                  ${percentage}% sold
                 </b>
 
                 <span>
@@ -530,9 +426,7 @@ function renderDraws() {
                   /
                   ${competition.max.toLocaleString()}
                 </span>
-
               </div>
-
 
               <button
                 class="enter"
@@ -542,43 +436,27 @@ function renderDraws() {
               >
                 ENTER NOW
               </button>
-
             </div>
-
           </article>
         `;
-
       }
     )
     .join('');
 
-
   $$('[data-open-comp]')
     .forEach(
       button => {
-
         button.onclick =
           () => {
-
             showCompetition(
               button.dataset.openComp
             );
-
           };
-
       }
     );
-
 }
 
-
-/* =========================================================
-   COMPETITION DETAILS
-   ========================================================= */
-
-
 function showCompetition(id) {
-
   const competition =
     competitions.find(
       item =>
@@ -586,13 +464,9 @@ function showCompetition(id) {
         String(id)
     );
 
-
   if (!competition) {
-
     return;
-
   }
-
 
   const remaining =
     Math.max(
@@ -600,7 +474,6 @@ function showCompetition(id) {
       competition.max -
       competition.sold
     );
-
 
   const maximumChoice =
     Math.max(
@@ -611,144 +484,115 @@ function showCompetition(id) {
       )
     );
 
+  const content =
+    $('#competitionContent');
 
-  $('#competitionContent')
-    .innerHTML = `
+  if (!content) {
+    return;
+  }
 
-      <div class="competition-detail">
+  content.innerHTML = `
+    <div class="competition-detail">
+      <img
+        src="${escapeHtml(
+          competition.image
+        )}"
+        alt="${escapeHtml(
+          competition.title
+        )}"
+      >
 
-        <img
-          src="${escapeHtml(
-            competition.image
-          )}"
-          alt="${escapeHtml(
+      <div>
+        <p class="eyebrow">
+          LIVE COMPETITION
+        </p>
+
+        <h2>
+          ${escapeHtml(
             competition.title
-          )}"
-        >
+          )}
+        </h2>
 
+        <p>
+          ${escapeHtml(
+            competition.description
+          )}
+        </p>
 
-        <div>
-
-          <p class="eyebrow">
-            LIVE COMPETITION
-          </p>
-
-          <h2>
-            ${escapeHtml(
-              competition.title
-            )}
-          </h2>
-
-          <p>
-            ${escapeHtml(
-              competition.description
-            )}
-          </p>
-
-
-          <div class="detail-price">
-
-            ${money(
-              competition.price
-            )}
-
-            <small>
-              per entry
-            </small>
-
-          </div>
-
-
-          <p>
-
-            <strong>
-              ${remaining.toLocaleString()}
-            </strong>
-
-            entries remaining
-
-          </p>
-
-
-          ${
-            remaining > 0
-              ? `
-
-                <label class="field">
-
-                  Number of entries
-
-                  <input
-                    id="entryQty"
-                    type="number"
-                    min="1"
-                    max="${maximumChoice}"
-                    value="1"
-                  >
-
-                </label>
-
-
-                <button
-                  class="btn gold full"
-                  id="addToCart"
-                >
-                  ADD TO BASKET
-                </button>
-
-              `
-              : `
-
-                <p>
-                  This competition
-                  has no entries
-                  remaining.
-                </p>
-
-              `
-          }
-
-
-          <p class="micro">
-
-            Checkout is currently
-            disabled while secure
-            payment processing is
-            being prepared.
-
-          </p>
-
+        <div class="detail-price">
+          ${money(
+            competition.price
+          )}
+          <small>
+            per entry
+          </small>
         </div>
 
+        <p>
+          <strong>
+            ${remaining.toLocaleString()}
+          </strong>
+          entries remaining
+        </p>
+
+        ${
+          remaining > 0
+            ? `
+              <label class="field">
+                Number of entries
+
+                <input
+                  id="entryQty"
+                  type="number"
+                  min="1"
+                  max="${maximumChoice}"
+                  value="1"
+                >
+              </label>
+
+              <button
+                class="btn gold full"
+                id="addToCart"
+              >
+                ADD TO BASKET
+              </button>
+            `
+            : `
+              <p>
+                This competition has no
+                entries remaining.
+              </p>
+            `
+        }
+
+        <p class="micro">
+          Secure payment processing is
+          still in preparation.
+        </p>
       </div>
-
-    `;
-
+    </div>
+  `;
 
   $('#addToCart')
     ?.addEventListener(
       'click',
       () => {
-
         openSkillQuestion(
           competition.id
         );
-
       }
     );
-
 
   openModal(
     '#competitionModal'
   );
-
 }
+
 /* =========================================================
    SKILL QUESTION
    ========================================================= */
 
 function openSkillQuestion(id) {
-
   const competition =
     competitions.find(
       item =>
@@ -757,11 +601,8 @@ function openSkillQuestion(id) {
     );
 
   if (!competition) {
-
     return;
-
   }
-
 
   const remaining =
     Math.max(
@@ -769,7 +610,6 @@ function openSkillQuestion(id) {
       competition.max -
       competition.sold
     );
-
 
   const quantity =
     Math.max(
@@ -783,23 +623,29 @@ function openSkillQuestion(id) {
       )
     );
 
-
-  $('#skillQuestion')
-    .textContent =
-      competition.skill_question ||
-      'Skill question unavailable.';
-
-
-  $('#skillError')
-    .textContent = '';
-
+  const question =
+    $('#skillQuestion');
 
   const answers =
     $('#skillAnswers');
 
+  const errorHost =
+    $('#skillError');
 
+  if (
+    !question ||
+    !answers ||
+    !errorHost
+  ) {
+    return;
+  }
+
+  question.textContent =
+    competition.skill_question ||
+    'Skill question unavailable.';
+
+  errorHost.textContent = '';
   answers.innerHTML = '';
-
 
   [
     competition.skill_option_a,
@@ -809,7 +655,6 @@ function openSkillQuestion(id) {
     .filter(Boolean)
     .forEach(
       option => {
-
         const button =
           document.createElement(
             'button'
@@ -830,33 +675,24 @@ function openSkillQuestion(id) {
         answers.appendChild(
           button
         );
-
       }
     );
-
 
   $$('[data-skill]')
     .forEach(
       button => {
-
         button.onclick =
           async () => {
-
-            $('#skillError')
-              .textContent =
-                'Checking answer...';
-
+            errorHost.textContent =
+              'Checking answer...';
 
             $$('[data-skill]')
               .forEach(
                 item => {
-
                   item.disabled =
                     true;
-
                 }
               );
-
 
             const {
               data,
@@ -868,98 +704,73 @@ function openSkillQuestion(id) {
                   'check-skill-answer',
                   {
                     body: {
-
                       competition_id:
                         competition.id,
 
                       answer:
                         button.dataset.skill
-
                     }
                   }
                 );
 
-
             $$('[data-skill]')
               .forEach(
                 item => {
-
                   item.disabled =
                     false;
-
                 }
               );
 
-
             if (error) {
-
               console.error(
                 'Skill answer check failed:',
                 error
               );
 
-              $('#skillError')
-                .textContent =
-                  'Unable to check your answer. Please try again.';
+              errorHost.textContent =
+                'Unable to check your answer. Please try again.';
 
               return;
-
             }
-
 
             if (!data?.correct) {
-
-              $('#skillError')
-                .textContent =
-                  'Incorrect answer. Please try again.';
+              errorHost.textContent =
+                'Incorrect answer. Please try again.';
 
               return;
-
             }
-
 
             addToCart(
               competition.id,
               quantity
             );
 
-
             closeModals();
-
             openCart();
-
           };
-
       }
     );
 
-
   closeModals();
-
 
   openModal(
     '#skillModal'
   );
-
 }
-
 
 /* =========================================================
    BASKET
    ========================================================= */
 
-
 function addToCart(
   id,
   quantity
 ) {
-
   cart =
     store.get(
       'nexa_cart',
       []
     );
-
 
   const competition =
     competitions.find(
@@ -968,13 +779,9 @@ function addToCart(
         String(id)
     );
 
-
   if (!competition) {
-
     return;
-
   }
-
 
   const remaining =
     Math.max(
@@ -983,17 +790,13 @@ function addToCart(
       competition.sold
     );
 
-
   if (remaining <= 0) {
-
     toast(
       'No entries remaining for this competition.'
     );
 
     return;
-
   }
-
 
   quantity =
     Math.max(
@@ -1005,7 +808,6 @@ function addToCart(
       )
     );
 
-
   const found =
     cart.find(
       item =>
@@ -1013,53 +815,41 @@ function addToCart(
         String(id)
     );
 
-
   if (found) {
-
     found.qty =
       Math.min(
-        Number(found.qty || 0) +
-        quantity,
+        Number(
+          found.qty || 0
+        ) + quantity,
         100,
         remaining
       );
-
   } else {
-
     cart.push({
       id:
         String(id),
       qty:
         quantity
     });
-
   }
-
 
   store.set(
     'nexa_cart',
     cart
   );
-
-
-  updateCartCount();
-
+     updateCartCount();
 
   toast(
     'Entries added to your basket'
   );
-
 }
 
-
 function updateCartCount() {
-
   cart =
     store.get(
       'nexa_cart',
       []
     );
-
 
   const count =
     cart.reduce(
@@ -1074,49 +864,43 @@ function updateCartCount() {
       0
     );
 
+  const countHost =
+    $('#cartCount');
 
-  if (
-    $('#cartCount')
-  ) {
-
-    $('#cartCount')
-      .textContent =
-        count;
-
+  if (countHost) {
+    countHost.textContent =
+      count;
   }
-
 }
 
-
 function openCart() {
-
   cart =
     store.get(
       'nexa_cart',
       []
     )
-    .filter(
-      item =>
-        competitions.some(
-          competition =>
-            competition.id ===
-            String(item.id)
-        )
-    );
-
+      .filter(
+        item =>
+          competitions.some(
+            competition =>
+              competition.id ===
+              String(item.id)
+          )
+      );
 
   store.set(
     'nexa_cart',
     cart
   );
 
-
   let total = 0;
-
 
   const host =
     $('#cartItems');
 
+  if (!host) {
+    return;
+  }
 
   host.innerHTML =
     cart.length
@@ -1126,7 +910,6 @@ function openCart() {
               item,
               index
             ) => {
-
               const competition =
                 competitions.find(
                   competition =>
@@ -1134,13 +917,9 @@ function openCart() {
                     String(item.id)
                 );
 
-
               if (!competition) {
-
                 return '';
-
               }
-
 
               const lineTotal =
                 competition.price *
@@ -1148,17 +927,12 @@ function openCart() {
                   item.qty || 0
                 );
 
-
               total +=
                 lineTotal;
 
-
               return `
-
                 <div class="cart-line">
-
                   <div>
-
                     <strong>
                       ${escapeHtml(
                         competition.title
@@ -1172,12 +946,9 @@ function openCart() {
                         competition.price
                       )}
                     </small>
-
                   </div>
 
-
                   <div>
-
                     <b>
                       ${money(
                         lineTotal
@@ -1190,37 +961,31 @@ function openCart() {
                     >
                       Remove
                     </button>
-
                   </div>
-
                 </div>
-
               `;
-
             }
           )
           .join('')
       : `
-
           <p class="empty">
             Your basket is empty.
           </p>
-
         `;
 
+  const totalHost =
+    $('#cartTotal');
 
-  $('#cartTotal')
-    .textContent =
+  if (totalHost) {
+    totalHost.textContent =
       money(total);
-
+  }
 
   $$('[data-remove]')
     .forEach(
       button => {
-
         button.onclick =
           () => {
-
             cart.splice(
               Number(
                 button.dataset.remove
@@ -1228,91 +993,68 @@ function openCart() {
               1
             );
 
-
             store.set(
               'nexa_cart',
               cart
             );
 
-
             updateCartCount();
-
-
             openCart();
-
           };
-
       }
     );
 
+  const checkoutButton =
+    $('#checkoutBtn');
 
-  $('#checkoutBtn')
-    .disabled =
+  if (checkoutButton) {
+    checkoutButton.disabled =
       !cart.length;
 
-
-  $('#checkoutBtn')
-    .textContent =
+    checkoutButton.textContent =
       PAYMENT_MODE === 'live'
         ? 'SECURE CHECKOUT'
         : 'CHECKOUT — COMING SOON';
-
+  }
 
   const micro =
     $('#cartModal .micro');
 
-
   if (micro) {
-
     micro.innerHTML =
       PAYMENT_MODE === 'live'
         ? `Secure payment powered by ${escapeHtml(
             PAYMENT_PROVIDER
           )}.`
-        : `Payment setup is being prepared. No card or wallet can be charged yet.`;
-
+        : 'Payment setup is being prepared. No card or wallet can be charged yet.';
   }
-
 
   openModal(
     '#cartModal'
   );
-
 }
-
 
 /* =========================================================
    CUSTOMER ACCOUNT
    ========================================================= */
 
-
 async function getCurrentCustomer() {
-
   const {
-    data: {
-      session
-    }
+    data: { session }
   } =
     await supabaseClient
       .auth
       .getSession();
 
-
   const authUser =
     session?.user || null;
 
-
   if (!authUser) {
-
     user = null;
-
     return null;
-
   }
 
-
   user = {
-
     id:
       authUser.id,
 
@@ -1324,37 +1066,239 @@ async function getCurrentCustomer() {
         .user_metadata
         ?.name ||
       'Customer'
-
   };
 
-
   return user;
-
 }
 
+async function loadCustomerOrders(
+  customer
+) {
+  const {
+    data: orderRows,
+    error: orderError
+  } =
+    await supabaseClient
+      .from('orders')
+      .select(
+        'id,total,status,created_at,paid_at,payment_provider,payment_reference'
+      )
+      .eq(
+        'user_id',
+        customer.id
+      )
+      .order(
+        'created_at',
+        {
+          ascending: false
+        }
+      );
+
+  if (orderError) {
+    console.error(
+      'Customer orders error:',
+      orderError
+    );
+
+    return {
+      orders: [],
+      error:
+        orderError.message
+    };
+  }
+
+  const orders =
+    orderRows || [];
+
+  if (!orders.length) {
+    return {
+      orders: [],
+      error: null
+    };
+  }
+
+  const orderIds =
+    orders.map(
+      order => order.id
+    );
+
+  const {
+    data: ticketRows,
+    error: ticketError
+  } =
+    await supabaseClient
+      .from('tickets')
+      .select(
+        'id,order_id,competition_id,ticket_number,status,created_at'
+      )
+      .in(
+        'order_id',
+        orderIds
+      )
+      .order(
+        'id',
+        {
+          ascending: true
+        }
+      );
+
+  if (ticketError) {
+    console.error(
+      'Customer tickets error:',
+      ticketError
+    );
+  }
+
+  const tickets =
+    ticketRows || [];
+
+  return {
+    error:
+      ticketError
+        ? ticketError.message
+        : null,
+
+    orders:
+      orders.map(
+        order => ({
+          ...order,
+
+          tickets:
+            tickets.filter(
+              ticket =>
+                ticket.order_id ===
+                order.id
+            )
+        })
+      )
+  };
+}
+
+function customerOrderCard(
+  order
+) {
+  const date =
+    formatDate(
+      order.paid_at ||
+      order.created_at
+    );
+
+  const status =
+    String(
+      order.status ||
+      'pending'
+    );
+
+  const statusLabel =
+    status === 'paid'
+      ? 'PAID'
+      : status.toUpperCase();
+
+  const tickets =
+    order.tickets || [];
+
+  const ticketsHtml =
+    tickets.length
+      ? tickets
+          .map(
+            ticket => {
+              const competition =
+                competitions.find(
+                  item =>
+                    item.id ===
+                    String(
+                      ticket.competition_id
+                    )
+                );
+
+              return `
+                <div class="ticket-line">
+                  <p>
+                    ${
+                      competition
+                        ? escapeHtml(
+                            competition.title
+                          )
+                        : 'Competition'
+                    }
+                  </p>
+
+                  <p>
+                    Ticket:
+                    <strong>
+                      ${escapeHtml(
+                        ticket.ticket_number
+                      )}
+                    </strong>
+                  </p>
+                </div>
+              `;
+            }
+          )
+          .join('')
+      : `
+          <p class="empty">
+            ${
+              status === 'paid'
+                ? 'No tickets found for this order.'
+                : 'No tickets issued yet.'
+            }
+          </p>
+        `;
+
+  return `
+    <div class="order-card">
+      <strong>
+        Order
+        ${escapeHtml(
+          order.id
+        )}
+      </strong>
+
+      <p>
+        ${money(
+                     order.total
+        )}
+      </p>
+
+      <small>
+        ${escapeHtml(
+          statusLabel
+        )}
+        ${
+          date
+            ? ` · ${escapeHtml(
+                date
+              )}`
+            : ''
+        }
+      </small>
+
+      <details>
+        <summary>
+          View tickets
+        </summary>
+
+        ${ticketsHtml}
+      </details>
+    </div>
+  `;
+}
 
 async function renderAccount(
   fromCheckout = false
 ) {
-
   await getCurrentCustomer();
-
 
   const host =
     $('#accountContent');
 
-
   if (!host) {
-
     return;
-
   }
 
-
   if (!user) {
-
     host.innerHTML = `
-
       <p class="eyebrow">
         MY NEXA
       </p>
@@ -1367,16 +1311,12 @@ async function renderAccount(
         }
       </h2>
 
-
       <h3>
         Create Account
       </h3>
 
-
       <form id="signupForm">
-
         <label class="field">
-
           Name
 
           <input
@@ -1384,12 +1324,9 @@ async function renderAccount(
             required
             autocomplete="name"
           >
-
         </label>
 
-
         <label class="field">
-
           Email
 
           <input
@@ -1398,12 +1335,9 @@ async function renderAccount(
             required
             autocomplete="email"
           >
-
         </label>
 
-
         <label class="field">
-
           Password
 
           <input
@@ -1413,9 +1347,7 @@ async function renderAccount(
             required
             autocomplete="new-password"
           >
-
         </label>
-
 
         <button
           class="btn gold full"
@@ -1423,22 +1355,16 @@ async function renderAccount(
         >
           CREATE ACCOUNT
         </button>
-
       </form>
 
-
       <hr>
-
 
       <h3>
         Already have an account?
       </h3>
 
-
       <form id="loginForm">
-
         <label class="field">
-
           Email
 
           <input
@@ -1447,12 +1373,9 @@ async function renderAccount(
             required
             autocomplete="email"
           >
-
         </label>
 
-
         <label class="field">
-
           Password
 
           <input
@@ -1461,9 +1384,7 @@ async function renderAccount(
             required
             autocomplete="current-password"
           >
-
         </label>
-
 
         <button
           class="btn outline full"
@@ -1471,24 +1392,18 @@ async function renderAccount(
         >
           LOG IN
         </button>
-
       </form>
-
     `;
-
 
     $('#signupForm')
       .onsubmit =
         async event => {
-
           event.preventDefault();
-
 
           const formData =
             new FormData(
               event.target
             );
-
 
           const {
             error
@@ -1496,7 +1411,6 @@ async function renderAccount(
             await supabaseClient
               .auth
               .signUp({
-
                 email:
                   String(
                     formData.get(
@@ -1512,58 +1426,44 @@ async function renderAccount(
                   ),
 
                 options: {
-
                   data: {
-
                     name:
                       String(
                         formData.get(
                           'name'
                         ) || ''
                       ).trim()
-
                   },
 
                   emailRedirectTo:
                     window.location.origin +
                     '/'
-
                 }
-
               });
 
-
           if (error) {
-
             alert(
               'Sign up failed: ' +
               error.message
             );
 
             return;
-
           }
-
 
           alert(
             'Account created. Please check your email if confirmation is required.'
           );
-
         };
-
 
     $('#loginForm')
       .onsubmit =
         async event => {
-
           event.preventDefault();
-
 
           const formData =
             new FormData(
               event.target
             );
-
 
           const {
             error
@@ -1571,7 +1471,6 @@ async function renderAccount(
             await supabaseClient
               .auth
               .signInWithPassword({
-
                 email:
                   String(
                     formData.get(
@@ -1585,84 +1484,45 @@ async function renderAccount(
                       'password'
                     ) || ''
                   )
-
               });
 
-
           if (error) {
-
             alert(
               'Login failed: ' +
               error.message
             );
 
             return;
-
           }
-
 
           await updateAccountLabel();
 
-
-          if (
-            checkoutPending
-          ) {
-
+          if (checkoutPending) {
             checkoutPending =
               false;
 
-
             closeModals();
-
-
             openCart();
-
 
             toast(
               'Logged in — you can continue checkout'
             );
 
-
             return;
-
           }
-
 
           await renderAccount(
             false
           );
-
         };
 
-
     return;
-
   }
 
-
-  orders =
-    store.get(
-      'nexa_orders',
-      []
-    );
-
-
-  const customerOrders =
-    orders.filter(
-      order =>
-        String(
-          order.email || ''
-        ).toLowerCase() ===
-        user.email.toLowerCase()
-    );
-
-
   host.innerHTML = `
-
     <p class="eyebrow">
       MY NEXA
     </p>
-
 
     <h2>
       Welcome,
@@ -1671,103 +1531,19 @@ async function renderAccount(
       )}
     </h2>
 
-
     <p>
       ${escapeHtml(
         user.email
       )}
     </p>
 
-
     <h3>
       Your orders
     </h3>
 
-
-    ${
-      customerOrders.length
-        ? customerOrders
-            .map(
-              order => `
-
-                <div class="order-card">
-
-                  <strong>
-                    ${escapeHtml(
-                      order.id
-                    )}
-                  </strong>
-
-
-                  <p>
-                    ${money(
-                      order.total
-                    )}
-                  </p>
-
-
-                  <small>
-                    ${escapeHtml(
-                      order.status ||
-                      'TEST'
-                    )}
-                  </small>
-
-
-                  <details>
-
-                    <summary>
-                      View tickets
-                    </summary>
-
-
-                    ${
-                      (order.items || [])
-                        .map(
-                          item => `
-
-                            <p>
-
-                              ${escapeHtml(
-                                item.title
-                              )}
-
-                              —
-
-                              ${
-                                (
-                                  item.tickets ||
-                                  []
-                                )
-                                  .map(
-                                    escapeHtml
-                                  )
-                                  .join(', ')
-                              }
-
-                            </p>
-
-                          `
-                        )
-                        .join('')
-                    }
-
-                  </details>
-
-                </div>
-
-              `
-            )
-            .join('')
-        : `
-
-            <p class="empty">
-              No orders yet.
-            </p>
-
-          `
-    }
-
+    <p class="empty">
+      Loading your orders...
+    </p>
 
     <button
       class="btn outline full"
@@ -1775,1313 +1551,1061 @@ async function renderAccount(
     >
       LOG OUT
     </button>
-
   `;
 
+  const {
+    orders,
+    error
+  } =
+    await loadCustomerOrders(
+      user
+    );
+
+  const orderSection =
+    orders.length
+      ? orders
+          .map(
+            customerOrderCard
+          )
+          .join('')
+      : `
+          <p class="empty">
+            ${
+              error
+                ? 'Your orders could not be loaded. Please try again.'
+                : 'No orders yet.'
+            }
+          </p>
+        `;
+
+  host.innerHTML = `
+    <p class="eyebrow">
+      MY NEXA
+    </p>
+
+    <h2>
+      Welcome,
+      ${escapeHtml(
+        user.name
+      )}
+    </h2>
+
+    <p>
+      ${escapeHtml(
+        user.email
+      )}
+    </p>
+
+    <h3>
+      Your orders
+    </h3>
+
+    ${orderSection}
+
+    <button
+      class="btn outline full"
+      id="logoutBtn"
+    >
+      LOG OUT
+    </button>
+  `;
 
   $('#logoutBtn')
     .onclick =
       async () => {
-
         await supabaseClient
           .auth
           .signOut();
 
-
-        user =
-          null;
-
-
+        user = null;
         checkoutPending =
           false;
 
-
         await updateAccountLabel();
-
 
         await renderAccount(
           false
         );
-
       };
-
 }
-
 
 async function updateAccountLabel() {
-
   await getCurrentCustomer();
 
+  const label =
+    $('#accountLabel');
 
-  if (
-    !$('#accountLabel')
-  ) {
-
+  if (!label) {
     return;
-
   }
 
-
-  $('#accountLabel')
-    .textContent =
-      user
-        ? (
-            user.name ||
-            'Customer'
-          )
-            .split(' ')[0]
-        : 'My Account';
-
+  label.textContent =
+    user
+      ? (
+          user.name ||
+          'Customer'
+        )
+          .split(' ')[0]
+      : 'My Account';
 }
+
 /* =========================================================
    CHECKOUT / PAYMENT-READY STATE
    ========================================================= */
 
 async function checkout() {
-
   cart =
     store.get(
       'nexa_cart',
       []
     );
 
-
   if (!cart.length) {
-
     return;
-
   }
-
 
   const authUser =
     await getCurrentCustomer();
 
-
   if (!authUser) {
-
     checkoutPending =
       true;
 
-
     closeModals();
-
 
     await renderAccount(
       true
     );
+               order.total
+        )}
+      </p>
 
+      <small>
+        ${escapeHtml(
+          statusLabel
+        )}
+        ${
+          date
+            ? ` · ${escapeHtml(
+                date
+              )}`
+            : ''
+        }
+      </small>
 
-    openModal(
-      '#accountModal'
-    );
+      <details>
+        <summary>
+          View tickets
+        </summary>
 
+        ${ticketsHtml}
+      </details>
+    </div>
+  `;
+}
 
-    return;
-
-  }
-
-
-  
-if (
-  PAYMENT_MODE !== 'live'
+async function renderAccount(
+  fromCheckout = false
 ) {
-
-  const items = cart.map(item => ({
-    competition_id: Number(item.id),
-    quantity: Number(item.qty)
-  }));
-
-  const {
-    data,
-    error
-  } = await supabaseClient.functions.invoke(
-    'create-order',
-    {
-      body: {
-        items
-      }
-    }
-  );
-
-  if (error) {
-    console.error(
-      'Create order error:',
-      error
-    );
-
-    alert(
-      'The secure order could not be created.'
-    );
-
-    return;
-  }
-
-  if (!data?.success) {
-    alert(
-      data?.error ||
-      'The secure order could not be created.'
-    );
-
-    return;
-  }
-
-  const cartItems =
-    $('#cartItems');
-
-  if (
-    cartItems &&
-    !$('#paymentNotice')
-  ) {
-
-    cartItems.insertAdjacentHTML(
-      'afterbegin',
-      `
-        <div
-          class="order-card"
-          id="paymentNotice"
-        >
-          <strong>
-            Secure test order created
-          </strong>
-
-          <p>
-            Order total:
-            £${Number(
-              data.order.total
-            ).toFixed(2)}
-          </p>
-
-          <p class="micro">
-            No payment has been taken.
-            No tickets have been issued.
-          </p>
-        </div>
-      `
-    );
-  }
-
-  toast(
-    'Secure test order created'
-  );
-
-  return;
-}
-  /*
-    IMPORTANT:
-
-    Real payments must NOT be
-    created or confirmed directly
-    inside this browser script.
-
-    Production flow:
-
-    1. Customer presses checkout.
-
-    2. Browser calls a secure
-       Supabase Edge Function.
-
-    3. Server re-reads prices from
-       the database.
-
-    4. Server checks remaining
-       competition entries.
-
-    5. Server creates a pending
-       order.
-
-    6. Server creates the payment
-       session with the approved
-       payment provider.
-
-    7. Payment provider confirms
-       payment through a secure
-       webhook.
-
-    8. Only after confirmed payment
-       are ticket numbers allocated.
-
-    9. Sold counts are updated
-       atomically on the server.
-
-    10. The paid tickets become
-        eligible for the eventual
-        winner draw.
-  */
-
-
-  alert(
-    'Payment backend is not connected yet.'
-  );
-
-}
-
-
-/* =========================================================
-   WINNERS
-   ========================================================= */
-
-async function renderWinners() {
+  await getCurrentCustomer();
 
   const host =
-    $('#winnerGrid');
+    $('#accountContent');
 
   if (!host) {
     return;
   }
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient.rpc(
-      'get_public_winners'
-    );
-
-  if (error) {
-    console.error(
-      'Public winners error:',
-      error
-    );
-
+  if (!user) {
     host.innerHTML = `
-      <p class="empty">
-        Winners could not be loaded.
+      <p class="eyebrow">
+        MY NEXA
       </p>
+
+      <h2>
+        ${
+          fromCheckout
+            ? 'Sign in to continue'
+            : 'Customer Account'
+        }
+      </h2>
+
+      <h3>
+        Create Account
+      </h3>
+
+      <form id="signupForm">
+        <label class="field">
+          Name
+
+          <input
+            name="name"
+            required
+            autocomplete="name"
+          >
+        </label>
+
+        <label class="field">
+          Email
+
+          <input
+            name="email"
+            type="email"
+            required
+            autocomplete="email"
+          >
+        </label>
+
+        <label class="field">
+          Password
+
+          <input
+            name="password"
+            type="password"
+            minlength="8"
+            required
+            autocomplete="new-password"
+          >
+        </label>
+
+        <button
+          class="btn gold full"
+          type="submit"
+        >
+          CREATE ACCOUNT
+        </button>
+      </form>
+
+      <hr>
+
+      <h3>
+        Already have an account?
+      </h3>
+
+      <form id="loginForm">
+        <label class="field">
+          Email
+
+          <input
+            name="email"
+            type="email"
+            required
+            autocomplete="email"
+          >
+        </label>
+
+        <label class="field">
+          Password
+
+          <input
+            name="password"
+            type="password"
+            required
+            autocomplete="current-password"
+          >
+        </label>
+
+        <button
+          class="btn outline full"
+          type="submit"
+        >
+          LOG IN
+        </button>
+      </form>
     `;
+
+    $('#signupForm')
+      .onsubmit =
+        async event => {
+          event.preventDefault();
+
+          const formData =
+            new FormData(
+              event.target
+            );
+
+          const {
+            error
+          } =
+            await supabaseClient
+              .auth
+              .signUp({
+                email:
+                  String(
+                    formData.get(
+                      'email'
+                    ) || ''
+                  ).trim(),
+
+                password:
+                  String(
+                    formData.get(
+                      'password'
+                    ) || ''
+                  ),
+
+                options: {
+                  data: {
+                    name:
+                      String(
+                        formData.get(
+                          'name'
+                        ) || ''
+                      ).trim()
+                  },
+
+                  emailRedirectTo:
+                    window.location.origin +
+                    '/'
+                }
+              });
+
+          if (error) {
+            alert(
+              'Sign up failed: ' +
+              error.message
+            );
+
+            return;
+          }
+
+          alert(
+            'Account created. Please check your email if confirmation is required.'
+          );
+        };
+
+    $('#loginForm')
+      .onsubmit =
+        async event => {
+          event.preventDefault();
+
+          const formData =
+            new FormData(
+              event.target
+            );
+
+          const {
+            error
+          } =
+            await supabaseClient
+              .auth
+              .signInWithPassword({
+                email:
+                  String(
+                    formData.get(
+                      'email'
+                    ) || ''
+                  ).trim(),
+
+                password:
+                  String(
+                    formData.get(
+                      'password'
+                    ) || ''
+                  )
+              });
+
+          if (error) {
+            alert(
+              'Login failed: ' +
+              error.message
+            );
+
+            return;
+          }
+
+          await updateAccountLabel();
+
+          if (checkoutPending) {
+            checkoutPending =
+              false;
+
+            closeModals();
+            openCart();
+
+            toast(
+              'Logged in — you can continue checkout'
+            );
+
+            return;
+          }
+
+          await renderAccount(
+            false
+          );
+        };
 
     return;
   }
 
-  const publicWinners =
-    Array.isArray(data)
-      ? data
-      : [];
+  host.innerHTML = `
+    <p class="eyebrow">
+      MY NEXA
+    </p>
 
-  host.innerHTML =
-    publicWinners.length
-      ? publicWinners
+    <h2>
+      Welcome,
+      ${escapeHtml(
+        user.name
+      )}
+    </h2>
+
+    <p>
+      ${escapeHtml(
+        user.email
+      )}
+    </p>
+
+    <h3>
+      Your orders
+    </h3>
+
+    <p class="empty">
+      Loading your orders...
+    </p>
+
+    <button
+      class="btn outline full"
+      id="logoutBtn"
+    >
+      LOG OUT
+    </button>
+  `;
+
+  const {
+    orders,
+    error
+  } =
+    await loadCustomerOrders(
+      user
+    );
+
+  const orderSection =
+    orders.length
+      ? orders
           .map(
-            winner => `
-              <article
-                class="winner-card"
-              >
-                <span>
-                  🏆
-                </span>
-
-                <h3>
-                  ${escapeHtml(
-                    winner.prize
-                  )}
-                </h3>
-
-                <p>
-                  Winner:
-                  <strong>
-                    Winner
-                  </strong>
-                </p>
-
-                <p>
-                  Ticket:
-                  <strong>
-                    ${escapeHtml(
-                      winner.ticket_number
-                    )}
-                  </strong>
-                </p>
-
-                <small>
-                  ${
-                    new Date(
-                      winner.drawn_at
-                    )
-                      .toLocaleDateString(
-                        'en-GB'
-                      )
-                  }
-                </small>
-              </article>
-            `
+            customerOrderCard
           )
           .join('')
       : `
           <p class="empty">
-            No winners have been published yet.
+            ${
+              error
+                ? 'Your orders could not be loaded. Please try again.'
+                : 'No orders yet.'
+            }
           </p>
         `;
+
+  host.innerHTML = `
+    <p class="eyebrow">
+      MY NEXA
+    </p>
+
+    <h2>
+      Welcome,
+      ${escapeHtml(
+        user.name
+      )}
+    </h2>
+
+    <p>
+      ${escapeHtml(
+        user.email
+      )}
+    </p>
+
+    <h3>
+      Your orders
+    </h3>
+
+    ${orderSection}
+
+    <button
+      class="btn outline full"
+      id="logoutBtn"
+    >
+      LOG OUT
+    </button>
+  `;
+
+  $('#logoutBtn')
+    .onclick =
+      async () => {
+        await supabaseClient
+          .auth
+          .signOut();
+
+        user = null;
+        checkoutPending =
+          false;
+
+        await updateAccountLabel();
+
+        await renderAccount(
+          false
+        );
+      };
 }
 
+async function updateAccountLabel() {
+  await getCurrentCustomer();
 
+  const label =
+    $('#accountLabel');
+
+  if (!label) {
+    return;
+  }
+
+  label.textContent =
+    user
+      ? (
+          user.name ||
+          'Customer'
+        )
+          .split(' ')[0]
+      : 'My Account';
+}
 
 /* =========================================================
-   SECURE WINNER DRAW
+   CHECKOUT / PAYMENT-READY STATE
    ========================================================= */
 
+async function checkout() {
+  cart =
+    store.get(
+      'nexa_cart',
+      []
+    );
 
-async function drawWinnerSecurely(
-  id
+  if (!cart.length) {
+    return;
+  }
+
+  const authUser =
+    await getCurrentCustomer();
+
+  if (!authUser) {
+    checkoutPending =
+      true;
+
+    closeModals();
+
+    await renderAccount(
+      true
+    );
+    async function getCorrectAnswerLetter(
+  competition
 ) {
-
-  if (
-    !(await isAdminSession())
-  ) {
-
-    alert(
-      'Administrator access required.'
-    );
-
-    return;
-
+  if (!competition?.id) {
+    return 'A';
   }
-
-
-  const competition =
-    competitions.find(
-      item =>
-        item.id ===
-        String(id)
-    );
-
-
-  if (!competition) {
-
-    return;
-
-  }
-
-
-  const confirmed =
-    window.confirm(
-
-      `Draw a winner for "${competition.title}"?\n\n` +
-
-      'Only confirmed paid tickets should be eligible. ' +
-
-      'The winner must be selected by the secure server-side draw function.'
-
-    );
-
-
-  if (!confirmed) {
-
-    return;
-
-  }
-
 
   const {
     data,
     error
   } =
     await supabaseClient
-      .functions
-      .invoke(
-        'draw-winner',
-        {
-
-          body: {
-
-            competition_id:
-              competition.id
-
-          }
-
-        }
-      );
-
-
-  if (error) {
-
-    console.error(
-      'Winner draw error:',
-      error
-    );
-
-
-    alert(
-
-      'Secure winner drawing is not connected yet. ' +
-
-      'No winner has been selected.'
-
-    );
-
-
-    return;
-
-  }
-
-
-  if (!data?.winner) {
-
-    alert(
-      data?.message ||
-      'No eligible paid entries were found.'
-    );
-
-    return;
-
-  }
-
-
-  winners =
-    store.get(
-      'nexa_winners',
-      []
-    );
-
-
-  winners.unshift({
-
-    competitionId:
-      competition.id,
-
-    prize:
-      competition.title,
-
-    name:
-      data.winner
-        .display_name ||
-      'Winner',
-
-    ticket:
-      data.winner
-        .ticket_number ||
-      '',
-
-    date:
-      data.drawn_at ||
-      new Date()
-        .toISOString()
-
-  });
-
-
-  store.set(
-    'nexa_winners',
-    winners
-  );
-
-
-  renderWinners();
-
-
-  toast(
-    'Winner drawn and published'
-  );
-
-}
-
-
-/* =========================================================
-   ADMIN LOGIN
-   ========================================================= */
-
-
-async function openSecureAdmin() {
-
-  let {
-    data: {
-      session
-    }
-  } =
-    await supabaseClient
-      .auth
-      .getSession();
-
-
-  if (!session) {
-
-    const email =
-      prompt(
-        'Admin email:'
-      );
-
-
-    if (!email) {
-
-      return;
-
-    }
-
-
-    const password =
-      prompt(
-        'Admin password:'
-      );
-
-
-    if (!password) {
-
-      return;
-
-    }
-
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .auth
-        .signInWithPassword({
-
-          email:
-            email,
-
-          password:
-            password
-
-        });
-
-
-    if (error) {
-
-      alert(
-        'Admin login failed: ' +
-        error.message
-      );
-
-      return;
-
-    }
-
-
-    session =
-      data.session;
-
-  }
-
+      .from(
+        'competition_skill_answers'
+      )
+      .select(
+        'correct_answer'
+      )
+      .eq(
+        'competition_id',
+        competition.id
+      )
+      .maybeSingle();
 
   if (
-    session?.user?.id !==
-    ADMIN_UID
+    error ||
+    !data?.correct_answer
   ) {
-
-    alert(
-      'This account does not have administrator access.'
-    );
-
-    return;
-
+    return 'A';
   }
 
+  const answer =
+    String(
+      data.correct_answer
+    );
 
-  await adminView();
+  if (
+    answer ===
+    competition.skill_option_b
+  ) {
+    return 'B';
+  }
 
+  if (
+    answer ===
+    competition.skill_option_c
+  ) {
+    return 'C';
+  }
 
-  openModal(
-    '#adminModal'
-  );
-
+  return 'A';
 }
-
-
-/* =========================================================
-   ADMIN DASHBOARD
-   ========================================================= */
-
 
 async function adminView(
   editId = null
 ) {
-
   if (
     !(await isAdminSession())
   ) {
+    const host =
+      $('#adminContent');
 
-    $('#adminContent')
-      .innerHTML = `
-
+    if (host) {
+      host.innerHTML = `
         <p class="empty">
-          Administrator access
-          required.
+          Administrator access required.
         </p>
-
       `;
-
+    }
 
     return;
-
   }
-await loadCompetitionsFromSupabase();
+
+  await loadCompetitionsFromSupabase();
 
   const edit =
     editId
       ? competitions.find(
-          competition =>
-            competition.id ===
+          item =>
+            item.id ===
             String(editId)
         )
       : null;
 
-
-  let selectedCorrect =
-    '';
-
-
-  if (edit) {
-
-    const {
-      data
-    } =
-      await supabaseClient
-        .from(
-          'competition_skill_answers'
+  const selectedCorrect =
+    edit
+      ? await getCorrectAnswerLetter(
+          edit
         )
-        .select(
-          'correct_answer'
-        )
-        .eq(
-          'competition_id',
-          edit.id
-        )
-        .maybeSingle();
+      : 'A';
 
+  const host =
+    $('#adminContent');
 
-    if (
-      data?.correct_answer ===
-      edit.skill_option_a
-    ) {
-
-      selectedCorrect =
-        'A';
-
-    }
-
-
-    if (
-      data?.correct_answer ===
-      edit.skill_option_b
-    ) {
-
-      selectedCorrect =
-        'B';
-
-    }
-
-
-    if (
-      data?.correct_answer ===
-      edit.skill_option_c
-    ) {
-
-      selectedCorrect =
-        'C';
-
-    }
-
+  if (!host) {
+    return;
   }
 
+  host.innerHTML = `
+    <div class="admin-head">
+      <div>
+        <p class="eyebrow">
+          NEXA DRAW
+        </p>
 
-  const totalMaximum =
-    competitions.reduce(
-      (
-        total,
-        competition
-      ) =>
-        total +
-        competition.max,
-      0
-    );
-
-
-  const totalSold =
-    competitions.reduce(
-      (
-        total,
-        competition
-      ) =>
-        total +
-        competition.sold,
-      0
-    );
-
-
-  $('#adminContent')
-    .innerHTML = `
-
-      <p class="eyebrow">
-        ADMIN
-      </p>
-
-
-      <h2>
-        Nexa Draw Dashboard
-      </h2>
-
-
-      <div class="admin-stats">
-
-        <div>
-
-          <strong>
-            ${competitions.length}
-          </strong>
-
-          <span>
-            Competitions
-          </span>
-
-        </div>
-
-
-        <div>
-
-          <strong>
-            ${totalSold.toLocaleString()}
-          </strong>
-
-          <span>
-            Sold
-          </span>
-
-        </div>
-
-
-        <div>
-
-          <strong>
-            ${totalMaximum.toLocaleString()}
-          </strong>
-
-          <span>
-            Capacity
-          </span>
-
-        </div>
-
+        <h2>
+          Admin Dashboard
+        </h2>
       </div>
-
 
       <button
         class="btn outline"
         id="adminLogout"
       >
-        Admin logout
+        LOG OUT
       </button>
+    </div>
 
+    <div class="admin-grid">
+      <div>
+        <h3>
+          ${
+            edit
+              ? 'Edit competition'
+              : 'Add competition'
+          }
+        </h3>
 
-      <div class="admin-grid">
-
-
-        <div>
-
-          <h3>
-            ${
-              edit
-                ? 'Edit'
-                : 'Add'
-            }
-            competition
-          </h3>
-
-
-          <form
-            id="competitionForm"
+        <form
+          id="competitionForm"
+        >
+          <input
+            type="hidden"
+            name="id"
+            value="${escapeHtml(
+              edit?.id || ''
+            )}"
           >
 
+          <label class="field">
+            Title
 
             <input
-              type="hidden"
-              name="existingId"
+              name="title"
+              required
               value="${escapeHtml(
-                edit?.id || ''
+                edit?.title || ''
               )}"
             >
-
-
-            <label class="field">
-
-              Title
-
-              <input
-                name="title"
-                value="${escapeHtml(
-                  edit?.title || ''
-                )}"
-                required
-              >
-
-            </label>
-
-
-            <label class="field">
-
-              Price
-
-              <input
-                name="price"
-                type="number"
-                step="0.01"
-                min="0"
-                value="${
-                  edit?.price ?? ''
-                }"
-                required
-              >
-
-            </label>
-
-
-            <label class="field">
-
-              Maximum entries
-
-              <input
-                name="max"
-                type="number"
-                min="1"
-                value="${
-                  edit?.max ?? ''
-                }"
-                required
-              >
-
-            </label>
-
-
-            <label class="field">
-
-              Sold
-
-              <input
-                name="sold"
-                type="number"
-                min="0"
-                value="${
-                  edit?.sold ?? 0
-                }"
-              >
-
-            </label>
-
-
-            <label class="field">
-
-              Closing date
-
-              <input
-                name="closes"
-                type="datetime-local"
-                value="${
-                  edit?.closes
-                    ? String(
-                        edit.closes
-                      ).slice(
-                        0,
-                        16
-                      )
-                    : ''
-                }"
-                required
-              >
-
-            </label>
-
-
-            <label class="field">
-
-              Image path / URL
-
-              <input
-                name="image"
-                value="${escapeHtml(
-                  edit?.image || ''
-                )}"
-              >
-
-            </label>
-
-
-            <label class="field">
-
-              Upload image
-
-              <input
-                name="image_file"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-              >
-
-            </label>
-
-
-            <label class="field">
-
-              Description
-
-              <textarea
-                name="description"
-              >${escapeHtml(
-                edit?.description || ''
-              )}</textarea>
-
-            </label>
-
-
-            <label class="field">
-
-              Skill Question
-
-              <input
-                name="skill_question"
-                value="${escapeHtml(
-                  edit?.skill_question || ''
-                )}"
-                required
-              >
-
-            </label>
-
-
-            <label class="field">
-
-              Option A
-
-              <input
-                name="skill_option_a"
-                value="${escapeHtml(
-                  edit?.skill_option_a || ''
-                )}"
-                required
-              >
-
-            </label>
-
-
-            <label class="field">
-
-              Option B
-
-              <input
-                name="skill_option_b"
-                value="${escapeHtml(
-                  edit?.skill_option_b || ''
-                )}"
-                required
-              >
-
-            </label>
-
-
-            <label class="field">
-
-              Option C
-
-              <input
-                name="skill_option_c"
-                value="${escapeHtml(
-                  edit?.skill_option_c || ''
-                )}"
-                required
-              >
-
-            </label>
-
-
-            <label class="field">
-
-              Correct Answer
-
-              <select
-                name="correct_answer"
-                required
-              >
-
-                <option value="">
-                  Choose correct answer
-                </option>
-
-                <option
-                  value="A"
-                  ${
-                    selectedCorrect ===
-                    'A'
-                      ? 'selected'
-                      : ''
-                  }
-                >
-                  Option A
-                </option>
-
-                <option
-                  value="B"
-                  ${
-                    selectedCorrect ===
-                    'B'
-                      ? 'selected'
-                      : ''
-                  }
-                >
-                  Option B
-                </option>
-
-                <option
-                  value="C"
-                  ${
-                    selectedCorrect ===
-                    'C'
-                      ? 'selected'
-                      : ''
-                  }
-                >
-                  Option C
-                </option>
-
-              </select>
-
-            </label>
-
-
-            <label class="field">
-
-              Status
-
-              <select
-                name="status"
-              >
-
-                <option
-                  value="live"
-                  ${
-                    edit?.status ===
-                    'live'
-                      ? 'selected'
-                      : ''
-                  }
-                >
-                  Live
-                </option>
-
-                <option
-                  value="paused"
-                  ${
-                    edit?.status ===
-                    'paused'
-                      ? 'selected'
-                      : ''
-                  }
-                >
-                  Paused
-                </option>
-
-                <option
-                  value="closed"
-                  ${
-                    edit?.status ===
-                    'closed'
-                      ? 'selected'
-                      : ''
-                  }
-                >
-                  Closed
-                </option>
-
-              </select>
-
-            </label>
-
-
-            <button
-              class="btn gold full"
-              type="submit"
+          </label>
+
+          <label class="field">
+            Price
+
+            <input
+              name="price"
+              type="number"
+              min="0"
+              step="0.01"
+              required
+              value="${escapeHtml(
+                edit?.price ?? ''
+              )}"
             >
+          </label>
 
-              ${
-                edit
-                  ? 'SAVE CHANGES'
-                  : 'ADD COMPETITION'
-              }
+          <label class="field">
+            Maximum entries
 
-            </button>
+            <input
+              name="max_entries"
+              type="number"
+              min="1"
+              step="1"
+              required
+              value="${escapeHtml(
+                edit?.max ?? ''
+              )}"
+            >
+          </label>
 
-          </form>
+          <label class="field">
+            Closing date
 
-        </div>
-
-
-        <div>
-
-          <h3>
-            Manage draws
-          </h3>
-
-
-          <div class="admin-list">
-
-            ${
-              competitions.length
-                ? competitions
-                    .map(
-                      competition => `
-
-                        <div
-                          class="admin-row"
-                        >
-
-                          <div>
-
-                            <strong>
-                              ${escapeHtml(
-                                competition.title
-                              )}
-                            </strong>
-
-                            <small>
-
-                              ${money(
-                                competition.price
-                              )}
-
-                              ·
-
-                              ${competition.sold}
-
-                              /
-
-                              ${competition.max}
-
-                            </small>
-
-                          </div>
-
-
-                          <div>
-
-                            <button
-                              class="btn outline"
-                              data-edit="${competition.id}"
-                            >
-                              Edit
-                            </button>
-
-
-                            <button
-                              class="btn outline"
-                              data-winner="${competition.id}"
-                            >
-                              Draw Winner
-                            </button>
-
-
-                            <button
-                              class="btn outline"
-                              data-delete="${competition.id}"
-                            >
-                              Delete
-                            </button>
-
-                          </div>
-
-                        </div>
-
-                      `
+            <input
+              name="closes_at"
+              type="datetime-local"
+              value="${escapeHtml(
+                edit?.closes
+                  ? new Date(
+                      edit.closes
                     )
-                    .join('')
-                : `
+                      .toISOString()
+                      .slice(0, 16)
+                  : ''
+              )}"
+            >
+          </label>
 
-                    <p class="empty">
-                      No competitions.
-                    </p>
+          <label class="field">
+            Description
 
-                  `
+            <textarea
+              name="description"
+              rows="4"
+            >${escapeHtml(
+              edit?.description || ''
+            )}</textarea>
+          </label>
+
+          <label class="field">
+            Competition image
+
+            <input
+              name="image"
+              type="file"
+              accept="image/*"
+            >
+          </label>
+
+          ${
+            edit?.image
+              ? `
+                <p class="micro">
+                  Current image is already saved.
+                  Upload another image only to replace it.
+                </p>
+              `
+              : ''
+          }
+
+          <label class="field">
+            Skill question
+
+            <input
+              name="skill_question"
+              required
+              value="${escapeHtml(
+                edit?.skill_question || ''
+              )}"
+            >
+          </label>
+
+          <label class="field">
+            Option A
+
+            <input
+              name="skill_option_a"
+              required
+              value="${escapeHtml(
+                edit?.skill_option_a || ''
+              )}"
+            >
+          </label>
+
+          <label class="field">
+            Option B
+
+            <input
+              name="skill_option_b"
+              required
+              value="${escapeHtml(
+                edit?.skill_option_b || ''
+              )}"
+            >
+          </label>
+
+          <label class="field">
+            Option C
+
+            <input
+              name="skill_option_c"
+              required
+              value="${escapeHtml(
+                edit?.skill_option_c || ''
+              )}"
+            >
+          </label>
+
+          <label class="field">
+            Correct answer
+
+            <select
+              name="correct_answer_letter"
+              required
+            >
+              <option
+                value="A"
+                ${
+                  selectedCorrect === 'A'
+                    ? 'selected'
+                    : ''
+                }
+              >
+                Option A
+              </option>
+
+              <option
+                value="B"
+                ${
+                  selectedCorrect === 'B'
+                    ? 'selected'
+                    : ''
+                }
+              >
+                Option B
+              </option>
+
+              <option
+                value="C"
+                ${
+                  selectedCorrect === 'C'
+                    ? 'selected'
+                    : ''
+                }
+              >
+                Option C
+              </option>
+            </select>
+          </label>
+
+          <label class="field">
+            Status
+
+            <select
+              name="status"
+            >
+              <option
+                value="live"
+                ${
+                  edit?.status === 'live'
+                    ? 'selected'
+                    : ''
+                }
+              >
+                Live
+              </option>
+
+              <option
+                value="paused"
+                ${
+                  edit?.status === 'paused'
+                    ? 'selected'
+                    : ''
+                }
+              >
+                Paused
+              </option>
+
+              <option
+                value="closed"
+                ${
+                  edit?.status === 'closed'
+                    ? 'selected'
+                    : ''
+                }
+              >
+                Closed
+              </option>
+            </select>
+          </label>
+
+          <button
+            class="btn gold full"
+            type="submit"
+          >
+            ${
+              edit
+                ? 'SAVE CHANGES'
+                : 'ADD COMPETITION'
             }
-
-          </div>
-
-        </div>
-
+          </button>
+        </form>
       </div>
 
-    `;
+      <div>
+        <h3>
+          Manage draws
+        </h3>
 
+        <div class="admin-list">
+          ${
+            competitions.length
+              ? competitions
+                  .map(
+                    competition => `
+                      <div
+                        class="admin-row"
+                      >
+                        <div>
+                          <strong>
+                            ${escapeHtml(
+                              competition.title
+                            )}
+                          </strong>
+
+                          <small>
+                            ${money(
+                              competition.price
+                            )}
+                            ·
+                            ${competition.sold}
+                            /
+                            ${competition.max}
+                          </small>
+                        </div>
+
+                        <div>
+                          <button
+                            class="btn outline"
+                            data-edit="${competition.id}"
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            class="btn outline"
+                            data-winner="${competition.id}"
+                          >
+                            Draw Winner
+                                                      </button>
+
+                          <button
+                            class="btn outline"
+                            data-delete="${competition.id}"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    `
+                  )
+                  .join('')
+              : `
+                  <p class="empty">
+                    No competitions.
+                  </p>
+                `
+          }
+        </div>
+      </div>
+    </div>
+  `;
 
   $('#adminLogout')
     .onclick =
       async () => {
-
         await supabaseClient
           .auth
           .signOut();
 
-
         closeModals();
 
-
         await updateAccountLabel();
-
 
         toast(
           'Admin logged out'
         );
-
       };
-
 
   $('#competitionForm')
     .onsubmit =
       saveCompetition;
 
-
   $$('[data-edit]')
     .forEach(
       button => {
-
         button.onclick =
           () =>
             adminView(
               button.dataset.edit
             );
-
       }
     );
-
 
   $$('[data-delete]')
     .forEach(
       button => {
-
         button.onclick =
           () =>
             deleteCompetition(
               button.dataset.delete
             );
-
       }
     );
-
 
   $$('[data-winner]')
     .forEach(
       button => {
-
         button.onclick =
           () =>
             drawWinnerSecurely(
               button.dataset.winner
             );
-
       }
     );
-
 }
+
 /* =========================================================
-   IMAGE UPLOAD
+   ADMIN IMAGE / SAVE / DELETE
    ========================================================= */
 
-async function uploadCompetitionImage(file) {
-
+async function uploadCompetitionImage(
+  file
+) {
   if (
     !file ||
     !file.size
   ) {
-
     return '';
-
   }
-
 
   const extension =
     (
@@ -3090,26 +2614,15 @@ async function uploadCompetitionImage(file) {
         .pop() ||
       'jpg'
     )
-      .toLowerCase();
+      .toLowerCase()
+      .replace(
+        /[^a-z0-9]/g,
+        ''
+      ) ||
+    'jpg';
 
-
-  const safeExtension =
-    [
-      'jpg',
-      'jpeg',
-      'png',
-      'webp'
-    ]
-      .includes(
-        extension
-      )
-      ? extension
-      : 'jpg';
-
-
-  const filename =
-    `${Date.now()}-${crypto.randomUUID()}.${safeExtension}`;
-
+  const path =
+    `${ADMIN_UID}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
 
   const {
     error
@@ -3120,7 +2633,7 @@ async function uploadCompetitionImage(file) {
         'competition-images'
       )
       .upload(
-        filename,
+        path,
         file,
         {
           cacheControl:
@@ -3131,13 +2644,9 @@ async function uploadCompetitionImage(file) {
         }
       );
 
-
   if (error) {
-
     throw error;
-
   }
-
 
   const {
     data
@@ -3148,236 +2657,223 @@ async function uploadCompetitionImage(file) {
         'competition-images'
       )
       .getPublicUrl(
-        filename
+        path
       );
 
-
-  return data.publicUrl;
-
+  return (
+    data?.publicUrl ||
+    ''
+  );
 }
-
-
-/* =========================================================
-   SAVE COMPETITION
-   ========================================================= */
 
 async function saveCompetition(
   event
 ) {
-
   event.preventDefault();
-
 
   if (
     !(await isAdminSession())
   ) {
-
     alert(
       'Administrator access required.'
     );
 
     return;
-
   }
-
-
-  const form =
-    event.target;
-
 
   const formData =
     new FormData(
-      form
+      event.target
     );
-
-
-  let image =
-    String(
-      formData.get(
-        'image'
-      ) || ''
-    )
-      .trim();
-
-
-  const file =
-    form.elements
-      .image_file
-      ?.files?.[0];
-
-
-  if (file) {
-
-    try {
-
-      image =
-        await uploadCompetitionImage(
-          file
-        );
-
-    } catch (
-      error
-    ) {
-
-      alert(
-        'Image upload failed: ' +
-        error.message
-      );
-
-      return;
-
-    }
-
-  }
-
-
-  const closesValue =
-    String(
-      formData.get(
-        'closes'
-      ) || ''
-    );
-
-
-  const row = {
-
-    title:
-      String(
-        formData.get(
-          'title'
-        ) || ''
-      )
-        .trim(),
-
-    price:
-      Number(
-        formData.get(
-          'price'
-        ) || 0
-      ),
-
-    image_url:
-      image,
-
-    closes_at:
-      new Date(
-        closesValue
-      )
-        .toISOString(),
-
-    max_entries:
-      Number(
-        formData.get(
-          'max'
-        ) || 0
-      ),
-
-    sold:
-      Number(
-        formData.get(
-          'sold'
-        ) || 0
-      ),
-
-    status:
-      String(
-        formData.get(
-          'status'
-        ) || 'live'
-      ),
-
-    description:
-      String(
-        formData.get(
-          'description'
-        ) || ''
-      )
-        .trim(),
-
-    skill_question:
-      String(
-        formData.get(
-          'skill_question'
-        ) || ''
-      )
-        .trim(),
-
-    skill_option_a:
-      String(
-        formData.get(
-          'skill_option_a'
-        ) || ''
-      )
-        .trim(),
-
-    skill_option_b:
-      String(
-        formData.get(
-          'skill_option_b'
-        ) || ''
-      )
-        .trim(),
-
-    skill_option_c:
-      String(
-        formData.get(
-          'skill_option_c'
-        ) || ''
-      )
-        .trim()
-
-  };
-
-
-  const answerMap = {
-
-    A:
-      row.skill_option_a,
-
-    B:
-      row.skill_option_b,
-
-    C:
-      row.skill_option_c
-
-  };
-
-
-  const correctAnswer =
-    answerMap[
-      String(
-        formData.get(
-          'correct_answer'
-        ) || ''
-      )
-    ];
-
-
-  if (!correctAnswer) {
-
-    alert(
-      'Please choose the correct answer.'
-    );
-
-    return;
-
-  }
-
 
   const existingId =
     String(
       formData.get(
-        'existingId'
+        'id'
       ) || ''
+    ).trim();
+
+  const existing =
+    existingId
+      ? competitions.find(
+          item =>
+            item.id ===
+            existingId
+        )
+      : null;
+
+  const title =
+    String(
+      formData.get(
+        'title'
+      ) || ''
+    ).trim();
+
+  const price =
+    Number(
+      formData.get(
+        'price'
+      )
     );
 
+  const maxEntries =
+    Number(
+      formData.get(
+        'max_entries'
+      )
+    );
+
+  const closesInput =
+    String(
+      formData.get(
+        'closes_at'
+      ) || ''
+    ).trim();
+
+  const description =
+    String(
+      formData.get(
+        'description'
+      ) || ''
+    ).trim();
+
+  const skillQuestion =
+    String(
+      formData.get(
+        'skill_question'
+      ) || ''
+    ).trim();
+
+  const optionA =
+    String(
+      formData.get(
+        'skill_option_a'
+      ) || ''
+    ).trim();
+
+  const optionB =
+    String(
+      formData.get(
+        'skill_option_b'
+      ) || ''
+    ).trim();
+
+  const optionC =
+    String(
+      formData.get(
+        'skill_option_c'
+      ) || ''
+    ).trim();
+
+  const correctLetter =
+    String(
+      formData.get(
+        'correct_answer_letter'
+      ) || 'A'
+    );
+
+  const status =
+    String(
+      formData.get(
+        'status'
+      ) || 'live'
+    );
+
+  if (
+    !title ||
+    !Number.isFinite(price) ||
+    price < 0 ||
+    !Number.isInteger(
+      maxEntries
+    ) ||
+    maxEntries < 1 ||
+    !skillQuestion ||
+    !optionA ||
+    !optionB ||
+    !optionC
+  ) {
+    alert(
+      'Please complete all required competition fields.'
+    );
+
+    return;
+  }
+
+  let imageUrl =
+    existing?.image || '';
+
+  const imageFile =
+    formData.get(
+      'image'
+    );
+
+  if (
+    imageFile instanceof File &&
+    imageFile.size
+  ) {
+    try {
+      imageUrl =
+        await uploadCompetitionImage(
+          imageFile
+        );
+    } catch (error) {
+      alert(
+        'Image upload failed: ' +
+        (
+          error?.message ||
+          'Unknown error'
+        )
+      );
+
+      return;
+    }
+  }
+
+  if (!imageUrl) {
+    alert(
+      'Please upload a competition image.'
+    );
+
+    return;
+  }
+
+  const payload = {
+    title,
+    price,
+    image_url:
+      imageUrl,
+
+    closes_at:
+      closesInput
+        ? new Date(
+            closesInput
+          ).toISOString()
+        : null,
+
+    max_entries:
+      maxEntries,
+
+    status,
+
+    description,
+
+    skill_question:
+      skillQuestion,
+
+    skill_option_a:
+      optionA,
+
+    skill_option_b:
+      optionB,
+
+    skill_option_c:
+      optionC
+  };
 
   let competitionId =
     existingId;
 
-
   if (existingId) {
-
     const {
       error
     } =
@@ -3386,27 +2882,22 @@ async function saveCompetition(
           'competitions'
         )
         .update(
-          row
+          payload
         )
         .eq(
           'id',
           existingId
         );
 
-
     if (error) {
-
       alert(
-        'Save failed: ' +
+        'Competition save failed: ' +
         error.message
       );
 
       return;
-
     }
-
   } else {
-
     const {
       data,
       error
@@ -3416,36 +2907,35 @@ async function saveCompetition(
           'competitions'
         )
         .insert(
-          row
+          payload
         )
-        .select(
-          'id'
-        )
+        .select('id')
         .single();
 
-
     if (error) {
-
       alert(
-        'Save failed: ' +
+        'Competition save failed: ' +
         error.message
       );
 
       return;
-
     }
-
 
     competitionId =
       String(
         data.id
       );
-
   }
 
+  const correctAnswer =
+    correctLetter === 'B'
+      ? optionB
+      : correctLetter === 'C'
+        ? optionC
+        : optionA;
 
   const {
-    data: answerRow,
+          data: existingAnswer,
     error: lookupError
   } =
     await supabaseClient
@@ -3461,21 +2951,16 @@ async function saveCompetition(
       )
       .maybeSingle();
 
-
   if (lookupError) {
-
     alert(
       'Competition saved, but private answer lookup failed: ' +
       lookupError.message
     );
 
     return;
-
   }
 
-
-  if (answerRow) {
-
+  if (existingAnswer) {
     const {
       error
     } =
@@ -3484,30 +2969,23 @@ async function saveCompetition(
           'competition_skill_answers'
         )
         .update({
-
           correct_answer:
             correctAnswer
-
         })
         .eq(
           'competition_id',
           competitionId
         );
 
-
     if (error) {
-
       alert(
         'Competition saved, but private answer update failed: ' +
         error.message
       );
 
       return;
-
     }
-
   } else {
-
     const {
       error
     } =
@@ -3516,65 +2994,45 @@ async function saveCompetition(
           'competition_skill_answers'
         )
         .insert({
-
           competition_id:
             competitionId,
 
           correct_answer:
             correctAnswer
-
         });
 
-
     if (error) {
-
       alert(
         'Competition saved, but private answer save failed: ' +
         error.message
       );
 
       return;
-
     }
-
   }
 
-
   await loadCompetitionsFromSupabase();
-
-
   await adminView();
-
 
   toast(
     existingId
       ? 'Competition updated'
       : 'Competition added'
   );
-
 }
-
-
-/* =========================================================
-   DELETE COMPETITION
-   ========================================================= */
 
 async function deleteCompetition(
   id
 ) {
-
   if (
     !(await isAdminSession())
   ) {
-
     alert(
       'Administrator access required.'
     );
 
     return;
-
   }
-
 
   const competition =
     competitions.find(
@@ -3583,24 +3041,17 @@ async function deleteCompetition(
         String(id)
     );
 
-
   if (!competition) {
-
     return;
-
   }
-
 
   if (
     !confirm(
       `Delete "${competition.title}"?`
     )
   ) {
-
     return;
-
   }
-
 
   const {
     error: answerError
@@ -3615,18 +3066,14 @@ async function deleteCompetition(
         id
       );
 
-
   if (answerError) {
-
     alert(
       'Delete failed: ' +
       answerError.message
     );
 
     return;
-
   }
-
 
   const {
     error
@@ -3641,18 +3088,14 @@ async function deleteCompetition(
         id
       );
 
-
   if (error) {
-
     alert(
       'Delete failed: ' +
       error.message
     );
 
     return;
-
   }
-
 
   cart =
     store.get(
@@ -3665,37 +3108,27 @@ async function deleteCompetition(
           String(id)
       );
 
-
   store.set(
     'nexa_cart',
     cart
   );
 
-
   updateCartCount();
 
-
   await loadCompetitionsFromSupabase();
-
-
   await adminView();
-
 
   toast(
     'Competition deleted'
   );
-
 }
-
 
 /* =========================================================
    LEGAL PLACEHOLDERS
    ========================================================= */
 
 const legalPages = {
-
   terms: `
-
     <p class="eyebrow">
       LEGAL
     </p>
@@ -3710,12 +3143,9 @@ const legalPages = {
       must be reviewed before
       launch.
     </p>
-
   `,
 
-
   privacy: `
-
     <p class="eyebrow">
       LEGAL
     </p>
@@ -3731,12 +3161,9 @@ const legalPages = {
       will be required before
       launch.
     </p>
-
   `,
 
-
   free: `
-
     <p class="eyebrow">
       LEGAL
     </p>
@@ -3750,12 +3177,9 @@ const legalPages = {
       will be published here
       where applicable.
     </p>
-
   `,
 
-
   responsible: `
-
     <p class="eyebrow">
       CUSTOMER CARE
     </p>
@@ -3771,99 +3195,78 @@ const legalPages = {
       information will be
       published before launch.
     </p>
-
   `
-
 };
-
 
 function openLegalPage(
   key
 ) {
+  const host =
+    $('#legalContent');
 
-  $('#legalContent')
-    .innerHTML =
-      legalPages[key] ||
-      '<p>Page unavailable.</p>';
+  if (!host) {
+    return;
+  }
 
+  host.innerHTML =
+    legalPages[key] ||
+    '<p>Page unavailable.</p>';
 
   openModal(
     '#legalModal'
   );
-
 }
-
 
 /* =========================================================
    PAGE EVENTS
    ========================================================= */
 
-document
-  .addEventListener(
-    'click',
-    event => {
-
-
-      if (
-        event.target.matches(
-          '[data-close]'
-        )
-      ) {
-
-        closeModals();
-
-      }
-
-
-      if (
-        event.target
-          .classList
-          ?.contains(
-            'modal'
-          )
-      ) {
-
-        closeModals();
-
-      }
-
-
-      const legal =
-        event.target
-          .closest(
-            '[data-legal]'
-          );
-
-
-      if (legal) {
-
-        openLegalPage(
-          legal.dataset.legal
-        );
-
-      }
-
-
-      const navItem =
-        event.target
-          .closest(
-            '#nav a, #nav button'
-          );
-
-
-      if (navItem) {
-
-        $('#nav')
-          ?.classList
-          .remove(
-            'open'
-          );
-
-      }
-
+document.addEventListener(
+  'click',
+  event => {
+    if (
+      event.target.matches(
+        '[data-close]'
+      )
+    ) {
+      closeModals();
     }
-  );
 
+    if (
+      event.target
+        .classList
+        ?.contains(
+          'modal'
+        )
+    ) {
+      closeModals();
+    }
+
+    const legal =
+      event.target.closest(
+        '[data-legal]'
+      );
+
+    if (legal) {
+      openLegalPage(
+        legal.dataset.legal
+      );
+    }
+
+    const navItem =
+      event.target.closest(
+        '#nav a, #nav button'
+      );
+
+    if (navItem) {
+      $('#nav')
+        ?.classList
+        .remove(
+          'open'
+        );
+    }
+  }
+);
 
 $('#cartBtn')
   ?.addEventListener(
@@ -3871,24 +3274,19 @@ $('#cartBtn')
     openCart
   );
 
-
 $('#accountBtn')
   ?.addEventListener(
     'click',
     async () => {
-
       await renderAccount(
         false
       );
 
-
       openModal(
         '#accountModal'
       );
-
     }
   );
-
 
 $('#checkoutBtn')
   ?.addEventListener(
@@ -3896,26 +3294,20 @@ $('#checkoutBtn')
     checkout
   );
 
-
 $('#viewAllBtn')
   ?.addEventListener(
     'click',
     () => {
-
       document
         .querySelector(
           '#draws'
         )
         ?.scrollIntoView({
-
           behavior:
             'smooth'
-
         });
-
     }
   );
-
 
 /* =========================================================
    AUTH CHANGES
@@ -3925,12 +3317,9 @@ supabaseClient
   .auth
   .onAuthStateChange(
     async () => {
-
       await updateAccountLabel();
-
     }
   );
-
 
 /* =========================================================
    FUNCTIONS USED BY HTML BUTTONS
@@ -3939,36 +3328,26 @@ supabaseClient
 window.openCart =
   openCart;
 
-
 window.renderAccount =
   renderAccount;
-
 
 window.openModal =
   openModal;
 
-
 window.openSecureAdmin =
   openSecureAdmin;
-
 
 /* =========================================================
    START SITE
    ========================================================= */
 
 async function startNexaDraw() {
-
   updateCartCount();
 
-
-  renderWinners();
-
-
+  await renderWinners();
   await updateAccountLabel();
-
-
   await loadCompetitionsFromSupabase();
-
 }
 
 startNexaDraw();
+     
