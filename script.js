@@ -926,7 +926,7 @@ async function renderAccount(
     <div class="account-orders">
 
       <h3>
-        Your demo orders
+        Your orders
       </h3>
 
       ${
