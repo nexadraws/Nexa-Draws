@@ -1624,6 +1624,7 @@ async function renderAccount(
 
 
             return;
+
           }
 
 
@@ -1632,65 +1633,30 @@ async function renderAccount(
           );
 
         };
-     return;
-}
 
 
-const {
-  data: dbOrders,
-  error: ordersError
-} = await supabaseClient
-  .from('orders')
-  .select(
-    'id, total, status, created_at, paid_at'
-  )
-  .eq('user_id', user.id)
-  .order('created_at', {
-    ascending: false
-  });
+    return;
 
-if (ordersError) {
-  console.error(
-    'Customer orders error:',
-    ordersError
-  );
-}
+  }
 
-const customerOrders =
-  await Promise.all(
-    (dbOrders || []).map(
-      async order => {
-        const {
-          data: ticketRows,
-          error: ticketError
-        } = await supabaseClient
-          .from('tickets')
-          .select(
-            'ticket_number, competition_id, status'
-          )
-          .eq('order_id', order.id)
-          .order('id', {
-            ascending: true
-          });
 
-        if (ticketError) {
-          console.error(
-            'Customer tickets error:',
-            ticketError
-          );
-        }
+  orders =
+    store.get(
+      'nexa_orders',
+      []
+    );
 
-        return {
-          ...order,
-          date:
-            order.paid_at ||
-            order.created_at,
-          tickets:
-            ticketRows || []
-        };
-      }
-    )
-  );
+
+  const customerOrders =
+    orders.filter(
+      order =>
+        String(
+          order.email || ''
+        ).toLowerCase() ===
+        user.email.toLowerCase()
+    );
+
+
   host.innerHTML = `
 
     <p class="eyebrow">
@@ -1749,33 +1715,44 @@ const customerOrders =
 
 
                   <details>
-  <summary>
-    View tickets
-  </summary>
 
-  ${
-    order.tickets?.length
-      ? order.tickets
-          .map(
-            ticket => `
-              <p>
-                Ticket:
-                <strong>
-                  ${escapeHtml(
-                    ticket.ticket_number
-                  )}
-                </strong>
-              </p>
-            `
-          )
-          .join('')
-      : `
-          <p class="empty">
-            No tickets issued yet.
-          </p>
-        `
-  }
-</details>
+                    <summary>
+                      View tickets
+                    </summary>
+
+
+                    ${
+                      (order.items || [])
+                        .map(
+                          item => `
+
+                            <p>
+
+                              ${escapeHtml(
+                                item.title
+                              )}
+
+                              —
+
+                              ${
+                                (
+                                  item.tickets ||
+                                  []
+                                )
+                                  .map(
+                                    escapeHtml
+                                  )
+                                  .join(', ')
+                              }
+
+                            </p>
+
+                          `
+                        )
+                        .join('')
+                    }
+
+                  </details>
 
                 </div>
 
@@ -2043,54 +2020,41 @@ if (
    WINNERS
    ========================================================= */
 
-async function renderWinners() {
+
+function renderWinners() {
+
+  winners =
+    store.get(
+      'nexa_winners',
+      []
+    );
+
 
   const host =
     $('#winnerGrid');
 
+
   if (!host) {
-    return;
-  }
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient.rpc(
-      'get_public_winners'
-    );
-
-  if (error) {
-    console.error(
-      'Public winners error:',
-      error
-    );
-
-    host.innerHTML = `
-      <p class="empty">
-        Winners could not be loaded.
-      </p>
-    `;
 
     return;
+
   }
 
-  const publicWinners =
-    Array.isArray(data)
-      ? data
-      : [];
 
   host.innerHTML =
-    publicWinners.length
-      ? publicWinners
+    winners.length
+      ? winners
           .map(
             winner => `
+
               <article
                 class="winner-card"
               >
+
                 <span>
                   🏆
                 </span>
+
 
                 <h3>
                   ${escapeHtml(
@@ -2098,43 +2062,69 @@ async function renderWinners() {
                   )}
                 </h3>
 
-                <p>
-                  Winner:
-                  <strong>
-                    Winner
-                  </strong>
-                </p>
 
                 <p>
-                  Ticket:
+
+                  Winner:
+
                   <strong>
                     ${escapeHtml(
-                      winner.ticket_number
+                      winner.name
                     )}
                   </strong>
+
                 </p>
 
+
+                ${
+                  winner.ticket
+                    ? `
+
+                        <p>
+
+                          Ticket:
+
+                          <strong>
+                            ${escapeHtml(
+                              winner.ticket
+                            )}
+                          </strong>
+
+                        </p>
+
+                      `
+                    : ''
+                }
+
+
                 <small>
+
                   ${
                     new Date(
-                      winner.drawn_at
+                      winner.date
                     )
                       .toLocaleDateString(
                         'en-GB'
                       )
                   }
+
                 </small>
+
               </article>
+
             `
           )
           .join('')
       : `
-          <p class="empty">
-            No winners have been published yet.
-          </p>
-        `;
-}
 
+          <p class="empty">
+            No winners have been
+            published yet.
+          </p>
+
+        `;
+
+}
 
 
 /* =========================================================
@@ -2428,7 +2418,7 @@ async function adminView(
     return;
 
   }
-await loadCompetitionsFromSupabase();
+
 
   const edit =
     editId
@@ -3993,5 +3983,7 @@ async function startNexaDraw() {
   await loadCompetitionsFromSupabase();
 
 }
+
+ 
 
 startNexaDraw();
