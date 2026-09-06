@@ -2418,7 +2418,7 @@ async function adminView(
     return;
 
   }
-
+await loadCompetitionsFromSupabase();
 
   const edit =
     editId
