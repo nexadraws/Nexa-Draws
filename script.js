@@ -4127,104 +4127,201 @@ free: `
   </p>
 
   <p>
-    Nexa Draw may provide a free method of entry for eligible
-    competitions. Where a free entry route is available, it will be
-    clearly explained on the relevant competition page.
+    Nexa Draw provides a postal free entry route for eligible paid
+    competitions. A valid free postal entry has the same chance of
+    winning as a valid paid entry.
   </p>
 
-  <h3>1. Eligibility</h3>
-
-  <p>
-    The same eligibility requirements apply to free entries as to paid
-    entries. Unless otherwise stated, entrants must be aged 18 or over
-    and legally resident in the United Kingdom.
-  </p>
+  <h3>1. Who Can Enter</h3>
 
   <p>
-    Entrants must have a valid Nexa Draw account and provide accurate
-    contact information.
+    Free postal entry is available to eligible entrants aged 18 or over
+    who are legally resident in the United Kingdom, subject to the
+    specific rules of the relevant competition.
   </p>
+
+  <p>
+    You must have a valid Nexa Draw account before submitting a free
+    postal entry.
+  </p>
+
 
   <h3>2. How to Enter for Free</h3>
 
   <p>
-    The exact free entry method for each eligible competition will be
-    displayed on the relevant competition page.
+    To enter an eligible competition without paying the online entry
+    price, send your entry by ordinary first-class or second-class post
+    to:
   </p>
 
   <p>
-    Entrants must follow all instructions provided for that competition
-    and provide all information requested.
+    <strong>
+      Nexa Draw<br>
+      7 High Street<br>
+      Kington<br>
+      Herefordshire<br>
+      HR5 3AX
+    </strong>
   </p>
 
   <p>
-    A free entry will only be valid if it is received before the
-    competition closing deadline and complies with the stated entry
-    requirements.
+    Your postal entry must clearly include:
   </p>
 
-  <h3>3. Equal Treatment of Entries</h3>
+  <ul>
+    <li>Your full name.</li>
+    <li>Your date of birth.</li>
+    <li>Your full postal address.</li>
+    <li>The email address registered to your Nexa Draw account.</li>
+    <li>The exact name of the competition you wish to enter.</li>
+    <li>Your answer to the competition question.</li>
+  </ul>
 
   <p>
-    Valid free entries and valid paid entries will be treated equally
-    when the winner is selected.
+    Please write clearly. Nexa Draw must be able to identify you,
+    your account and the competition you wish to enter.
   </p>
 
-  <p>
-    Using a free entry route will not reduce an entrant's chance of
-    winning compared with a valid paid entry.
-  </p>
 
-  <h3>4. Competition Questions</h3>
+  <h3>3. One Free Entry Per Person</h3>
 
   <p>
-    Where a competition requires entrants to answer a competition
-    question, entrants using the free entry route must complete the same
-    requirement unless the competition rules expressly state otherwise.
-  </p>
-
-  <h3>5. Entry Limits</h3>
-
-  <p>
-    Free entries are subject to the same overall competition entry
-    limits and any applicable per-person limits shown on the competition
-    page.
+    Each eligible person may submit a maximum of
+    <strong>one free postal entry per competition</strong>.
   </p>
 
   <p>
-    Nexa Draw may reject entries where it reasonably believes that
-    multiple accounts, false identities, automated systems or other
-    methods have been used to bypass entry restrictions.
+    Multiple free entries submitted by the same person for the same
+    competition may be rejected.
   </p>
 
-  <h3>6. Invalid or Late Entries</h3>
+
+  <h3>4. Postal Requirements</h3>
 
   <p>
-    Free entries may be rejected if they are incomplete, illegible,
-    submitted incorrectly, received after the closing deadline or do
-    not otherwise comply with the instructions for the relevant
-    competition.
+    Free entries must be sent using ordinary first-class or second-class
+    post.
   </p>
 
-  <h3>7. No Advantage for Paid Entries</h3>
-
   <p>
-    Purchasing an entry does not give an entrant any preferential
-    treatment over a valid free entrant when a winner is selected.
+    There is no requirement to use Special Delivery, Signed For or any
+    other premium postal service.
   </p>
 
-  <h3>8. Competition-Specific Instructions</h3>
-
   <p>
-    Entrants should always check the relevant competition page before
-    submitting a free entry because the required method, information
-    and deadline may vary between competitions.
+    The entrant is responsible for the ordinary cost of postage.
   </p>
 
-  <h3>9. Contact</h3>
+
+  <h3>5. Closing Deadline</h3>
 
   <p>
-    Questions about the Nexa Draw free entry route can be sent to:
+    Postal entries must be received by Nexa Draw before the closing
+    deadline stated for the relevant competition.
+  </p>
+
+  <p>
+    Posting an entry before the closing date does not guarantee that it
+    will arrive before the deadline. Entrants should allow sufficient
+    time for delivery.
+  </p>
+
+  <p>
+    Entries received after the competition has closed will not be
+    included.
+  </p>
+
+
+  <h3>6. Competition Question</h3>
+
+  <p>
+    Where a competition requires a competition question to be answered,
+    the postal entrant must provide their answer as part of the free
+    entry.
+  </p>
+
+  <p>
+    Where the competition rules require a correct answer, an incorrect
+    answer may result in the entry being rejected.
+  </p>
+
+
+  <h3>7. Processing Your Free Entry</h3>
+
+  <p>
+    Once a valid postal entry has been received and verified, Nexa Draw
+    will allocate an entry or ticket number to that entrant for the
+    relevant competition.
+  </p>
+
+  <p>
+    The entry will then be included in the competition in the same way
+    as a valid paid entry.
+  </p>
+
+  <p>
+    Nexa Draw may contact the entrant using the email address registered
+    to their account if further information is reasonably required to
+    process the entry.
+  </p>
+
+
+  <h3>8. Equal Treatment</h3>
+
+  <p>
+    Valid free entries and valid paid entries are treated equally when
+    a winner is selected.
+  </p>
+
+  <p>
+    Paying for an entry does not give an entrant preferential treatment
+    over someone who has submitted a valid free postal entry.
+  </p>
+
+
+  <h3>9. Invalid Entries</h3>
+
+  <p>
+    A free entry may be rejected if:
+  </p>
+
+  <ul>
+    <li>It is received after the competition closing deadline.</li>
+    <li>Required information is missing or illegible.</li>
+    <li>The entrant cannot be matched to a valid Nexa Draw account.</li>
+    <li>The entrant is under 18 or otherwise ineligible.</li>
+    <li>The wrong competition is identified.</li>
+    <li>A required competition answer is missing or invalid.</li>
+    <li>The entrant has already used their free entry for that competition.</li>
+    <li>The entry does not comply with these instructions.</li>
+  </ul>
+
+
+  <h3>10. Proof of Posting</h3>
+
+  <p>
+    Proof of posting is not proof that an entry was received by
+    Nexa Draw.
+  </p>
+
+  <p>
+    Nexa Draw cannot be responsible for postal entries that are lost,
+    delayed, damaged or incorrectly addressed before they are received.
+  </p>
+
+
+  <h3>11. Winner Selection</h3>
+
+  <p>
+    A valid free postal entry will be included in the same winner
+    selection process as every other valid entry in the competition.
+  </p>
+
+
+  <h3>12. Contact</h3>
+
+  <p>
+    Questions about the Nexa Draw Free Entry Route can be sent to:
   </p>
 
   <p>
