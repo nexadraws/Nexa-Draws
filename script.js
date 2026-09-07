@@ -1939,6 +1939,46 @@ async function getCorrectAnswerLetter(
    ADMIN WINNERS
    ========================================================= */
 
+function winnerContactLink(winner) {
+  const email =
+    String(
+      winner?.winner_email || ''
+    ).trim();
+
+  if (!email) {
+    return '';
+  }
+
+  const name =
+    winner?.winner_name ||
+    'Winner';
+
+  const competition =
+    winner?.competition_title ||
+    'Competition';
+
+  const ticket =
+    winner?.ticket_number ||
+    '';
+
+  const subject =
+    `Nexa Draw Winner - ${competition}`;
+
+  const body =
+    `Hi ${name},\n\n` +
+    `Congratulations! You have been drawn as the winner of ${competition}.\n\n` +
+    `Your winning ticket number is: ${ticket}\n\n` +
+    `Please reply to this email so we can arrange your prize.\n\n` +
+    `Kind regards,\n` +
+    `Nexa Draw`;
+
+  return (
+    `mailto:${encodeURIComponent(email)}` +
+    `?subject=${encodeURIComponent(subject)}` +
+    `&body=${encodeURIComponent(body)}`
+  );
+}
+
 async function loadAdminWinners() {
   if (!(await isAdminSession())) {
     return [];
@@ -2500,6 +2540,30 @@ async function adminView(
                         </strong>
                       </small>
 
+                                        </div>
+
+                    <div>
+                      ${
+                        winner.winner_email
+                          ? `
+                            <a
+                              class="btn outline"
+                              href="${winnerContactLink(
+                                winner
+                              )}"
+                            >
+                              CONTACT WINNER
+                            </a>
+                          `
+                          : `
+                            <button
+                              class="btn outline"
+                              disabled
+                            >
+                              EMAIL UNAVAILABLE
+                            </button>
+                          `
+                      }
                     </div>
 
                   </div>
