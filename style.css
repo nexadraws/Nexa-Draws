@@ -14,3 +14,15 @@ button{font:inherit}.text-btn,.link-btn{background:none;border:0;color:inherit;c
   margin-left: 10px;
   margin-right: auto;
 }
+
+@media (max-width: 650px) {
+  .topbar-actions {
+    margin-left: 0;
+    margin-right: 0;
+    gap: 8px;
+  }
+
+  .topbar {
+    justify-content: flex-start;
+  }
+}
