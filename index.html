@@ -46,10 +46,24 @@
         👤 <span id="accountLabel">My Account</span>
       </button>
 
-      <button class="text-btn" id="cartBtn">
-        🛒 <b id="cartCount">0</b>
-      </button>
-    </div>
+      <div class="topbar-actions">
+
+  <button
+    class="menu-btn"
+    id="menuBtn"
+    type="button"
+    aria-label="Open menu"
+    onclick="document.getElementById('nav').classList.toggle('open')"
+  >
+    ☰
+  </button>
+
+  <button class="text-btn" id="cartBtn">
+    🛒 <b id="cartCount">0</b>
+  </button>
+
+</div>
+    
   </header>
 
 
