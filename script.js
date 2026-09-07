@@ -1667,11 +1667,13 @@ async function renderWinners() {
               </h3>
 
               <p>
-                Winner:
-                <strong>
-                  Winner
-                </strong>
-              </p>
+  Winner:
+  <strong>
+    ${escapeHtml(
+      winner.winner_name || 'Winner'
+    )}
+  </strong>
+</p>
 
               <p>
                 Ticket:
