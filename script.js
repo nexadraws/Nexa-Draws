@@ -2542,7 +2542,7 @@ async function adminView(
 
                                         </div>
 
-                    <div>
+                    <div style="margin-top: 12px;">
                       ${
                         winner.winner_email
                           ? `
