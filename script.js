@@ -667,7 +667,7 @@ async function enterFreeCompetition(id) {
   */
   const { data, error } =
     await supabaseClient.functions.invoke(
-      'create-free-entry',
+      'create-free-entry-v2',
       {
         body: {
           competition_id: competition.id
