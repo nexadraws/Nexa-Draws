@@ -26,3 +26,49 @@ button{font:inherit}.text-btn,.link-btn{background:none;border:0;color:inherit;c
     justify-content: flex-start;
   }
 }
+
+.age-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.92);
+}
+
+.age-gate.open {
+  display: flex;
+}
+
+.age-gate-card {
+  width: min(520px, 100%);
+  padding: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  background: #0b0b0b;
+  text-align: center;
+}
+
+.age-gate-card h2 {
+  margin: 10px 0 14px;
+}
+
+.age-gate-card p {
+  line-height: 1.6;
+}
+
+.age-gate-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.age-gate-actions .btn {
+  width: 100%;
+}
+
+body.age-locked {
+  overflow: hidden;
+}
