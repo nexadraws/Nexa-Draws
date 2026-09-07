@@ -698,7 +698,7 @@ async function enterFreeCompetition(id) {
       'Your free entry could not be created.'
     );
 
-    return;
+       return;
   }
 
   freeEntryPending = null;
@@ -1398,6 +1398,7 @@ async function renderAccount(
     >
       LOG OUT
     </button>
+
   `;
 
   const {
@@ -1667,13 +1668,13 @@ async function renderWinners() {
               </h3>
 
               <p>
-  Winner:
-  <strong>
-    ${escapeHtml(
-      winner.winner_name || 'Winner'
-    )}
-  </strong>
-</p>
+                Winner:
+                <strong>
+                  ${escapeHtml(
+                    winner.winner_name || 'Winner'
+                  )}
+                </strong>
+              </p>
 
               <p>
                 Ticket:
@@ -2097,8 +2098,8 @@ async function adminView(
               name="max_entries"
               type="number"
               min="1"
-              step="1"
-              required
+
+                            required
               value="${escapeHtml(
                 edit?.max ?? ''
               )}"
@@ -2798,7 +2799,8 @@ async function saveCompetition(
   const payload = {
     title,
     price,
-    image_url: imageUrl,
+
+         image_url: imageUrl,
 
     closes_at:
       closesInput
