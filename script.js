@@ -3234,23 +3234,28 @@ terms: `
     displayed on the relevant competition page.
   </p>
 
-  <h3>1. Promoter</h3>
+<h3>1. Promoter</h3>
 
-  <p>
-    The promoter is <strong>Nexa Draw</strong>.
-  </p>
+<p>
+  The promoter is <strong>Nexa Draw Limited</strong>,
+  trading as <strong>Nexa Draw</strong>.
+</p>
 
-  <p>
-    Email:
-    <strong>hello@nexadraw.co.uk</strong>
-  </p>
+<p>
+  Company number:
+  <strong>17442068</strong>
+</p>
 
-  <p>
-    Full legal business and registered address details will be displayed
-    on the website where required.
-  </p>
+<p>
+  Registered office:
+  <strong>[YOUR VERIFIED REGISTERED OFFICE ADDRESS]</strong>
+</p>
 
-
+<p>
+  Email:
+  <strong>hello@nexadraw.co.uk</strong>
+</p>
+  
   <h3>2. Eligibility</h3>
 
   <p>
@@ -3775,18 +3780,33 @@ terms: `
     enter competitions or contact us.
   </p>
 
-  <h3>1. Who We Are</h3>
+<h3>1. Who We Are</h3>
 
-  <p>
-    Nexa Draw is responsible for the personal information collected through
-    this website.
-  </p>
+<p>
+  Nexa Draw is the trading name of
+  <strong>Nexa Draw Limited</strong>.
+</p>
 
-  <p>
-    Contact:
-    <strong>hello@nexadraw.co.uk</strong>
-  </p>
+<p>
+  Company number:
+  <strong>17442068</strong>
+</p>
 
+<p>
+  Registered office:
+  <strong>[YOUR VERIFIED REGISTERED OFFICE ADDRESS]</strong>
+</p>
+
+<p>
+  Nexa Draw Limited is responsible for the personal information
+  collected through nexadraw.co.uk.
+</p>
+
+<p>
+  Contact:
+  <strong>hello@nexadraw.co.uk</strong>
+</p>
+ 
   <h3>2. Information We May Collect</h3>
 
   <p>
