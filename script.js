@@ -1781,7 +1781,29 @@ async function drawWinnerSecurely(id) {
 /* =========================================================
    ADMIN
    ========================================================= */
+async function loadAdminWinners() {
+  if (!(await isAdminSession())) {
+    return [];
+  }
 
+  const { data, error } =
+    await supabaseClient.rpc(
+      'get_admin_winners'
+    );
+
+  if (error) {
+    console.error(
+      'Admin winners error:',
+      error
+    );
+
+    return [];
+  }
+
+  return Array.isArray(data)
+    ? data
+    : [];
+}
 async function openSecureAdmin() {
   closeModals();
 
