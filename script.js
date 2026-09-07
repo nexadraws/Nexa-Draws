@@ -50,6 +50,12 @@ let cart = store.get('nexa_cart', []);
 let user = null;
 let checkoutPending = false;
 
+/*
+  Used when somebody tries to enter
+  a free competition before logging in.
+*/
+let freeEntryPending = null;
+
 
 /* =========================================================
    HELPERS
@@ -60,6 +66,16 @@ function money(value) {
     style: 'currency',
     currency: 'GBP'
   }).format(Number(value) || 0);
+}
+
+function isFreeCompetition(competition) {
+  return Number(competition?.price || 0) === 0;
+}
+
+function competitionPriceLabel(competition) {
+  return isFreeCompetition(competition)
+    ? 'FREE ENTRY'
+    : `${money(competition.price)} per entry`;
 }
 
 function escapeHtml(value = '') {
@@ -196,10 +212,6 @@ function renderDraws() {
 
   if (!host) return;
 
-  /*
-    ONLY LIVE COMPETITIONS APPEAR
-    ON THE MAIN WEBSITE.
-  */
   const live = competitions.filter(
     competition => competition.status === 'live'
   );
@@ -215,31 +227,55 @@ function renderDraws() {
     const percentage = competition.max > 0
       ? Math.min(
           100,
-          Math.round((competition.sold / competition.max) * 100)
+          Math.round(
+            (competition.sold / competition.max) * 100
+          )
         )
       : 0;
 
+    const free = isFreeCompetition(competition);
+
     return `
-      <article class="card" data-id="${escapeHtml(competition.id)}">
+      <article
+        class="card"
+        data-id="${escapeHtml(competition.id)}"
+      >
         <div class="card-img">
           <img
             src="${escapeHtml(competition.image)}"
             alt="${escapeHtml(competition.title)}"
           >
+
           <span>${daysLeft(competition.closes)}</span>
         </div>
 
         <div class="card-body">
+          ${
+            free
+              ? `
+                <p class="eyebrow">
+                  FREE DRAW
+                </p>
+              `
+              : ''
+          }
+
           <h3>${escapeHtml(competition.title)}</h3>
 
-          <p>${money(competition.price)} per entry</p>
+          <p>
+            ${
+              free
+                ? '<strong>FREE ENTRY</strong>'
+                : `${money(competition.price)} per entry`
+            }
+          </p>
 
           <div class="bar">
             <i style="width:${percentage}%"></i>
           </div>
 
           <div class="stats">
-            <b>${percentage}% sold</b>
+            <b>${percentage}% entered</b>
 
             <span>
               ${competition.sold.toLocaleString()}
@@ -252,7 +288,11 @@ function renderDraws() {
             class="enter"
             data-open-comp="${escapeHtml(competition.id)}"
           >
-            ENTER NOW
+            ${
+              free
+                ? 'ENTER FREE DRAW'
+                : 'ENTER NOW'
+            }
           </button>
         </div>
       </article>
@@ -273,16 +313,13 @@ function showCompetition(id) {
 
   if (!competition) return;
 
-  /*
-    SAFETY CHECK:
-    CLOSED / PAUSED COMPETITIONS
-    CANNOT BE OPENED FOR ENTRY.
-  */
   if (competition.status !== 'live') {
     toast('This competition is no longer available.');
     renderDraws();
     return;
   }
+
+  const free = isFreeCompetition(competition);
 
   const remaining = Math.max(
     0,
@@ -306,59 +343,111 @@ function showCompetition(id) {
       >
 
       <div>
-        <p class="eyebrow">LIVE COMPETITION</p>
+        <p class="eyebrow">
+          ${
+            free
+              ? 'FREE DRAW'
+              : 'LIVE COMPETITION'
+          }
+        </p>
 
         <h2>${escapeHtml(competition.title)}</h2>
 
-        <p>${escapeHtml(competition.description)}</p>
+        <p>
+          ${escapeHtml(competition.description)}
+        </p>
 
         <div class="detail-price">
-          ${money(competition.price)}
-          <small>per entry</small>
+          ${
+            free
+              ? 'FREE'
+              : money(competition.price)
+          }
+
+          <small>
+            ${
+              free
+                ? 'one free entry'
+                : 'per entry'
+            }
+          </small>
         </div>
 
         <p>
-          <strong>${remaining.toLocaleString()}</strong>
+          <strong>
+            ${remaining.toLocaleString()}
+          </strong>
           entries remaining
         </p>
 
         ${
           remaining > 0
-            ? `
-              <label class="field">
-                Number of entries
+            ? free
+              ? `
+                <p class="micro">
+                  One free entry will be issued to your
+                  Nexa account after you answer the
+                  skill question correctly.
+                </p>
 
-                <input
-                  id="entryQty"
-                  type="number"
-                  min="1"
-                  max="${maximumChoice}"
-                  value="1"
+                <button
+                  class="btn gold full"
+                  id="addToCart"
                 >
-              </label>
+                  ENTER FREE DRAW
+                </button>
+              `
+              : `
+                <label class="field">
+                  Number of entries
 
-              <button
-                class="btn gold full"
-                id="addToCart"
-              >
-                ADD TO BASKET
-              </button>
-            `
+                  <input
+                    id="entryQty"
+                    type="number"
+                    min="1"
+                    max="${maximumChoice}"
+                    value="1"
+                  >
+                </label>
+
+                <button
+                  class="btn gold full"
+                  id="addToCart"
+                >
+                  ADD TO BASKET
+                </button>
+              `
             : `
-              <p>This competition has no entries remaining.</p>
+              <p>
+                This competition has no entries remaining.
+              </p>
             `
         }
 
-        <p class="micro">
-          Secure payment processing is still in preparation.
-        </p>
+        ${
+          free
+            ? `
+              <p class="micro">
+                No payment is required for this draw.
+              </p>
+            `
+            : `
+              <p class="micro">
+                Secure payment processing is still
+                in preparation.
+              </p>
+            `
+        }
       </div>
     </div>
   `;
 
-  $('#addToCart')?.addEventListener('click', () => {
-    openSkillQuestion(competition.id);
-  });
+  $('#addToCart')?.addEventListener(
+    'click',
+    () => {
+      openSkillQuestion(competition.id);
+    }
+  );
 
   openModal('#competitionModal');
 }
@@ -380,19 +469,23 @@ function openSkillQuestion(id) {
     return;
   }
 
+  const free = isFreeCompetition(competition);
+
   const remaining = Math.max(
     0,
     competition.max - competition.sold
   );
 
-  const quantity = Math.max(
-    1,
-    Math.min(
-      100,
-      remaining,
-      Number($('#entryQty')?.value) || 1
-    )
-  );
+  const quantity = free
+    ? 1
+    : Math.max(
+        1,
+        Math.min(
+          100,
+          remaining,
+          Number($('#entryQty')?.value) || 1
+        )
+      );
 
   const question = $('#skillQuestion');
   const answers = $('#skillAnswers');
@@ -434,22 +527,26 @@ function openSkillQuestion(id) {
         item.disabled = true;
       });
 
-      const { data, error } = await supabaseClient.functions.invoke(
-        'check-skill-answer',
-        {
-          body: {
-            competition_id: competition.id,
-            answer: button.dataset.skill
+      const { data, error } =
+        await supabaseClient.functions.invoke(
+          'check-skill-answer',
+          {
+            body: {
+              competition_id: competition.id,
+              answer: button.dataset.skill
+            }
           }
-        }
-      );
+        );
 
       $$('[data-skill]').forEach(item => {
         item.disabled = false;
       });
 
       if (error) {
-        console.error('Skill answer check failed:', error);
+        console.error(
+          'Skill answer check failed:',
+          error
+        );
 
         errorHost.textContent =
           'Unable to check your answer. Please try again.';
@@ -464,7 +561,28 @@ function openSkillQuestion(id) {
         return;
       }
 
-      addToCart(competition.id, quantity);
+      /*
+        FREE DRAW:
+        DO NOT ADD TO BASKET.
+        CREATE SECURE FREE ENTRY.
+      */
+      if (free) {
+        closeModals();
+
+        await enterFreeCompetition(
+          competition.id
+        );
+
+        return;
+      }
+
+      /*
+        NORMAL PAID COMPETITION.
+      */
+      addToCart(
+        competition.id,
+        quantity
+      );
 
       closeModals();
       openCart();
@@ -473,6 +591,147 @@ function openSkillQuestion(id) {
 
   closeModals();
   openModal('#skillModal');
+}
+
+
+/* =========================================================
+   FREE COMPETITION ENTRY
+   ========================================================= */
+
+async function enterFreeCompetition(id) {
+  const competition = competitions.find(
+    item => item.id === String(id)
+  );
+
+  if (!competition) {
+    alert('Competition could not be found.');
+    return;
+  }
+
+  if (competition.status !== 'live') {
+    toast('This competition is no longer available.');
+    return;
+  }
+
+  if (!isFreeCompetition(competition)) {
+    alert(
+      'This is not a free competition.'
+    );
+    return;
+  }
+
+  const remaining = Math.max(
+    0,
+    competition.max - competition.sold
+  );
+
+  if (remaining <= 0) {
+    toast('This free draw is full.');
+    return;
+  }
+
+  const customer =
+    await getCurrentCustomer();
+
+  /*
+    USER MUST HAVE AN ACCOUNT.
+  */
+  if (!customer) {
+    freeEntryPending = competition.id;
+
+    closeModals();
+
+    await renderAccount(true);
+
+    openModal('#accountModal');
+
+    toast(
+      'Log in or create an account to receive your free ticket'
+    );
+
+    return;
+  }
+
+  /*
+    SECURE SERVER-SIDE FREE ENTRY.
+
+    The Supabase Edge Function should:
+    - verify the logged-in user
+    - verify competition is live
+    - verify price = 0
+    - prevent duplicate free entry if desired
+    - create the order/entry
+    - create the ticket number
+    - increase sold count
+    - return the ticket number
+  */
+  const { data, error } =
+    await supabaseClient.functions.invoke(
+      'create-free-entry',
+      {
+        body: {
+          competition_id: competition.id
+        }
+      }
+    );
+
+  if (error) {
+    console.error(
+      'Free entry error:',
+      error
+    );
+
+    alert(
+      await functionErrorMessage(
+        error,
+        'Your free entry could not be created.'
+      )
+    );
+
+    return;
+  }
+
+  if (!data?.success) {
+    alert(
+      data?.error ||
+      data?.message ||
+      'Your free entry could not be created.'
+    );
+
+    return;
+  }
+
+  freeEntryPending = null;
+
+  await loadCompetitionsFromSupabase();
+
+  const ticketNumber =
+    data?.ticket?.ticket_number ||
+    data?.ticket_number ||
+    '';
+
+  if (ticketNumber) {
+    alert(
+      `You're entered!\n\n` +
+      `Competition: ${competition.title}\n` +
+      `Ticket number: ${ticketNumber}\n\n` +
+      `Your ticket is saved in My Account.`
+    );
+  } else {
+    alert(
+      `You're entered into "${competition.title}".\n\n` +
+      'Your entry has been saved to your Nexa account.'
+    );
+  }
+
+  toast('Free entry confirmed');
+
+  /*
+    OPEN CUSTOMER ACCOUNT SO THEY CAN
+    SEE THEIR TICKET.
+  */
+  await renderAccount(false);
+  openModal('#accountModal');
 }
 
 
@@ -489,12 +748,16 @@ function addToCart(id, quantity) {
 
   if (!competition) return;
 
-  /*
-    CLOSED / PAUSED COMPETITIONS
-    CANNOT BE ADDED TO THE BASKET.
-  */
   if (competition.status !== 'live') {
     toast('This competition is no longer available.');
+    return;
+  }
+
+  /*
+    FREE COMPETITIONS NEVER GO INTO CART.
+  */
+  if (isFreeCompetition(competition)) {
+    enterFreeCompetition(competition.id);
     return;
   }
 
@@ -504,7 +767,9 @@ function addToCart(id, quantity) {
   );
 
   if (remaining <= 0) {
-    toast('No entries remaining for this competition.');
+    toast(
+      'No entries remaining for this competition.'
+    );
     return;
   }
 
@@ -558,15 +823,16 @@ function updateCartCount() {
 
 function openCart() {
   /*
-    REMOVE MISSING, PAUSED OR CLOSED
-    COMPETITIONS FROM THE CUSTOMER BASKET.
+    ONLY PAID, LIVE COMPETITIONS
+    BELONG IN THE BASKET.
   */
   cart = store.get('nexa_cart', []).filter(
     item =>
       competitions.some(
         competition =>
           competition.id === String(item.id) &&
-          competition.status === 'live'
+          competition.status === 'live' &&
+          !isFreeCompetition(competition)
       )
   );
 
@@ -585,13 +851,15 @@ function openCart() {
         const competition = competitions.find(
           competition =>
             competition.id === String(item.id) &&
-            competition.status === 'live'
+            competition.status === 'live' &&
+            !isFreeCompetition(competition)
         );
 
         if (!competition) return '';
 
         const lineTotal =
-          competition.price * Number(item.qty || 0);
+          competition.price *
+          Number(item.qty || 0);
 
         total += lineTotal;
 
@@ -603,7 +871,8 @@ function openCart() {
               </strong>
 
               <small>
-                ${item.qty} × ${money(competition.price)}
+                ${item.qty} ×
+                ${money(competition.price)}
               </small>
             </div>
 
@@ -621,7 +890,9 @@ function openCart() {
         `;
       }).join('')
     : `
-        <p class="empty">Your basket is empty.</p>
+        <p class="empty">
+          Your basket is empty.
+        </p>
       `;
 
   const totalHost = $('#cartTotal');
@@ -632,7 +903,10 @@ function openCart() {
 
   $$('[data-remove]').forEach(button => {
     button.onclick = () => {
-      cart.splice(Number(button.dataset.remove), 1);
+      cart.splice(
+        Number(button.dataset.remove),
+        1
+      );
 
       store.set('nexa_cart', cart);
 
@@ -652,7 +926,8 @@ function openCart() {
         : 'CHECKOUT — COMING SOON';
   }
 
-  const micro = $('#cartModal .micro');
+  const micro =
+    $('#cartModal .micro');
 
   if (micro) {
     micro.innerHTML =
@@ -674,7 +949,8 @@ async function getCurrentCustomer() {
     data: { session }
   } = await supabaseClient.auth.getSession();
 
-  const authUser = session?.user || null;
+  const authUser =
+    session?.user || null;
 
   if (!authUser) {
     user = null;
@@ -684,7 +960,9 @@ async function getCurrentCustomer() {
   user = {
     id: authUser.id,
     email: authUser.email || '',
-    name: authUser.user_metadata?.name || 'Customer'
+    name:
+      authUser.user_metadata?.name ||
+      'Customer'
   };
 
   return user;
@@ -700,10 +978,15 @@ async function loadCustomerOrders(customer) {
       'id,total,status,created_at,paid_at,payment_provider,payment_reference'
     )
     .eq('user_id', customer.id)
-    .order('created_at', { ascending: false });
+    .order('created_at', {
+      ascending: false
+    });
 
   if (orderError) {
-    console.error('Customer orders error:', orderError);
+    console.error(
+      'Customer orders error:',
+      orderError
+    );
 
     return {
       orders: [],
@@ -720,7 +1003,8 @@ async function loadCustomerOrders(customer) {
     };
   }
 
-  const orderIds = orders.map(order => order.id);
+  const orderIds =
+    orders.map(order => order.id);
 
   const {
     data: ticketRows,
@@ -731,22 +1015,32 @@ async function loadCustomerOrders(customer) {
       'id,order_id,competition_id,ticket_number,status,created_at'
     )
     .in('order_id', orderIds)
-    .order('id', { ascending: true });
+    .order('id', {
+      ascending: true
+    });
 
   if (ticketError) {
-    console.error('Customer tickets error:', ticketError);
+    console.error(
+      'Customer tickets error:',
+      ticketError
+    );
   }
 
-  const tickets = ticketRows || [];
+  const tickets =
+    ticketRows || [];
 
   return {
-    error: ticketError ? ticketError.message : null,
+    error:
+      ticketError
+        ? ticketError.message
+        : null,
 
     orders: orders.map(order => ({
       ...order,
 
       tickets: tickets.filter(
-        ticket => ticket.order_id === order.id
+        ticket =>
+          ticket.order_id === order.id
       )
     }))
   };
@@ -754,78 +1048,113 @@ async function loadCustomerOrders(customer) {
 
 function customerOrderCard(order) {
   const date = formatDate(
-    order.paid_at || order.created_at
+    order.paid_at ||
+    order.created_at
   );
 
   const status = String(
     order.status || 'pending'
   );
 
-  const statusLabel =
-    status === 'paid'
-      ? 'PAID'
-      : status.toUpperCase();
+  const total =
+    Number(order.total || 0);
 
-  const tickets = order.tickets || [];
+  let statusLabel;
 
-  const ticketsHtml = tickets.length
-    ? tickets.map(ticket => {
-        const competition = competitions.find(
-          item =>
-            item.id === String(ticket.competition_id)
-        );
+  if (total === 0) {
+    statusLabel = 'FREE ENTRY';
+  } else if (status === 'paid') {
+    statusLabel = 'PAID';
+  } else {
+    statusLabel =
+      status.toUpperCase();
+  }
 
-        return `
-          <div class="ticket-line">
-            <p>
-              ${
-                competition
-                  ? escapeHtml(competition.title)
-                  : 'Competition'
-              }
-            </p>
+  const tickets =
+    order.tickets || [];
 
-            <p>
-              Ticket:
-              <strong>
-                ${escapeHtml(ticket.ticket_number)}
-              </strong>
-            </p>
-          </div>
+  const ticketsHtml =
+    tickets.length
+      ? tickets.map(ticket => {
+          const competition =
+            competitions.find(
+              item =>
+                item.id ===
+                String(
+                  ticket.competition_id
+                )
+            );
+
+          return `
+            <div class="ticket-line">
+              <p>
+                ${
+                  competition
+                    ? escapeHtml(
+                        competition.title
+                      )
+                    : 'Competition'
+                }
+              </p>
+
+              <p>
+                Ticket:
+                <strong>
+                  ${escapeHtml(
+                    ticket.ticket_number
+                  )}
+                </strong>
+              </p>
+            </div>
+          `;
+        }).join('')
+      : `
+          <p class="empty">
+            No tickets found for this entry.
+          </p>
         `;
-      }).join('')
-    : `
-        <p class="empty">
-          ${
-            status === 'paid'
-              ? 'No tickets found for this order.'
-              : 'No tickets issued yet.'
-          }
-        </p>
-      `;
 
   return `
     <div class="order-card">
       <strong>
-        Order ${escapeHtml(order.id)}
+        ${
+          total === 0
+            ? 'Free Entry'
+            : `Order ${escapeHtml(order.id)}`
+        }
       </strong>
 
-      <p>${money(order.total)}</p>
+      <p>
+        ${
+          total === 0
+            ? 'FREE'
+            : money(total)
+        }
+      </p>
 
       <small>
         ${escapeHtml(statusLabel)}
-        ${date ? ` · ${escapeHtml(date)}` : ''}
+        ${
+          date
+            ? ` · ${escapeHtml(date)}`
+            : ''
+        }
       </small>
 
       <details>
-        <summary>View tickets</summary>
+        <summary>
+          View ticket
+        </summary>
+
         ${ticketsHtml}
       </details>
     </div>
   `;
 }
 
-async function renderAccount(fromCheckout = false) {
+async function renderAccount(
+  fromCheckout = false
+) {
   await getCurrentCustomer();
 
   const host = $('#accountContent');
@@ -834,7 +1163,9 @@ async function renderAccount(fromCheckout = false) {
 
   if (!user) {
     host.innerHTML = `
-      <p class="eyebrow">MY NEXA</p>
+      <p class="eyebrow">
+        MY NEXA
+      </p>
 
       <h2>
         ${
@@ -844,7 +1175,9 @@ async function renderAccount(fromCheckout = false) {
         }
       </h2>
 
-      <h3>Create Account</h3>
+      <h3>
+        Create Account
+      </h3>
 
       <form id="signupForm">
         <label class="field">
@@ -890,7 +1223,9 @@ async function renderAccount(fromCheckout = false) {
 
       <hr>
 
-      <h3>Already have an account?</h3>
+      <h3>
+        Already have an account?
+      </h3>
 
       <form id="loginForm">
         <label class="field">
@@ -924,97 +1259,137 @@ async function renderAccount(fromCheckout = false) {
       </form>
     `;
 
-    $('#signupForm').onsubmit = async event => {
-      event.preventDefault();
+    $('#signupForm').onsubmit =
+      async event => {
+        event.preventDefault();
 
-      const formData = new FormData(event.target);
+        const formData =
+          new FormData(event.target);
 
-      const { error } = await supabaseClient.auth.signUp({
-        email: String(
-          formData.get('email') || ''
-        ).trim(),
+        const { error } =
+          await supabaseClient.auth.signUp({
+            email: String(
+              formData.get('email') || ''
+            ).trim(),
 
-        password: String(
-          formData.get('password') || ''
-        ),
+            password: String(
+              formData.get('password') || ''
+            ),
 
-        options: {
-          data: {
-            name: String(
-              formData.get('name') || ''
-            ).trim()
-          },
+            options: {
+              data: {
+                name: String(
+                  formData.get('name') || ''
+                ).trim()
+              },
 
-          emailRedirectTo:
-            window.location.origin + '/'
+              emailRedirectTo:
+                window.location.origin + '/'
+            }
+          });
+
+        if (error) {
+          alert(
+            'Sign up failed: ' +
+            error.message
+          );
+          return;
         }
-      });
 
-      if (error) {
-        alert('Sign up failed: ' + error.message);
-        return;
-      }
-
-      alert(
-        'Account created. Please check your email if confirmation is required.'
-      );
-    };
-
-    $('#loginForm').onsubmit = async event => {
-      event.preventDefault();
-
-      const formData = new FormData(event.target);
-
-      const { error } =
-        await supabaseClient.auth.signInWithPassword({
-          email: String(
-            formData.get('email') || ''
-          ).trim(),
-
-          password: String(
-            formData.get('password') || ''
-          )
-        });
-
-      if (error) {
-        alert('Login failed: ' + error.message);
-        return;
-      }
-
-      await updateAccountLabel();
-
-      if (checkoutPending) {
-        checkoutPending = false;
-
-        closeModals();
-        openCart();
-
-        toast(
-          'Logged in — you can continue checkout'
+        alert(
+          'Account created. Please check your email if confirmation is required.'
         );
+      };
 
-        return;
-      }
+    $('#loginForm').onsubmit =
+      async event => {
+        event.preventDefault();
 
-      await renderAccount(false);
-    };
+        const formData =
+          new FormData(event.target);
+
+        const { error } =
+          await supabaseClient.auth
+            .signInWithPassword({
+              email: String(
+                formData.get('email') || ''
+              ).trim(),
+
+              password: String(
+                formData.get('password') || ''
+              )
+            });
+
+        if (error) {
+          alert(
+            'Login failed: ' +
+            error.message
+          );
+
+          return;
+        }
+
+        await updateAccountLabel();
+
+        /*
+          FREE DRAW WAS WAITING
+          FOR LOGIN.
+        */
+        if (freeEntryPending) {
+          const pendingCompetition =
+            freeEntryPending;
+
+          freeEntryPending = null;
+
+          closeModals();
+
+          await enterFreeCompetition(
+            pendingCompetition
+          );
+
+          return;
+        }
+
+        if (checkoutPending) {
+          checkoutPending = false;
+
+          closeModals();
+
+          openCart();
+
+          toast(
+            'Logged in — you can continue checkout'
+          );
+
+          return;
+        }
+
+        await renderAccount(false);
+      };
 
     return;
   }
 
   host.innerHTML = `
-    <p class="eyebrow">MY NEXA</p>
+    <p class="eyebrow">
+      MY NEXA
+    </p>
 
     <h2>
-      Welcome, ${escapeHtml(user.name)}
+      Welcome,
+      ${escapeHtml(user.name)}
     </h2>
 
-    <p>${escapeHtml(user.email)}</p>
+    <p>
+      ${escapeHtml(user.email)}
+    </p>
 
-    <h3>Your orders</h3>
+    <h3>
+      Your entries & orders
+    </h3>
 
     <p class="empty">
-      Loading your orders...
+      Loading your entries...
     </p>
 
     <button
@@ -1028,30 +1403,41 @@ async function renderAccount(fromCheckout = false) {
   const {
     orders,
     error
-  } = await loadCustomerOrders(user);
+  } =
+    await loadCustomerOrders(user);
 
-  const orderSection = orders.length
-    ? orders.map(customerOrderCard).join('')
-    : `
-        <p class="empty">
-          ${
-            error
-              ? 'Your orders could not be loaded. Please try again.'
-              : 'No orders yet.'
-          }
-        </p>
-      `;
+  const orderSection =
+    orders.length
+      ? orders
+          .map(customerOrderCard)
+          .join('')
+      : `
+          <p class="empty">
+            ${
+              error
+                ? 'Your entries could not be loaded. Please try again.'
+                : 'No entries yet.'
+            }
+          </p>
+        `;
 
   host.innerHTML = `
-    <p class="eyebrow">MY NEXA</p>
+    <p class="eyebrow">
+      MY NEXA
+    </p>
 
     <h2>
-      Welcome, ${escapeHtml(user.name)}
+      Welcome,
+      ${escapeHtml(user.name)}
     </h2>
 
-    <p>${escapeHtml(user.email)}</p>
+    <p>
+      ${escapeHtml(user.email)}
+    </p>
 
-    <h3>Your orders</h3>
+    <h3>
+      Your entries & orders
+    </h3>
 
     ${orderSection}
 
@@ -1063,26 +1449,30 @@ async function renderAccount(fromCheckout = false) {
     </button>
   `;
 
-  $('#logoutBtn').onclick = async () => {
-    await supabaseClient.auth.signOut();
+  $('#logoutBtn').onclick =
+    async () => {
+      await supabaseClient.auth.signOut();
 
-    user = null;
-    checkoutPending = false;
+      user = null;
+      checkoutPending = false;
+      freeEntryPending = null;
 
-    await updateAccountLabel();
-    await renderAccount(false);
-  };
+      await updateAccountLabel();
+      await renderAccount(false);
+    };
 }
 
 async function updateAccountLabel() {
   await getCurrentCustomer();
 
-  const label = $('#accountLabel');
+  const label =
+    $('#accountLabel');
 
   if (!label) return;
 
   label.textContent = user
-    ? (user.name || 'Customer').split(' ')[0]
+    ? (user.name || 'Customer')
+        .split(' ')[0]
     : 'My Account';
 }
 
@@ -1093,43 +1483,60 @@ async function updateAccountLabel() {
 
 async function checkout() {
   /*
-    ONLY LIVE COMPETITIONS
-    MAY CONTINUE TO CHECKOUT.
+    FREE COMPETITIONS ARE NOT
+    SENT THROUGH CHECKOUT.
   */
-  cart = store.get('nexa_cart', []).filter(
-    item =>
-      competitions.some(
-        competition =>
-          competition.id === String(item.id) &&
-          competition.status === 'live'
-      )
-  );
+  cart = store
+    .get('nexa_cart', [])
+    .filter(
+      item =>
+        competitions.some(
+          competition =>
+            competition.id ===
+              String(item.id) &&
+            competition.status ===
+              'live' &&
+            !isFreeCompetition(
+              competition
+            )
+        )
+    );
 
   store.set('nexa_cart', cart);
   updateCartCount();
 
   if (!cart.length) {
-    toast('Your basket has no live competitions.');
+    toast(
+      'Your basket has no paid competitions.'
+    );
+
     return;
   }
 
-  const authUser = await getCurrentCustomer();
+  const authUser =
+    await getCurrentCustomer();
 
   if (!authUser) {
     checkoutPending = true;
 
     closeModals();
+
     await renderAccount(true);
+
     openModal('#accountModal');
 
     return;
   }
 
   if (PAYMENT_MODE !== 'live') {
-    const items = cart.map(item => ({
-      competition_id: Number(item.id),
-      quantity: Number(item.qty)
-    }));
+    const items =
+      cart.map(item => ({
+        competition_id:
+          Number(item.id),
+
+        quantity:
+          Number(item.qty)
+      }));
 
     const { data, error } =
       await supabaseClient.functions.invoke(
@@ -1140,7 +1547,10 @@ async function checkout() {
       );
 
     if (error) {
-      console.error('Create order error:', error);
+      console.error(
+        'Create order error:',
+        error
+      );
 
       alert(
         await functionErrorMessage(
@@ -1161,9 +1571,13 @@ async function checkout() {
       return;
     }
 
-    const cartItems = $('#cartItems');
+    const cartItems =
+      $('#cartItems');
 
-    if (cartItems && !$('#paymentNotice')) {
+    if (
+      cartItems &&
+      !$('#paymentNotice')
+    ) {
       cartItems.insertAdjacentHTML(
         'afterbegin',
         `
@@ -1177,7 +1591,9 @@ async function checkout() {
 
             <p>
               Order total:
-              £${Number(data.order.total).toFixed(2)}
+              £${Number(
+                data.order.total
+              ).toFixed(2)}
             </p>
 
             <p class="micro">
@@ -1189,7 +1605,10 @@ async function checkout() {
       );
     }
 
-    toast('Secure test order created');
+    toast(
+      'Secure test order created'
+    );
+
     return;
   }
 
@@ -1204,7 +1623,8 @@ async function checkout() {
    ========================================================= */
 
 async function renderWinners() {
-  const host = $('#winnerGrid');
+  const host =
+    $('#winnerGrid');
 
   if (!host) return;
 
@@ -1233,37 +1653,48 @@ async function renderWinners() {
       ? data
       : [];
 
-  host.innerHTML = publicWinners.length
-    ? publicWinners.map(winner => `
-        <article class="winner-card">
-          <span>🏆</span>
+  host.innerHTML =
+    publicWinners.length
+      ? publicWinners.map(
+          winner => `
+            <article class="winner-card">
+              <span>🏆</span>
 
-          <h3>
-            ${escapeHtml(winner.prize)}
-          </h3>
+              <h3>
+                ${escapeHtml(
+                  winner.prize
+                )}
+              </h3>
 
-          <p>
-            Winner:
-            <strong>Winner</strong>
+              <p>
+                Winner:
+                <strong>
+                  Winner
+                </strong>
+              </p>
+
+              <p>
+                Ticket:
+                <strong>
+                  ${escapeHtml(
+                    winner.ticket_number
+                  )}
+                </strong>
+              </p>
+
+              <small>
+                ${formatDate(
+                  winner.drawn_at
+                )}
+              </small>
+            </article>
+          `
+        ).join('')
+      : `
+          <p class="empty">
+            No winners have been published yet.
           </p>
-
-          <p>
-            Ticket:
-            <strong>
-              ${escapeHtml(winner.ticket_number)}
-            </strong>
-          </p>
-
-          <small>
-            ${formatDate(winner.drawn_at)}
-          </small>
-        </article>
-      `).join('')
-    : `
-        <p class="empty">
-          No winners have been published yet.
-        </p>
-      `;
+        `;
 }
 
 
@@ -1273,21 +1704,27 @@ async function renderWinners() {
 
 async function drawWinnerSecurely(id) {
   if (!(await isAdminSession())) {
-    alert('Administrator access required.');
+    alert(
+      'Administrator access required.'
+    );
+
     return;
   }
 
-  const competition = competitions.find(
-    item => item.id === String(id)
-  );
+  const competition =
+    competitions.find(
+      item =>
+        item.id === String(id)
+    );
 
   if (!competition) return;
 
-  const confirmed = window.confirm(
-    `Draw a winner for "${competition.title}"?\n\n` +
-    'Only confirmed paid tickets should be eligible. ' +
-    'The winner must be selected by the secure server-side draw function.'
-  );
+  const confirmed =
+    window.confirm(
+      `Draw a winner for "${competition.title}"?\n\n` +
+      'Only eligible issued tickets should be included. ' +
+      'The winner must be selected by the secure server-side draw function.'
+    );
 
   if (!confirmed) return;
 
@@ -1296,7 +1733,8 @@ async function drawWinnerSecurely(id) {
       'draw-winner',
       {
         body: {
-          competition_id: competition.id
+          competition_id:
+            competition.id
         }
       }
     );
@@ -1320,16 +1758,19 @@ async function drawWinnerSecurely(id) {
   if (!data?.winner) {
     alert(
       data?.message ||
-      'No eligible paid entries were found.'
+      'No eligible tickets were found.'
     );
 
     return;
   }
 
   await renderWinners();
+
   await loadCompetitionsFromSupabase();
 
-  toast('Winner drawn and published');
+  toast(
+    'Winner drawn and published'
+  );
 
   await adminView();
 }
@@ -1342,20 +1783,27 @@ async function drawWinnerSecurely(id) {
 async function openSecureAdmin() {
   closeModals();
 
-  const host = $('#adminContent');
+  const host =
+    $('#adminContent');
 
   if (!host) return;
 
   if (await isAdminSession()) {
     await adminView();
+
     openModal('#adminModal');
+
     return;
   }
 
   host.innerHTML = `
-    <p class="eyebrow">NEXA DRAW</p>
+    <p class="eyebrow">
+      NEXA DRAW
+    </p>
 
-    <h2>Administrator</h2>
+    <h2>
+      Administrator
+    </h2>
 
     <form id="adminLoginForm">
       <label class="field">
@@ -1391,52 +1839,63 @@ async function openSecureAdmin() {
 
   openModal('#adminModal');
 
-  $('#adminLoginForm').onsubmit = async event => {
-    event.preventDefault();
+  $('#adminLoginForm').onsubmit =
+    async event => {
+      event.preventDefault();
 
-    const formData = new FormData(event.target);
+      const formData =
+        new FormData(event.target);
 
-    const { data, error } =
-      await supabaseClient.auth.signInWithPassword({
-        email: String(
-          formData.get('email') || ''
-        ).trim(),
+      const { data, error } =
+        await supabaseClient.auth
+          .signInWithPassword({
+            email: String(
+              formData.get('email') || ''
+            ).trim(),
 
-        password: String(
-          formData.get('password') || ''
-        )
-      });
+            password: String(
+              formData.get('password') || ''
+            )
+          });
 
-    if (error) {
-      alert(
-        'Admin login failed: ' +
-        error.message
-      );
+      if (error) {
+        alert(
+          'Admin login failed: ' +
+          error.message
+        );
 
-      return;
-    }
+        return;
+      }
 
-    if (data?.user?.id !== ADMIN_UID) {
-      await supabaseClient.auth.signOut();
+      if (
+        data?.user?.id !== ADMIN_UID
+      ) {
+        await supabaseClient.auth
+          .signOut();
 
-      alert(
-        'Administrator access required.'
-      );
+        alert(
+          'Administrator access required.'
+        );
 
-      return;
-    }
+        return;
+      }
 
-    await updateAccountLabel();
-    await adminView();
-  };
+      await updateAccountLabel();
+
+      await adminView();
+    };
 }
 
-async function getCorrectAnswerLetter(competition) {
+async function getCorrectAnswerLetter(
+  competition
+) {
   if (!competition?.id) return 'A';
 
   const { data, error } =
     await supabaseClient
-      .from('competition_skill_answers')
+      .from(
+        'competition_skill_answers'
+      )
       .select('correct_answer')
       .eq(
         'competition_id',
@@ -1444,22 +1903,26 @@ async function getCorrectAnswerLetter(competition) {
       )
       .maybeSingle();
 
-  if (error || !data?.correct_answer) {
+  if (
+    error ||
+    !data?.correct_answer
+  ) {
     return 'A';
   }
 
-  const answer = String(
-    data.correct_answer
-  );
+  const answer =
+    String(data.correct_answer);
 
   if (
-    answer === competition.skill_option_b
+    answer ===
+    competition.skill_option_b
   ) {
     return 'B';
   }
 
   if (
-    answer === competition.skill_option_c
+    answer ===
+    competition.skill_option_c
   ) {
     return 'C';
   }
@@ -1467,9 +1930,12 @@ async function getCorrectAnswerLetter(competition) {
   return 'A';
 }
 
-async function adminView(editId = null) {
+async function adminView(
+  editId = null
+) {
   if (!(await isAdminSession())) {
-    const host = $('#adminContent');
+    const host =
+      $('#adminContent');
 
     if (host) {
       host.innerHTML = `
@@ -1484,25 +1950,37 @@ async function adminView(editId = null) {
 
   await loadCompetitionsFromSupabase();
 
-  const edit = editId
-    ? competitions.find(
-        item => item.id === String(editId)
-      )
-    : null;
+  const edit =
+    editId
+      ? competitions.find(
+          item =>
+            item.id ===
+            String(editId)
+        )
+      : null;
 
-  const selectedCorrect = edit
-    ? await getCorrectAnswerLetter(edit)
-    : 'A';
+  const selectedCorrect =
+    edit
+      ? await getCorrectAnswerLetter(
+          edit
+        )
+      : 'A';
 
-  const host = $('#adminContent');
+  const host =
+    $('#adminContent');
 
   if (!host) return;
 
   host.innerHTML = `
     <div class="admin-head">
       <div>
-        <p class="eyebrow">NEXA DRAW</p>
-        <h2>Admin Dashboard</h2>
+        <p class="eyebrow">
+          NEXA DRAW
+        </p>
+
+        <h2>
+          Admin Dashboard
+        </h2>
       </div>
 
       <button
@@ -1527,7 +2005,9 @@ async function adminView(editId = null) {
           <input
             type="hidden"
             name="id"
-            value="${escapeHtml(edit?.id || '')}"
+            value="${escapeHtml(
+              edit?.id || ''
+            )}"
           >
 
           <label class="field">
@@ -1536,7 +2016,9 @@ async function adminView(editId = null) {
             <input
               name="title"
               required
-              value="${escapeHtml(edit?.title || '')}"
+              value="${escapeHtml(
+                edit?.title || ''
+              )}"
             >
           </label>
 
@@ -1549,8 +2031,15 @@ async function adminView(editId = null) {
               min="0"
               step="0.01"
               required
-              value="${escapeHtml(edit?.price ?? '')}"
+              value="${escapeHtml(
+                edit?.price ?? ''
+              )}"
             >
+
+            <small>
+              Enter 0.00 to create a
+              FREE DRAW.
+            </small>
           </label>
 
           <label class="field">
@@ -1562,7 +2051,9 @@ async function adminView(editId = null) {
               min="1"
               step="1"
               required
-              value="${escapeHtml(edit?.max ?? '')}"
+              value="${escapeHtml(
+                edit?.max ?? ''
+              )}"
             >
           </label>
 
@@ -1574,7 +2065,9 @@ async function adminView(editId = null) {
               type="datetime-local"
               value="${escapeHtml(
                 edit?.closes
-                  ? new Date(edit.closes)
+                  ? new Date(
+                      edit.closes
+                    )
                       .toISOString()
                       .slice(0, 16)
                   : ''
@@ -1588,7 +2081,9 @@ async function adminView(editId = null) {
             <textarea
               name="description"
               rows="4"
-            >${escapeHtml(edit?.description || '')}</textarea>
+            >${escapeHtml(
+              edit?.description || ''
+            )}</textarea>
           </label>
 
           <label class="field">
@@ -1606,7 +2101,8 @@ async function adminView(editId = null) {
               ? `
                 <p class="micro">
                   Current image is already saved.
-                  Upload another image only to replace it.
+                  Upload another image only
+                  to replace it.
                 </p>
               `
               : ''
@@ -1618,7 +2114,9 @@ async function adminView(editId = null) {
             <input
               name="skill_question"
               required
-              value="${escapeHtml(edit?.skill_question || '')}"
+              value="${escapeHtml(
+                edit?.skill_question || ''
+              )}"
             >
           </label>
 
@@ -1628,7 +2126,9 @@ async function adminView(editId = null) {
             <input
               name="skill_option_a"
               required
-              value="${escapeHtml(edit?.skill_option_a || '')}"
+              value="${escapeHtml(
+                edit?.skill_option_a || ''
+              )}"
             >
           </label>
 
@@ -1638,7 +2138,9 @@ async function adminView(editId = null) {
             <input
               name="skill_option_b"
               required
-              value="${escapeHtml(edit?.skill_option_b || '')}"
+              value="${escapeHtml(
+                edit?.skill_option_b || ''
+              )}"
             >
           </label>
 
@@ -1648,7 +2150,9 @@ async function adminView(editId = null) {
             <input
               name="skill_option_c"
               required
-              value="${escapeHtml(edit?.skill_option_c || '')}"
+              value="${escapeHtml(
+                edit?.skill_option_c || ''
+              )}"
             >
           </label>
 
@@ -1661,21 +2165,33 @@ async function adminView(editId = null) {
             >
               <option
                 value="A"
-                ${selectedCorrect === 'A' ? 'selected' : ''}
+                ${
+                  selectedCorrect === 'A'
+                    ? 'selected'
+                    : ''
+                }
               >
                 Option A
               </option>
 
               <option
                 value="B"
-                ${selectedCorrect === 'B' ? 'selected' : ''}
+                ${
+                  selectedCorrect === 'B'
+                    ? 'selected'
+                    : ''
+                }
               >
                 Option B
               </option>
 
               <option
                 value="C"
-                ${selectedCorrect === 'C' ? 'selected' : ''}
+                ${
+                  selectedCorrect === 'C'
+                    ? 'selected'
+                    : ''
+                }
               >
                 Option C
               </option>
@@ -1688,21 +2204,33 @@ async function adminView(editId = null) {
             <select name="status">
               <option
                 value="live"
-                ${edit?.status === 'live' ? 'selected' : ''}
+                ${
+                  edit?.status === 'live'
+                    ? 'selected'
+                    : ''
+                }
               >
                 Live
               </option>
 
               <option
                 value="paused"
-                ${edit?.status === 'paused' ? 'selected' : ''}
+                ${
+                  edit?.status === 'paused'
+                    ? 'selected'
+                    : ''
+                }
               >
                 Paused
               </option>
 
               <option
                 value="closed"
-                ${edit?.status === 'closed' ? 'selected' : ''}
+                ${
+                  edit?.status === 'closed'
+                    ? 'selected'
+                    : ''
+                }
               >
                 Closed
               </option>
@@ -1723,66 +2251,87 @@ async function adminView(editId = null) {
       </div>
 
       <div>
-        <h3>Manage draws</h3>
+        <h3>
+          Manage draws
+        </h3>
 
         <div class="admin-list">
           ${
             competitions.length
-              ? competitions.map(competition => `
-                  <div class="admin-row">
-                    <div>
-                      <strong>
-                        ${escapeHtml(competition.title)}
-                      </strong>
+              ? competitions.map(
+                  competition => `
+                    <div class="admin-row">
+                      <div>
+                        <strong>
+                          ${escapeHtml(
+                            competition.title
+                          )}
+                        </strong>
 
-                      <small>
-                        ${money(competition.price)}
-                        ·
-                        ${competition.sold}
-                        /
-                        ${competition.max}
-                        ·
-                        ${escapeHtml(
-                          String(
-                            competition.status || 'live'
-                          ).toUpperCase()
-                        )}
-                      </small>
+                        <small>
+                          ${
+                            isFreeCompetition(
+                              competition
+                            )
+                              ? 'FREE'
+                              : money(
+                                  competition.price
+                                )
+                          }
+
+                          ·
+
+                          ${competition.sold}
+                          /
+                          ${competition.max}
+
+                          ·
+
+                          ${escapeHtml(
+                            String(
+                              competition.status ||
+                              'live'
+                            ).toUpperCase()
+                          )}
+                        </small>
+                      </div>
+
+                      <div>
+                        <button
+                          class="btn outline"
+                          data-edit="${competition.id}"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          class="btn outline"
+                          data-winner="${competition.id}"
+                        >
+                          Draw Winner
+                        </button>
+
+                        <button
+                          class="btn outline"
+                          data-close-competition="${competition.id}"
+                          ${
+                            competition.status ===
+                            'closed'
+                              ? 'disabled'
+                              : ''
+                          }
+                        >
+                          ${
+                            competition.status ===
+                            'closed'
+                              ? 'Closed'
+                              : 'Close Competition'
+                          }
+                        </button>
+                      </div>
                     </div>
-
-                    <div>
-                      <button
-                        class="btn outline"
-                        data-edit="${competition.id}"
-                      >
-                        Edit
-                      </button>
-
-                      <button
-                        class="btn outline"
-                        data-winner="${competition.id}"
-                      >
-                        Draw Winner
-                      </button>
-
-                      <button
-                        class="btn outline"
-                        data-close-competition="${competition.id}"
-                        ${
-                          competition.status === 'closed'
-                            ? 'disabled'
-                            : ''
-                        }
-                      >
-                        ${
-                          competition.status === 'closed'
-                            ? 'Closed'
-                            : 'Close Competition'
-                        }
-                      </button>
-                    </div>
-                  </div>
-                `).join('')
+                  `
+                ).join('')
               : `
                   <p class="empty">
                     No competitions.
@@ -1794,37 +2343,52 @@ async function adminView(editId = null) {
     </div>
   `;
 
-  $('#adminLogout').onclick = async () => {
-    await supabaseClient.auth.signOut();
+  $('#adminLogout').onclick =
+    async () => {
+      await supabaseClient.auth.signOut();
 
-    closeModals();
-    await updateAccountLabel();
+      closeModals();
 
-    toast('Admin logged out');
-  };
+      await updateAccountLabel();
+
+      toast(
+        'Admin logged out'
+      );
+    };
 
   $('#competitionForm').onsubmit =
     saveCompetition;
 
-  $$('[data-edit]').forEach(button => {
-    button.onclick = () =>
-      adminView(button.dataset.edit);
+  $$('[data-edit]').forEach(
+    button => {
+      button.onclick =
+        () =>
+          adminView(
+            button.dataset.edit
+          );
+    }
+  );
+
+  $$(
+    '[data-close-competition]'
+  ).forEach(button => {
+    button.onclick =
+      () =>
+        closeCompetition(
+          button.dataset
+            .closeCompetition
+        );
   });
 
-  /*
-    NEW CLOSE COMPETITION BUTTON
-  */
-  $$('[data-close-competition]').forEach(button => {
-    button.onclick = () =>
-      closeCompetition(
-        button.dataset.closeCompetition
-      );
-  });
-
-  $$('[data-winner]').forEach(button => {
-    button.onclick = () =>
-      drawWinnerSecurely(button.dataset.winner);
-  });
+  $$('[data-winner]').forEach(
+    button => {
+      button.onclick =
+        () =>
+          drawWinnerSecurely(
+            button.dataset.winner
+          );
+    }
+  );
 }
 
 
@@ -1832,107 +2396,165 @@ async function adminView(editId = null) {
    ADMIN IMAGE / SAVE
    ========================================================= */
 
-async function uploadCompetitionImage(file) {
+async function uploadCompetitionImage(
+  file
+) {
   if (!file || !file.size) {
     return '';
   }
 
   const extension = (
-    file.name.split('.').pop() || 'jpg'
+    file.name
+      .split('.')
+      .pop() || 'jpg'
   )
     .toLowerCase()
-    .replace(/[^a-z0-9]/g, '') || 'jpg';
+    .replace(
+      /[^a-z0-9]/g,
+      ''
+    ) || 'jpg';
 
   const path =
-    `${ADMIN_UID}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
+    `${ADMIN_UID}/` +
+    `${Date.now()}-` +
+    `${crypto.randomUUID()}.` +
+    `${extension}`;
 
   const { error } =
     await supabaseClient.storage
-      .from('competition-images')
-      .upload(path, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
+      .from(
+        'competition-images'
+      )
+      .upload(
+        path,
+        file,
+        {
+          cacheControl: '3600',
+          upsert: false
+        }
+      );
 
   if (error) throw error;
 
   const { data } =
     supabaseClient.storage
-      .from('competition-images')
+      .from(
+        'competition-images'
+      )
       .getPublicUrl(path);
 
   return data?.publicUrl || '';
 }
 
-async function saveCompetition(event) {
+async function saveCompetition(
+  event
+) {
   event.preventDefault();
 
   if (!(await isAdminSession())) {
-    alert('Administrator access required.');
+    alert(
+      'Administrator access required.'
+    );
+
     return;
   }
 
-  const formData = new FormData(event.target);
+  const formData =
+    new FormData(event.target);
 
-  const existingId = String(
-    formData.get('id') || ''
-  ).trim();
+  const existingId =
+    String(
+      formData.get('id') || ''
+    ).trim();
 
-  const existing = existingId
-    ? competitions.find(
-        item => item.id === existingId
+  const existing =
+    existingId
+      ? competitions.find(
+          item =>
+            item.id ===
+            existingId
+        )
+      : null;
+
+  const title =
+    String(
+      formData.get('title') || ''
+    ).trim();
+
+  const price =
+    Number(
+      formData.get('price')
+    );
+
+  const maxEntries =
+    Number(
+      formData.get(
+        'max_entries'
       )
-    : null;
+    );
 
-  const title = String(
-    formData.get('title') || ''
-  ).trim();
+  const closesInput =
+    String(
+      formData.get(
+        'closes_at'
+      ) || ''
+    ).trim();
 
-  const price = Number(
-    formData.get('price')
-  );
+  const description =
+    String(
+      formData.get(
+        'description'
+      ) || ''
+    ).trim();
 
-  const maxEntries = Number(
-    formData.get('max_entries')
-  );
+  const skillQuestion =
+    String(
+      formData.get(
+        'skill_question'
+      ) || ''
+    ).trim();
 
-  const closesInput = String(
-    formData.get('closes_at') || ''
-  ).trim();
+  const optionA =
+    String(
+      formData.get(
+        'skill_option_a'
+      ) || ''
+    ).trim();
 
-  const description = String(
-    formData.get('description') || ''
-  ).trim();
+  const optionB =
+    String(
+      formData.get(
+        'skill_option_b'
+      ) || ''
+    ).trim();
 
-  const skillQuestion = String(
-    formData.get('skill_question') || ''
-  ).trim();
+  const optionC =
+    String(
+      formData.get(
+        'skill_option_c'
+      ) || ''
+    ).trim();
 
-  const optionA = String(
-    formData.get('skill_option_a') || ''
-  ).trim();
+  const correctLetter =
+    String(
+      formData.get(
+        'correct_answer_letter'
+      ) || 'A'
+    );
 
-  const optionB = String(
-    formData.get('skill_option_b') || ''
-  ).trim();
-
-  const optionC = String(
-    formData.get('skill_option_c') || ''
-  ).trim();
-
-  const correctLetter = String(
-    formData.get('correct_answer_letter') || 'A'
-  );
-
-  const status = String(
-    formData.get('status') || 'live'
-  );
+  const status =
+    String(
+      formData.get('status') ||
+      'live'
+    );
 
   if (
     !title ||
     !Number.isFinite(price) ||
     price < 0 ||
-    !Number.isInteger(maxEntries) ||
+    !Number.isInteger(
+      maxEntries
+    ) ||
     maxEntries < 1 ||
     !skillQuestion ||
     !optionA ||
@@ -1946,9 +2568,11 @@ async function saveCompetition(event) {
     return;
   }
 
-  let imageUrl = existing?.image || '';
+  let imageUrl =
+    existing?.image || '';
 
-  const imageFile = formData.get('image');
+  const imageFile =
+    formData.get('image');
 
   if (
     imageFile instanceof File &&
@@ -1956,11 +2580,16 @@ async function saveCompetition(event) {
   ) {
     try {
       imageUrl =
-        await uploadCompetitionImage(imageFile);
+        await uploadCompetitionImage(
+          imageFile
+        );
     } catch (error) {
       alert(
         'Image upload failed: ' +
-        (error?.message || 'Unknown error')
+        (
+          error?.message ||
+          'Unknown error'
+        )
       );
 
       return;
@@ -1980,27 +2609,38 @@ async function saveCompetition(event) {
     price,
     image_url: imageUrl,
 
-    closes_at: closesInput
-      ? new Date(closesInput).toISOString()
-      : null,
+    closes_at:
+      closesInput
+        ? new Date(
+            closesInput
+          ).toISOString()
+        : null,
 
     max_entries: maxEntries,
     status,
     description,
-    skill_question: skillQuestion,
-    skill_option_a: optionA,
-    skill_option_b: optionB,
-    skill_option_c: optionC
+    skill_question:
+      skillQuestion,
+    skill_option_a:
+      optionA,
+    skill_option_b:
+      optionB,
+    skill_option_c:
+      optionC
   };
 
-  let competitionId = existingId;
+  let competitionId =
+    existingId;
 
   if (existingId) {
     const { error } =
       await supabaseClient
         .from('competitions')
         .update(payload)
-        .eq('id', existingId);
+        .eq(
+          'id',
+          existingId
+        );
 
     if (error) {
       alert(
@@ -2027,7 +2667,8 @@ async function saveCompetition(event) {
       return;
     }
 
-    competitionId = String(data.id);
+    competitionId =
+      String(data.id);
   }
 
   const correctAnswer =
@@ -2041,7 +2682,9 @@ async function saveCompetition(event) {
     data: existingAnswer,
     error: lookupError
   } = await supabaseClient
-    .from('competition_skill_answers')
+    .from(
+      'competition_skill_answers'
+    )
     .select('competition_id')
     .eq(
       'competition_id',
@@ -2061,9 +2704,12 @@ async function saveCompetition(event) {
   if (existingAnswer) {
     const { error } =
       await supabaseClient
-        .from('competition_skill_answers')
+        .from(
+          'competition_skill_answers'
+        )
         .update({
-          correct_answer: correctAnswer
+          correct_answer:
+            correctAnswer
         })
         .eq(
           'competition_id',
@@ -2081,10 +2727,15 @@ async function saveCompetition(event) {
   } else {
     const { error } =
       await supabaseClient
-        .from('competition_skill_answers')
+        .from(
+          'competition_skill_answers'
+        )
         .insert({
-          competition_id: competitionId,
-          correct_answer: correctAnswer
+          competition_id:
+            competitionId,
+
+          correct_answer:
+            correctAnswer
         });
 
     if (error) {
@@ -2098,12 +2749,17 @@ async function saveCompetition(event) {
   }
 
   await loadCompetitionsFromSupabase();
+
   await adminView();
 
   toast(
     existingId
       ? 'Competition updated'
-      : 'Competition added'
+      : isFreeCompetition({
+          price
+        })
+        ? 'Free competition added'
+        : 'Competition added'
   );
 }
 
@@ -2114,26 +2770,38 @@ async function saveCompetition(event) {
 
 async function closeCompetition(id) {
   if (!(await isAdminSession())) {
-    alert('Administrator access required.');
+    alert(
+      'Administrator access required.'
+    );
+
     return;
   }
 
-  const competition = competitions.find(
-    item => item.id === String(id)
-  );
+  const competition =
+    competitions.find(
+      item =>
+        item.id === String(id)
+    );
 
   if (!competition) return;
 
-  if (competition.status === 'closed') {
-    toast('Competition is already closed');
+  if (
+    competition.status ===
+    'closed'
+  ) {
+    toast(
+      'Competition is already closed'
+    );
+
     return;
   }
 
-  const confirmed = window.confirm(
-    `Close "${competition.title}"?\n\n` +
-    'This will remove the competition from the main website.\n\n' +
-    'The competition record, image, entries, orders, tickets and other saved data will NOT be deleted.'
-  );
+  const confirmed =
+    window.confirm(
+      `Close "${competition.title}"?\n\n` +
+      'This will remove the competition from the main website.\n\n' +
+      'The competition record, image, entries, orders, tickets and other saved data will NOT be deleted.'
+    );
 
   if (!confirmed) return;
 
@@ -2159,25 +2827,28 @@ async function closeCompetition(id) {
     return;
   }
 
-  /*
-    REMOVE THE CLOSED COMPETITION
-    FROM THIS BROWSER'S BASKET.
-  */
-  cart = store.get('nexa_cart', []).filter(
-    item => item.id !== String(id)
-  );
+  cart =
+    store
+      .get('nexa_cart', [])
+      .filter(
+        item =>
+          item.id !== String(id)
+      );
 
-  store.set('nexa_cart', cart);
+  store.set(
+    'nexa_cart',
+    cart
+  );
 
   updateCartCount();
 
-  /*
-    RELOAD SUPABASE DATA AND ADMIN.
-  */
   await loadCompetitionsFromSupabase();
+
   await adminView();
 
-  toast('Competition closed');
+  toast(
+    'Competition closed'
+  );
 }
 
 
@@ -2186,36 +2857,50 @@ async function closeCompetition(id) {
    ========================================================= */
 
 /*
-  THIS FUNCTION IS KEPT IN THE FILE FOR NOW,
-  BUT THERE IS NO DELETE BUTTON IN THE ADMIN.
+  NO DELETE BUTTON IS SHOWN IN ADMIN.
 
-  NORMAL ADMIN USE SHOULD USE:
-  closeCompetition()
+  This function remains available
+  internally only.
 
-  That protects old competition data.
+  Normal admin use should close
+  competitions instead.
 */
 
 async function deleteCompetition(id) {
   if (!(await isAdminSession())) {
-    alert('Administrator access required.');
+    alert(
+      'Administrator access required.'
+    );
+
     return;
   }
 
-  const competition = competitions.find(
-    item => item.id === String(id)
-  );
+  const competition =
+    competitions.find(
+      item =>
+        item.id === String(id)
+    );
 
   if (!competition) return;
 
-  if (!confirm(`Delete "${competition.title}"?`)) {
+  if (
+    !confirm(
+      `Delete "${competition.title}"?`
+    )
+  ) {
     return;
   }
 
   const { error: answerError } =
     await supabaseClient
-      .from('competition_skill_answers')
+      .from(
+        'competition_skill_answers'
+      )
       .delete()
-      .eq('competition_id', id);
+      .eq(
+        'competition_id',
+        id
+      );
 
   if (answerError) {
     alert(
@@ -2241,18 +2926,28 @@ async function deleteCompetition(id) {
     return;
   }
 
-  cart = store.get('nexa_cart', []).filter(
-    item => item.id !== String(id)
-  );
+  cart =
+    store
+      .get('nexa_cart', [])
+      .filter(
+        item =>
+          item.id !== String(id)
+      );
 
-  store.set('nexa_cart', cart);
+  store.set(
+    'nexa_cart',
+    cart
+  );
 
   updateCartCount();
 
   await loadCompetitionsFromSupabase();
+
   await adminView();
 
-  toast('Competition deleted');
+  toast(
+    'Competition deleted'
+  );
 }
 
 
@@ -2262,51 +2957,73 @@ async function deleteCompetition(id) {
 
 const legalPages = {
   terms: `
-    <p class="eyebrow">LEGAL</p>
+    <p class="eyebrow">
+      LEGAL
+    </p>
 
-    <h2>Terms & Conditions</h2>
+    <h2>
+      Terms & Conditions
+    </h2>
 
     <p>
       Draft terms placeholder.
-      Final competition terms must be reviewed before launch.
+      Final competition terms must be
+      reviewed before launch.
     </p>
   `,
 
   privacy: `
-    <p class="eyebrow">LEGAL</p>
+    <p class="eyebrow">
+      LEGAL
+    </p>
 
-    <h2>Privacy Policy</h2>
+    <h2>
+      Privacy Policy
+    </h2>
 
     <p>
       Draft privacy information placeholder.
-      A complete privacy notice will be required before launch.
+      A complete privacy notice will be
+      required before launch.
     </p>
   `,
 
   free: `
-    <p class="eyebrow">LEGAL</p>
+    <p class="eyebrow">
+      LEGAL
+    </p>
 
-    <h2>Free Entry Route</h2>
+    <h2>
+      Free Entry Route
+    </h2>
 
     <p>
-      Free-entry information will be published here where applicable.
+      Free competitions require no payment.
+      Entrants must have a Nexa account and
+      complete the competition skill question.
     </p>
   `,
 
   responsible: `
-    <p class="eyebrow">CUSTOMER CARE</p>
+    <p class="eyebrow">
+      CUSTOMER CARE
+    </p>
 
-    <h2>Responsible Play</h2>
+    <h2>
+      Responsible Play
+    </h2>
 
     <p>
-      Customer protection, age controls and responsible participation
-      information will be published before launch.
+      Customer protection, age controls and
+      responsible participation information
+      will be published before launch.
     </p>
   `
 };
 
 function openLegalPage(key) {
-  const host = $('#legalContent');
+  const host =
+    $('#legalContent');
 
   if (!host) return;
 
@@ -2322,60 +3039,83 @@ function openLegalPage(key) {
    PAGE EVENTS
    ========================================================= */
 
-document.addEventListener('click', event => {
-  if (event.target.matches('[data-close]')) {
-    closeModals();
-  }
+document.addEventListener(
+  'click',
+  event => {
+    if (
+      event.target.matches(
+        '[data-close]'
+      )
+    ) {
+      closeModals();
+    }
 
-  if (event.target.classList?.contains('modal')) {
-    closeModals();
-  }
+    if (
+      event.target.classList
+        ?.contains('modal')
+    ) {
+      closeModals();
+    }
 
-  const legal = event.target.closest(
-    '[data-legal]'
+    const legal =
+      event.target.closest(
+        '[data-legal]'
+      );
+
+    if (legal) {
+      openLegalPage(
+        legal.dataset.legal
+      );
+    }
+
+    const navItem =
+      event.target.closest(
+        '#nav a, #nav button'
+      );
+
+    if (navItem) {
+      $('#nav')
+        ?.classList
+        .remove('open');
+    }
+  }
+);
+
+$('#cartBtn')
+  ?.addEventListener(
+    'click',
+    openCart
   );
 
-  if (legal) {
-    openLegalPage(legal.dataset.legal);
-  }
+$('#accountBtn')
+  ?.addEventListener(
+    'click',
+    async () => {
+      await renderAccount(false);
 
-  const navItem = event.target.closest(
-    '#nav a, #nav button'
+      openModal(
+        '#accountModal'
+      );
+    }
   );
 
-  if (navItem) {
-    $('#nav')?.classList.remove('open');
-  }
-});
+$('#checkoutBtn')
+  ?.addEventListener(
+    'click',
+    checkout
+  );
 
-$('#cartBtn')?.addEventListener(
-  'click',
-  openCart
-);
-
-$('#accountBtn')?.addEventListener(
-  'click',
-  async () => {
-    await renderAccount(false);
-    openModal('#accountModal');
-  }
-);
-
-$('#checkoutBtn')?.addEventListener(
-  'click',
-  checkout
-);
-
-$('#viewAllBtn')?.addEventListener(
-  'click',
-  () => {
-    document
-      .querySelector('#draws')
-      ?.scrollIntoView({
-        behavior: 'smooth'
-      });
-  }
-);
+$('#viewAllBtn')
+  ?.addEventListener(
+    'click',
+    () => {
+      document
+        .querySelector('#draws')
+        ?.scrollIntoView({
+          behavior: 'smooth'
+        });
+    }
+  );
 
 
 /* =========================================================
@@ -2393,10 +3133,20 @@ supabaseClient.auth.onAuthStateChange(
    FUNCTIONS USED BY HTML BUTTONS
    ========================================================= */
 
-window.openCart = openCart;
-window.renderAccount = renderAccount;
-window.openModal = openModal;
-window.openSecureAdmin = openSecureAdmin;
+window.openCart =
+  openCart;
+
+window.renderAccount =
+  renderAccount;
+
+window.openModal =
+  openModal;
+
+window.openSecureAdmin =
+  openSecureAdmin;
+
+window.enterFreeCompetition =
+  enterFreeCompetition;
 
 
 /* =========================================================
@@ -2407,7 +3157,9 @@ async function startNexaDraw() {
   updateCartCount();
 
   await renderWinners();
+
   await updateAccountLabel();
+
   await loadCompetitionsFromSupabase();
 }
 
