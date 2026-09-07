@@ -3755,54 +3755,364 @@ terms: `
     <strong>hello@nexadraw.co.uk</strong>
   </p>
 `,
-   
-  privacy: `
-    <p class="eyebrow">
-      LEGAL
-    </p>
 
-    <h2>
-      Privacy Policy
-    </h2>
+   privacy: `
+  <p class="eyebrow">
+    LEGAL
+  </p>
 
-    <p>
-      Draft privacy information placeholder.
-      A complete privacy notice will be
-      required before launch.
-    </p>
-  `,
+  <h2>
+    Privacy Policy
+  </h2>
 
-  free: `
-    <p class="eyebrow">
-      LEGAL
-    </p>
+  <p>
+    <strong>Last updated: 7 September 2026</strong>
+  </p>
 
-    <h2>
-      Free Entry Route
-    </h2>
+  <p>
+    This Privacy Policy explains how Nexa Draw collects, uses and protects
+    personal information when you use nexadraw.co.uk, create an account,
+    enter competitions or contact us.
+  </p>
 
-    <p>
-      Free competitions require no payment.
-      Entrants must have a Nexa account and
-      complete the competition skill question.
-    </p>
-  `,
+  <h3>1. Who We Are</h3>
 
-  responsible: `
-    <p class="eyebrow">
-      CUSTOMER CARE
-    </p>
+  <p>
+    Nexa Draw is responsible for the personal information collected through
+    this website.
+  </p>
 
-    <h2>
-      Responsible Play
-    </h2>
+  <p>
+    Contact:
+    <strong>hello@nexadraw.co.uk</strong>
+  </p>
 
-    <p>
-      Customer protection, age controls and
-      responsible participation information
-      will be published before launch.
-    </p>
-  `
+  <h3>2. Information We May Collect</h3>
+
+  <p>
+    We may collect information including:
+  </p>
+
+  <ul>
+    <li>Your name.</li>
+    <li>Your email address.</li>
+    <li>Your account details.</li>
+    <li>Your competition entries and ticket numbers.</li>
+    <li>Your order and payment status.</li>
+    <li>Your winner and prize information.</li>
+    <li>Messages or enquiries you send to us.</li>
+    <li>Technical information relating to your use of the website.</li>
+  </ul>
+
+  <h3>3. Account Information</h3>
+
+  <p>
+    When you create a Nexa Draw account, we use your information to create
+    and manage your account, authenticate you and provide access to your
+    competition entries and account features.
+  </p>
+
+  <h3>4. Competition Entries</h3>
+
+  <p>
+    We process information relating to your competition entries so that we
+    can administer competitions, issue ticket numbers, determine valid
+    entries, select winners and maintain competition records.
+  </p>
+
+  <h3>5. Payments</h3>
+
+  <p>
+    Where paid competitions are available, payments may be processed by
+    third-party payment service providers.
+  </p>
+
+  <p>
+    Nexa Draw does not need to store your full payment card details where
+    those details are handled securely by the payment provider.
+  </p>
+
+  <p>
+    We may receive limited payment information such as payment status,
+    transaction references and amounts paid.
+  </p>
+
+  <h3>6. Emails and Communications</h3>
+
+  <p>
+    We may use your email address to send important service communications
+    such as account verification, entry confirmations, winner notifications
+    and information relating to competitions you have entered.
+  </p>
+
+  <p>
+    Email communications may be delivered using third-party email service
+    providers.
+  </p>
+
+  <h3>7. Marketing</h3>
+
+  <p>
+    We will only send marketing communications where we have an appropriate
+    lawful basis to do so.
+  </p>
+
+  <p>
+    You can unsubscribe from marketing communications at any time using
+    the unsubscribe option provided or by contacting us.
+  </p>
+
+  <p>
+    Service messages that are necessary to operate your account or
+    competition entries may still be sent.
+  </p>
+
+  <h3>8. How We Use Personal Information</h3>
+
+  <p>
+    We may use personal information to:
+  </p>
+
+  <ul>
+    <li>Create and manage user accounts.</li>
+    <li>Administer competitions and entries.</li>
+    <li>Process and record orders and payments.</li>
+    <li>Issue and manage competition tickets.</li>
+    <li>Select, verify and contact winners.</li>
+    <li>Arrange prize delivery or payment.</li>
+    <li>Respond to enquiries and complaints.</li>
+    <li>Detect and prevent fraud or misuse.</li>
+    <li>Maintain the security of our website and systems.</li>
+    <li>Meet legal, regulatory and accounting obligations.</li>
+    <li>Improve our website and services.</li>
+  </ul>
+
+  <h3>9. Our Lawful Bases</h3>
+
+  <p>
+    Depending on the circumstances, we may process personal information
+    because:
+  </p>
+
+  <ul>
+    <li>It is necessary to perform a contract with you.</li>
+    <li>It is necessary to comply with a legal obligation.</li>
+    <li>We have a legitimate interest in operating and protecting Nexa Draw.</li>
+    <li>You have provided consent where consent is required.</li>
+  </ul>
+
+  <h3>10. Service Providers</h3>
+
+  <p>
+    We may use trusted third-party service providers to help operate
+    Nexa Draw, including providers of website hosting, databases,
+    authentication, email delivery and payment processing.
+  </p>
+
+  <p>
+    These providers may process personal information only as necessary
+    to provide their services and subject to applicable data protection
+    requirements.
+  </p>
+
+  <h3>11. Supabase</h3>
+
+  <p>
+    Nexa Draw uses Supabase for services including database storage,
+    authentication and backend functionality.
+  </p>
+
+  <p>
+    Information relating to your account and competition activity may
+    therefore be processed through Supabase systems.
+  </p>
+
+  <h3>12. Email Delivery</h3>
+
+  <p>
+    Nexa Draw may use third-party email providers, including Resend,
+    to deliver account and competition-related emails.
+  </p>
+
+  <p>
+    Information such as your email address and the content necessary
+    to send the relevant message may be processed by the email provider.
+  </p>
+
+  <h3>13. Payment Providers</h3>
+
+  <p>
+    If Nexa Draw introduces paid entry processing, payment information
+    may be processed by the payment provider selected by Nexa Draw.
+  </p>
+
+  <p>
+    The payment provider will process information in accordance with
+    its own privacy and security requirements.
+  </p>
+
+  <h3>14. Sharing Personal Information</h3>
+
+  <p>
+    We do not sell your personal information.
+  </p>
+
+  <p>
+    We may share information where necessary with:
+  </p>
+
+  <ul>
+    <li>Service providers acting on our behalf.</li>
+    <li>Payment processors.</li>
+    <li>Email service providers.</li>
+    <li>Professional advisers where necessary.</li>
+    <li>Law enforcement, regulators or public authorities where required.</li>
+  </ul>
+
+  <h3>15. Winner Information</h3>
+
+  <p>
+    We may publish limited information about competition winners where
+    appropriate, including a winner's name, the competition won,
+    winning ticket number and draw date.
+  </p>
+
+  <p>
+    We will not publicly publish a winner's email address, telephone
+    number or home address.
+  </p>
+
+  <h3>16. Data Security</h3>
+
+  <p>
+    Nexa Draw takes reasonable technical and organisational measures
+    to protect personal information against unauthorised access,
+    loss, misuse or disclosure.
+  </p>
+
+  <p>
+    No internet-based service can guarantee complete security, but
+    we take reasonable steps to protect the information we process.
+  </p>
+
+  <h3>17. How Long We Keep Information</h3>
+
+  <p>
+    We keep personal information only for as long as reasonably necessary
+    for the purposes for which it was collected and to meet legal,
+    accounting, fraud-prevention and dispute-resolution requirements.
+  </p>
+
+  <p>
+    Different categories of information may be retained for different
+    periods.
+  </p>
+
+  <h3>18. Your Data Protection Rights</h3>
+
+  <p>
+    Depending on the circumstances, you may have rights including the
+    right to:
+  </p>
+
+  <ul>
+    <li>Request access to your personal information.</li>
+    <li>Request correction of inaccurate information.</li>
+    <li>Request deletion of personal information.</li>
+    <li>Request restriction of processing.</li>
+    <li>Object to certain processing.</li>
+    <li>Request transfer of your information where applicable.</li>
+    <li>Withdraw consent where processing is based on consent.</li>
+  </ul>
+
+  <p>
+    These rights are subject to applicable legal conditions and
+    exemptions.
+  </p>
+
+  <h3>19. Exercising Your Rights</h3>
+
+  <p>
+    To make a privacy request, contact:
+  </p>
+
+  <p>
+    <strong>hello@nexadraw.co.uk</strong>
+  </p>
+
+  <p>
+    We may need to verify your identity before responding to a request.
+  </p>
+
+  <h3>20. Cookies and Similar Technologies</h3>
+
+  <p>
+    Nexa Draw may use cookies, local storage and similar technologies
+    where necessary to provide website functionality, maintain sessions
+    and improve the user experience.
+  </p>
+
+  <p>
+    Additional cookie information may be provided separately where
+    required.
+  </p>
+
+  <h3>21. International Processing</h3>
+
+  <p>
+    Some service providers may process information outside the United
+    Kingdom.
+  </p>
+
+  <p>
+    Where required, appropriate safeguards will be used for international
+    transfers of personal information.
+  </p>
+
+  <h3>22. Children</h3>
+
+  <p>
+    Nexa Draw competitions are intended for adults aged 18 or over.
+  </p>
+
+  <p>
+    We do not knowingly allow anyone under 18 to enter competitions.
+  </p>
+
+  <h3>23. Changes to This Privacy Policy</h3>
+
+  <p>
+    We may update this Privacy Policy from time to time to reflect
+    changes to our services, technology or legal requirements.
+  </p>
+
+  <p>
+    The latest version will be made available on nexadraw.co.uk.
+  </p>
+
+  <h3>24. Complaints</h3>
+
+  <p>
+    If you have concerns about how Nexa Draw handles your personal
+    information, please contact us first so that we can investigate.
+  </p>
+
+  <p>
+    You also have the right to raise a complaint with the UK Information
+    Commissioner's Office where applicable.
+  </p>
+
+  <h3>25. Contact</h3>
+
+  <p>
+    For privacy questions or requests, contact:
+  </p>
+
+  <p>
+    <strong>hello@nexadraw.co.uk</strong>
+  </p>
+`,
+  
 };
 
 function openLegalPage(key) {
