@@ -4469,6 +4469,92 @@ window.openSecureAdmin =
 window.enterFreeCompetition =
   enterFreeCompetition;
 
+function initAgeGate() {
+  const ageGate =
+    document.getElementById('ageGate');
+
+  const yesButton =
+    document.getElementById('ageConfirmYes');
+
+  const noButton =
+    document.getElementById('ageConfirmNo');
+
+  if (
+    !ageGate ||
+    !yesButton ||
+    !noButton
+  ) {
+    return;
+  }
+
+  const confirmed =
+    localStorage.getItem(
+      'nexa_age_confirmed'
+    );
+
+  if (confirmed === 'yes') {
+    return;
+  }
+
+  ageGate.classList.add('open');
+
+  ageGate.setAttribute(
+    'aria-hidden',
+    'false'
+  );
+
+  document.body.classList.add(
+    'age-locked'
+  );
+
+  yesButton.onclick = () => {
+    localStorage.setItem(
+      'nexa_age_confirmed',
+      'yes'
+    );
+
+    ageGate.classList.remove('open');
+
+    ageGate.setAttribute(
+      'aria-hidden',
+      'true'
+    );
+
+    document.body.classList.remove(
+      'age-locked'
+    );
+  };
+
+  noButton.onclick = () => {
+    document.body.innerHTML = `
+      <main
+        style="
+          min-height:100vh;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          padding:24px;
+          background:#080808;
+          color:#fff;
+          text-align:center;
+        "
+      >
+        <div>
+          <h1>Nexa Draw</h1>
+
+          <p>
+            You must be 18 or over to use this website.
+          </p>
+        </div>
+      </main>
+    `;
+  };
+}
+
+document.addEventListener(
+  'DOMContentLoaded',
+  initAgeGate
+);
 
 /* =========================================================
    START SITE
