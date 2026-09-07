@@ -3214,7 +3214,7 @@ async function deleteCompetition(id) {
 
 const legalPages = {
  
- terms: `
+terms: `
   <p class="eyebrow">
     LEGAL
   </p>
@@ -3250,6 +3250,7 @@ const legalPages = {
     on the website where required.
   </p>
 
+
   <h3>2. Eligibility</h3>
 
   <p>
@@ -3268,6 +3269,7 @@ const legalPages = {
     Nexa Draw may require reasonable proof of age, identity and address
     before accepting an entry or awarding a prize.
   </p>
+
 
   <h3>3. How to Enter</h3>
 
@@ -3300,10 +3302,11 @@ const legalPages = {
     on their account is accurate and up to date.
   </p>
 
+
   <h3>4. Free Entry Route</h3>
 
   <p>
-    Where a competition offers a free entry route, the instructions
+    Where a competition offers a free entry route, full instructions
     for using that route will be displayed on the relevant competition
     page or on the Nexa Draw Free Entry Route page.
   </p>
@@ -3324,6 +3327,7 @@ const legalPages = {
     not comply with the stated requirements may be rejected.
   </p>
 
+
   <h3>5. Competition Questions</h3>
 
   <p>
@@ -3335,6 +3339,7 @@ const legalPages = {
     Where the rules of a competition require a correct answer, an
     incorrect answer may result in the entry being rejected.
   </p>
+
 
   <h3>6. Entry Limits</h3>
 
@@ -3349,6 +3354,7 @@ const legalPages = {
     multiple accounts, false identities, automated systems or another
     unfair method.
   </p>
+
 
   <h3>7. Competition Closing Dates</h3>
 
@@ -3367,6 +3373,7 @@ const legalPages = {
     condition where reasonably necessary and permitted by applicable law.
   </p>
 
+
   <h3>8. Payment</h3>
 
   <p>
@@ -3382,6 +3389,7 @@ const legalPages = {
   <p>
     Entry prices are displayed in pounds sterling.
   </p>
+
 
   <h3>9. Selection of Winners</h3>
 
@@ -3400,6 +3408,7 @@ const legalPages = {
     and winning entries.
   </p>
 
+
   <h3>10. Winner Notification</h3>
 
   <p>
@@ -3408,7 +3417,8 @@ const legalPages = {
   </p>
 
   <p>
-    Entrants are responsible for keeping their contact details accurate.
+    Entrants are responsible for keeping their contact details accurate
+    and up to date.
   </p>
 
   <p>
@@ -3423,6 +3433,7 @@ const legalPages = {
     permitted.
   </p>
 
+
   <h3>11. Publication of Winners</h3>
 
   <p>
@@ -3436,47 +3447,127 @@ const legalPages = {
     information.
   </p>
 
+
   <h3>12. Prizes</h3>
 
   <p>
-    The prize offered in each competition will be described on the
+    The exact prize offered in each competition will be described on the
     relevant competition page.
   </p>
 
   <p>
-    Images may be illustrative unless otherwise stated.
+    Nexa Draw may offer prizes including cash, technology products,
+    gaming products, Pokémon products, trading cards, graded cards,
+    sealed collectible products, other collectibles and consumer goods.
   </p>
 
   <p>
-    Where details such as make, model, specification, mileage, colour,
-    condition or value are material to the prize, the relevant
-    competition page will provide those details.
+    Images used on the website may be illustrative unless expressly
+    stated otherwise.
   </p>
 
   <p>
-    A winner may not demand a cash alternative unless Nexa Draw
-    expressly offers one for that competition.
+    Where brand, model, edition, specification, condition, grading,
+    authenticity, packaging or another characteristic is material to
+    the prize, relevant information will be stated on the competition
+    page where available.
   </p>
 
   <p>
-    Where a cash alternative is offered, the amount stated by Nexa Draw
-    for that competition will apply.
-  </p>
-
-  <h3>13. Vehicle Prizes</h3>
-
-  <p>
-    Where the prize is a vehicle, material details about the vehicle
-    will be displayed on the competition page.
+    A winner may not demand a cash alternative for a physical prize
+    unless a cash alternative is expressly offered for that competition.
   </p>
 
   <p>
-    Once ownership of a vehicle has been transferred, the winner will
-    be responsible for insurance, taxation, maintenance, fuel and
-    lawful use of the vehicle unless otherwise stated.
+    Where a cash alternative is offered, the amount displayed on the
+    relevant competition page will apply.
   </p>
 
-  <h3>14. Prize Delivery or Collection</h3>
+
+  <h3>13. Cash Prizes</h3>
+
+  <p>
+    Where the advertised prize is cash, the amount of the cash prize
+    will be clearly stated on the relevant competition page.
+  </p>
+
+  <p>
+    Cash prizes will be paid to the verified winner using a reasonable
+    payment method selected by Nexa Draw.
+  </p>
+
+  <p>
+    Nexa Draw may require the winner to provide identity verification
+    and appropriate payment details before a cash prize is released.
+  </p>
+
+  <p>
+    Nexa Draw will not knowingly send a cash prize to an account or
+    payment method belonging to another person unless reasonably
+    satisfied that it is appropriate and lawful to do so.
+  </p>
+
+
+  <h3>14. Technology and Gaming Prizes</h3>
+
+  <p>
+    Technology and gaming prizes may include items such as smartphones,
+    tablets, laptops, televisions, games consoles, gaming equipment,
+    accessories and other electronic products.
+  </p>
+
+  <p>
+    The relevant competition page will identify the material details of
+    the prize, such as brand, model, storage capacity, specification or
+    condition where applicable.
+  </p>
+
+  <p>
+    Unless otherwise stated, technology prizes will be supplied in the
+    condition described on the competition page.
+  </p>
+
+  <p>
+    Any manufacturer warranty or retailer warranty will be subject to
+    the terms of the relevant manufacturer or retailer and is not
+    provided separately by Nexa Draw unless expressly stated.
+  </p>
+
+
+  <h3>15. Pokémon and Collectible Prizes</h3>
+
+  <p>
+    Pokémon and other collectible prizes may include individual cards,
+    graded cards, sealed products, booster boxes, collections,
+    merchandise or other collectible items.
+  </p>
+
+  <p>
+    Where relevant, the competition page will describe material details
+    such as the item name, set, edition, language, condition, grading
+    company, grade, certification details or whether the product is
+    sealed.
+  </p>
+
+  <p>
+    Where a collectible has been professionally graded, any stated grade
+    will be the grade issued by the grading company identified in the
+    competition description.
+  </p>
+
+  <p>
+    Nexa Draw does not guarantee that a collectible will increase or
+    maintain its market value after the winner receives it.
+  </p>
+
+  <p>
+    Market values of trading cards and collectibles can change over time.
+    Any approximate value stated in connection with a competition is not
+    a guarantee of future resale value.
+  </p>
+
+
+  <h3>16. Prize Delivery or Collection</h3>
 
   <p>
     Delivery or collection arrangements will be agreed with the winner
@@ -3488,7 +3579,17 @@ const legalPages = {
     will be stated on the relevant competition page where applicable.
   </p>
 
-  <h3>15. Refunds and Cancellations</h3>
+  <p>
+    Nexa Draw may require a signature or other confirmation of receipt
+    for valuable prizes.
+  </p>
+
+  <p>
+    Winners are responsible for providing accurate delivery information.
+  </p>
+
+
+  <h3>17. Refunds and Cancellations</h3>
 
   <p>
     Competition entries are generally final once successfully submitted,
@@ -3507,7 +3608,8 @@ const legalPages = {
     provide refunds where required by law.
   </p>
 
-  <h3>16. Disqualification</h3>
+
+  <h3>18. Disqualification</h3>
 
   <p>
     Nexa Draw may reject or disqualify an entrant where it reasonably
@@ -3525,7 +3627,8 @@ const legalPages = {
     <li>Has engaged in fraudulent or abusive behaviour.</li>
   </ul>
 
-  <h3>17. Website Availability</h3>
+
+  <h3>19. Website Availability</h3>
 
   <p>
     Nexa Draw will take reasonable steps to keep its website and
@@ -3539,7 +3642,8 @@ const legalPages = {
     control.
   </p>
 
-  <h3>18. Limitation of Liability</h3>
+
+  <h3>20. Limitation of Liability</h3>
 
   <p>
     Nothing in these Terms excludes or limits liability where it would
@@ -3553,7 +3657,13 @@ const legalPages = {
     competition.
   </p>
 
-  <h3>19. Personal Information</h3>
+  <p>
+    Nothing in these Terms affects an entrant's statutory rights as a
+    consumer.
+  </p>
+
+
+  <h3>21. Personal Information</h3>
 
   <p>
     Nexa Draw will process personal information in accordance with its
@@ -3572,7 +3682,8 @@ const legalPages = {
     from marketing communications.
   </p>
 
-  <h3>20. Responsible Participation</h3>
+
+  <h3>22. Responsible Participation</h3>
 
   <p>
     Entrants should participate responsibly and should never spend more
@@ -3584,7 +3695,8 @@ const legalPages = {
     participation measures where appropriate.
   </p>
 
-  <h3>21. Changes to These Terms</h3>
+
+  <h3>23. Changes to These Terms</h3>
 
   <p>
     Nexa Draw may update these general Terms and Conditions from time
@@ -3598,7 +3710,8 @@ const legalPages = {
     disadvantaging entrants.
   </p>
 
-  <h3>22. Governing Law</h3>
+
+  <h3>24. Governing Law</h3>
 
   <p>
     These Terms and Conditions are governed by the laws of England and
@@ -3614,7 +3727,8 @@ const legalPages = {
     Nothing in these Terms affects your statutory rights as a consumer.
   </p>
 
-  <h3>23. Complaints</h3>
+
+  <h3>25. Complaints</h3>
 
   <p>
     If you have a complaint concerning a competition or Nexa Draw,
@@ -3630,7 +3744,8 @@ const legalPages = {
     and enough information for us to investigate the matter.
   </p>
 
-  <h3>24. Contact</h3>
+
+  <h3>26. Contact</h3>
 
   <p>
     Questions about these Terms and Conditions can be sent to:
@@ -3640,7 +3755,7 @@ const legalPages = {
     <strong>hello@nexadraw.co.uk</strong>
   </p>
 `,
-
+   
   privacy: `
     <p class="eyebrow">
       LEGAL
