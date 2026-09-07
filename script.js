@@ -196,6 +196,10 @@ function renderDraws() {
 
   if (!host) return;
 
+  /*
+    ONLY LIVE COMPETITIONS APPEAR
+    ON THE MAIN WEBSITE.
+  */
   const live = competitions.filter(
     competition => competition.status === 'live'
   );
@@ -268,6 +272,17 @@ function showCompetition(id) {
   );
 
   if (!competition) return;
+
+  /*
+    SAFETY CHECK:
+    CLOSED / PAUSED COMPETITIONS
+    CANNOT BE OPENED FOR ENTRY.
+  */
+  if (competition.status !== 'live') {
+    toast('This competition is no longer available.');
+    renderDraws();
+    return;
+  }
 
   const remaining = Math.max(
     0,
@@ -359,6 +374,11 @@ function openSkillQuestion(id) {
   );
 
   if (!competition) return;
+
+  if (competition.status !== 'live') {
+    toast('This competition is no longer available.');
+    return;
+  }
 
   const remaining = Math.max(
     0,
@@ -469,6 +489,15 @@ function addToCart(id, quantity) {
 
   if (!competition) return;
 
+  /*
+    CLOSED / PAUSED COMPETITIONS
+    CANNOT BE ADDED TO THE BASKET.
+  */
+  if (competition.status !== 'live') {
+    toast('This competition is no longer available.');
+    return;
+  }
+
   const remaining = Math.max(
     0,
     competition.max - competition.sold
@@ -528,15 +557,22 @@ function updateCartCount() {
 }
 
 function openCart() {
+  /*
+    REMOVE MISSING, PAUSED OR CLOSED
+    COMPETITIONS FROM THE CUSTOMER BASKET.
+  */
   cart = store.get('nexa_cart', []).filter(
     item =>
       competitions.some(
         competition =>
-          competition.id === String(item.id)
+          competition.id === String(item.id) &&
+          competition.status === 'live'
       )
   );
 
   store.set('nexa_cart', cart);
+
+  updateCartCount();
 
   let total = 0;
 
@@ -548,7 +584,8 @@ function openCart() {
     ? cart.map((item, index) => {
         const competition = competitions.find(
           competition =>
-            competition.id === String(item.id)
+            competition.id === String(item.id) &&
+            competition.status === 'live'
         );
 
         if (!competition) return '';
@@ -1055,9 +1092,26 @@ async function updateAccountLabel() {
    ========================================================= */
 
 async function checkout() {
-  cart = store.get('nexa_cart', []);
+  /*
+    ONLY LIVE COMPETITIONS
+    MAY CONTINUE TO CHECKOUT.
+  */
+  cart = store.get('nexa_cart', []).filter(
+    item =>
+      competitions.some(
+        competition =>
+          competition.id === String(item.id) &&
+          competition.status === 'live'
+      )
+  );
 
-  if (!cart.length) return;
+  store.set('nexa_cart', cart);
+  updateCartCount();
+
+  if (!cart.length) {
+    toast('Your basket has no live competitions.');
+    return;
+  }
 
   const authUser = await getCurrentCustomer();
 
@@ -1687,6 +1741,12 @@ async function adminView(editId = null) {
                         ${competition.sold}
                         /
                         ${competition.max}
+                        ·
+                        ${escapeHtml(
+                          String(
+                            competition.status || 'live'
+                          ).toUpperCase()
+                        )}
                       </small>
                     </div>
 
@@ -1707,9 +1767,18 @@ async function adminView(editId = null) {
 
                       <button
                         class="btn outline"
-                        data-delete="${competition.id}"
+                        data-close-competition="${competition.id}"
+                        ${
+                          competition.status === 'closed'
+                            ? 'disabled'
+                            : ''
+                        }
                       >
-                        Delete
+                        ${
+                          competition.status === 'closed'
+                            ? 'Closed'
+                            : 'Close Competition'
+                        }
                       </button>
                     </div>
                   </div>
@@ -1742,9 +1811,14 @@ async function adminView(editId = null) {
       adminView(button.dataset.edit);
   });
 
-  $$('[data-delete]').forEach(button => {
+  /*
+    NEW CLOSE COMPETITION BUTTON
+  */
+  $$('[data-close-competition]').forEach(button => {
     button.onclick = () =>
-      deleteCompetition(button.dataset.delete);
+      closeCompetition(
+        button.dataset.closeCompetition
+      );
   });
 
   $$('[data-winner]').forEach(button => {
@@ -1755,7 +1829,7 @@ async function adminView(editId = null) {
 
 
 /* =========================================================
-   ADMIN IMAGE / SAVE / DELETE
+   ADMIN IMAGE / SAVE
    ========================================================= */
 
 async function uploadCompetitionImage(file) {
@@ -2032,6 +2106,94 @@ async function saveCompetition(event) {
       : 'Competition added'
   );
 }
+
+
+/* =========================================================
+   CLOSE COMPETITION
+   ========================================================= */
+
+async function closeCompetition(id) {
+  if (!(await isAdminSession())) {
+    alert('Administrator access required.');
+    return;
+  }
+
+  const competition = competitions.find(
+    item => item.id === String(id)
+  );
+
+  if (!competition) return;
+
+  if (competition.status === 'closed') {
+    toast('Competition is already closed');
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `Close "${competition.title}"?\n\n` +
+    'This will remove the competition from the main website.\n\n' +
+    'The competition record, image, entries, orders, tickets and other saved data will NOT be deleted.'
+  );
+
+  if (!confirmed) return;
+
+  const { error } =
+    await supabaseClient
+      .from('competitions')
+      .update({
+        status: 'closed'
+      })
+      .eq('id', id);
+
+  if (error) {
+    console.error(
+      'Close competition error:',
+      error
+    );
+
+    alert(
+      'Could not close competition: ' +
+      error.message
+    );
+
+    return;
+  }
+
+  /*
+    REMOVE THE CLOSED COMPETITION
+    FROM THIS BROWSER'S BASKET.
+  */
+  cart = store.get('nexa_cart', []).filter(
+    item => item.id !== String(id)
+  );
+
+  store.set('nexa_cart', cart);
+
+  updateCartCount();
+
+  /*
+    RELOAD SUPABASE DATA AND ADMIN.
+  */
+  await loadCompetitionsFromSupabase();
+  await adminView();
+
+  toast('Competition closed');
+}
+
+
+/* =========================================================
+   DELETE COMPETITION
+   ========================================================= */
+
+/*
+  THIS FUNCTION IS KEPT IN THE FILE FOR NOW,
+  BUT THERE IS NO DELETE BUTTON IN THE ADMIN.
+
+  NORMAL ADMIN USE SHOULD USE:
+  closeCompetition()
+
+  That protects old competition data.
+*/
 
 async function deleteCompetition(id) {
   if (!(await isAdminSession())) {
