@@ -4112,7 +4112,234 @@ terms: `
     <strong>hello@nexadraw.co.uk</strong>
   </p>
 `,
-  
+
+free: `
+  <p class="eyebrow">
+    LEGAL
+  </p>
+
+  <h2>
+    Free Entry Route
+  </h2>
+
+  <p>
+    <strong>Last updated: 7 September 2026</strong>
+  </p>
+
+  <p>
+    Nexa Draw may provide a free method of entry for eligible
+    competitions. Where a free entry route is available, it will be
+    clearly explained on the relevant competition page.
+  </p>
+
+  <h3>1. Eligibility</h3>
+
+  <p>
+    The same eligibility requirements apply to free entries as to paid
+    entries. Unless otherwise stated, entrants must be aged 18 or over
+    and legally resident in the United Kingdom.
+  </p>
+
+  <p>
+    Entrants must have a valid Nexa Draw account and provide accurate
+    contact information.
+  </p>
+
+  <h3>2. How to Enter for Free</h3>
+
+  <p>
+    The exact free entry method for each eligible competition will be
+    displayed on the relevant competition page.
+  </p>
+
+  <p>
+    Entrants must follow all instructions provided for that competition
+    and provide all information requested.
+  </p>
+
+  <p>
+    A free entry will only be valid if it is received before the
+    competition closing deadline and complies with the stated entry
+    requirements.
+  </p>
+
+  <h3>3. Equal Treatment of Entries</h3>
+
+  <p>
+    Valid free entries and valid paid entries will be treated equally
+    when the winner is selected.
+  </p>
+
+  <p>
+    Using a free entry route will not reduce an entrant's chance of
+    winning compared with a valid paid entry.
+  </p>
+
+  <h3>4. Competition Questions</h3>
+
+  <p>
+    Where a competition requires entrants to answer a competition
+    question, entrants using the free entry route must complete the same
+    requirement unless the competition rules expressly state otherwise.
+  </p>
+
+  <h3>5. Entry Limits</h3>
+
+  <p>
+    Free entries are subject to the same overall competition entry
+    limits and any applicable per-person limits shown on the competition
+    page.
+  </p>
+
+  <p>
+    Nexa Draw may reject entries where it reasonably believes that
+    multiple accounts, false identities, automated systems or other
+    methods have been used to bypass entry restrictions.
+  </p>
+
+  <h3>6. Invalid or Late Entries</h3>
+
+  <p>
+    Free entries may be rejected if they are incomplete, illegible,
+    submitted incorrectly, received after the closing deadline or do
+    not otherwise comply with the instructions for the relevant
+    competition.
+  </p>
+
+  <h3>7. No Advantage for Paid Entries</h3>
+
+  <p>
+    Purchasing an entry does not give an entrant any preferential
+    treatment over a valid free entrant when a winner is selected.
+  </p>
+
+  <h3>8. Competition-Specific Instructions</h3>
+
+  <p>
+    Entrants should always check the relevant competition page before
+    submitting a free entry because the required method, information
+    and deadline may vary between competitions.
+  </p>
+
+  <h3>9. Contact</h3>
+
+  <p>
+    Questions about the Nexa Draw free entry route can be sent to:
+  </p>
+
+  <p>
+    <strong>hello@nexadraw.co.uk</strong>
+  </p>
+`,
+
+responsible: `
+  <p class="eyebrow">
+    CUSTOMER CARE
+  </p>
+
+  <h2>
+    Responsible Play
+  </h2>
+
+  <p>
+    <strong>Last updated: 7 September 2026</strong>
+  </p>
+
+  <p>
+    Nexa Draw competitions are intended to be an enjoyable form of
+    entertainment. We encourage all customers to participate responsibly.
+  </p>
+
+  <h3>1. Age Requirement</h3>
+
+  <p>
+    Nexa Draw competitions are intended only for people aged 18 or over.
+  </p>
+
+  <p>
+    We may request proof of age or identity before allowing participation
+    or releasing a prize.
+  </p>
+
+  <h3>2. Spend Responsibly</h3>
+
+  <p>
+    Never spend more on competition entries than you can comfortably
+    afford.
+  </p>
+
+  <p>
+    Competition entries should never be treated as a way to make money
+    or solve financial difficulties.
+  </p>
+
+  <h3>3. Set Personal Limits</h3>
+
+  <p>
+    Consider setting yourself a personal budget before entering
+    competitions and do not exceed it.
+  </p>
+
+  <p>
+    Take regular breaks and avoid entering competitions when upset,
+    under financial pressure or otherwise unable to make considered
+    decisions.
+  </p>
+
+  <h3>4. Entry Limits</h3>
+
+  <p>
+    Nexa Draw may apply entry limits to individual competitions and may
+    introduce additional customer protection measures where appropriate.
+  </p>
+
+  <h3>5. Account Concerns</h3>
+
+  <p>
+    If you are concerned about your participation or would like help
+    regarding your Nexa Draw account, contact us and we will consider
+    what reasonable account controls are available.
+  </p>
+
+  <h3>6. Protecting Your Account</h3>
+
+  <p>
+    Keep your account login details secure and do not allow anyone under
+    18 to use your Nexa Draw account.
+  </p>
+
+  <p>
+    Contact us promptly if you believe someone else has accessed your
+    account without permission.
+  </p>
+
+  <h3>7. Free Entry</h3>
+
+  <p>
+    Where a competition offers a free entry route, details will be
+    available on the relevant competition page and through the Nexa Draw
+    Free Entry Route information.
+  </p>
+
+  <h3>8. Getting Support</h3>
+
+  <p>
+    If competition participation is causing you financial stress or
+    affecting your wellbeing, consider stopping participation and seeking
+    independent support.
+  </p>
+
+  <h3>9. Contact</h3>
+
+  <p>
+    For responsible participation or account-related enquiries, contact:
+  </p>
+
+  <p>
+    <strong>hello@nexadraw.co.uk</strong>
+  </p>
+`
+   
 };
 
 function openLegalPage(key) {
