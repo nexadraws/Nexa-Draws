@@ -1781,29 +1781,7 @@ async function drawWinnerSecurely(id) {
 /* =========================================================
    ADMIN
    ========================================================= */
-async function loadAdminWinners() {
-  if (!(await isAdminSession())) {
-    return [];
-  }
 
-  const { data, error } =
-    await supabaseClient.rpc(
-      'get_admin_winners'
-    );
-
-  if (error) {
-    console.error(
-      'Admin winners error:',
-      error
-    );
-
-    return [];
-  }
-
-  return Array.isArray(data)
-    ? data
-    : [];
-}
 async function openSecureAdmin() {
   closeModals();
 
@@ -1910,6 +1888,7 @@ async function openSecureAdmin() {
     };
 }
 
+
 async function getCorrectAnswerLetter(
   competition
 ) {
@@ -1954,6 +1933,40 @@ async function getCorrectAnswerLetter(
   return 'A';
 }
 
+
+/* =========================================================
+   ADMIN WINNERS
+   ========================================================= */
+
+async function loadAdminWinners() {
+  if (!(await isAdminSession())) {
+    return [];
+  }
+
+  const { data, error } =
+    await supabaseClient.rpc(
+      'get_admin_winners'
+    );
+
+  if (error) {
+    console.error(
+      'Admin winners error:',
+      error
+    );
+
+    return [];
+  }
+
+  return Array.isArray(data)
+    ? data
+    : [];
+}
+
+
+/* =========================================================
+   ADMIN DASHBOARD
+   ========================================================= */
+
 async function adminView(
   editId = null
 ) {
@@ -1973,6 +1986,9 @@ async function adminView(
   }
 
   await loadCompetitionsFromSupabase();
+
+  const adminWinners =
+    await loadAdminWinners();
 
   const edit =
     editId
@@ -2015,7 +2031,11 @@ async function adminView(
       </button>
     </div>
 
+
     <div class="admin-grid">
+
+      <!-- ADD / EDIT COMPETITION -->
+
       <div>
         <h3>
           ${
@@ -2026,6 +2046,7 @@ async function adminView(
         </h3>
 
         <form id="competitionForm">
+
           <input
             type="hidden"
             name="id"
@@ -2033,6 +2054,7 @@ async function adminView(
               edit?.id || ''
             )}"
           >
+
 
           <label class="field">
             Title
@@ -2045,6 +2067,7 @@ async function adminView(
               )}"
             >
           </label>
+
 
           <label class="field">
             Price
@@ -2066,6 +2089,7 @@ async function adminView(
             </small>
           </label>
 
+
           <label class="field">
             Maximum entries
 
@@ -2080,6 +2104,7 @@ async function adminView(
               )}"
             >
           </label>
+
 
           <label class="field">
             Closing date
@@ -2099,6 +2124,7 @@ async function adminView(
             >
           </label>
 
+
           <label class="field">
             Description
 
@@ -2110,6 +2136,7 @@ async function adminView(
             )}</textarea>
           </label>
 
+
           <label class="field">
             Competition image
 
@@ -2119,6 +2146,7 @@ async function adminView(
               accept="image/*"
             >
           </label>
+
 
           ${
             edit?.image
@@ -2132,6 +2160,7 @@ async function adminView(
               : ''
           }
 
+
           <label class="field">
             Skill question
 
@@ -2143,6 +2172,7 @@ async function adminView(
               )}"
             >
           </label>
+
 
           <label class="field">
             Option A
@@ -2156,6 +2186,7 @@ async function adminView(
             >
           </label>
 
+
           <label class="field">
             Option B
 
@@ -2167,6 +2198,7 @@ async function adminView(
               )}"
             >
           </label>
+
 
           <label class="field">
             Option C
@@ -2180,6 +2212,7 @@ async function adminView(
             >
           </label>
 
+
           <label class="field">
             Correct answer
 
@@ -2187,6 +2220,7 @@ async function adminView(
               name="correct_answer_letter"
               required
             >
+
               <option
                 value="A"
                 ${
@@ -2219,13 +2253,16 @@ async function adminView(
               >
                 Option C
               </option>
+
             </select>
           </label>
+
 
           <label class="field">
             Status
 
             <select name="status">
+
               <option
                 value="live"
                 ${
@@ -2258,8 +2295,10 @@ async function adminView(
               >
                 Closed
               </option>
+
             </select>
           </label>
+
 
           <button
             class="btn gold full"
@@ -2271,8 +2310,12 @@ async function adminView(
                 : 'ADD COMPETITION'
             }
           </button>
+
         </form>
       </div>
+
+
+      <!-- MANAGE DRAWS -->
 
       <div>
         <h3>
@@ -2280,12 +2323,15 @@ async function adminView(
         </h3>
 
         <div class="admin-list">
+
           ${
             competitions.length
               ? competitions.map(
                   competition => `
                     <div class="admin-row">
+
                       <div>
+
                         <strong>
                           ${escapeHtml(
                             competition.title
@@ -2318,9 +2364,12 @@ async function adminView(
                             ).toUpperCase()
                           )}
                         </small>
+
                       </div>
 
+
                       <div>
+
                         <button
                           class="btn outline"
                           data-edit="${competition.id}"
@@ -2328,12 +2377,14 @@ async function adminView(
                           Edit
                         </button>
 
+
                         <button
                           class="btn outline"
                           data-winner="${competition.id}"
                         >
                           Draw Winner
                         </button>
+
 
                         <button
                           class="btn outline"
@@ -2352,7 +2403,9 @@ async function adminView(
                               : 'Close Competition'
                           }
                         </button>
+
                       </div>
+
                     </div>
                   `
                 ).join('')
@@ -2362,14 +2415,114 @@ async function adminView(
                   </p>
                 `
           }
+
         </div>
       </div>
+
+    </div>
+
+
+    <!-- PRIVATE WINNER CONTACT DETAILS -->
+
+    <div style="margin-top: 32px;">
+
+      <h3>
+        Winner Contact Details
+      </h3>
+
+      <p class="micro">
+        Private administrator information.
+        Winner email addresses are not shown
+        on the public website.
+      </p>
+
+      <div class="admin-list">
+
+        ${
+          adminWinners.length
+            ? adminWinners.map(
+                winner => `
+                  <div class="admin-row">
+
+                    <div>
+
+                      <strong>
+                        🏆
+                        ${escapeHtml(
+                          winner.winner_name ||
+                          'Winner'
+                        )}
+                      </strong>
+
+                      <p>
+                        ${escapeHtml(
+                          winner.competition_title ||
+                          'Competition'
+                        )}
+                      </p>
+
+
+                      <small>
+                        Email:
+                        <strong>
+                          ${escapeHtml(
+                            winner.winner_email ||
+                            'Unavailable'
+                          )}
+                        </strong>
+                      </small>
+
+                      <br>
+
+
+                      <small>
+                        Ticket:
+                        <strong>
+                          ${escapeHtml(
+                            winner.ticket_number ||
+                            ''
+                          )}
+                        </strong>
+                      </small>
+
+                      <br>
+
+
+                      <small>
+                        Drawn:
+                        <strong>
+                          ${escapeHtml(
+                            formatDate(
+                              winner.drawn_at
+                            )
+                          )}
+                        </strong>
+                      </small>
+
+                    </div>
+
+                  </div>
+                `
+              ).join('')
+            : `
+                <p class="empty">
+                  No winners have been drawn yet.
+                </p>
+              `
+        }
+
+      </div>
+
     </div>
   `;
 
+
+  /* ADMIN LOGOUT */
+
   $('#adminLogout').onclick =
     async () => {
-      await supabaseClient.auth.signOut();
+      await supabaseClient.auth
+        .signOut();
 
       closeModals();
 
@@ -2380,8 +2533,14 @@ async function adminView(
       );
     };
 
+
+  /* SAVE COMPETITION */
+
   $('#competitionForm').onsubmit =
     saveCompetition;
+
+
+  /* EDIT BUTTONS */
 
   $$('[data-edit]').forEach(
     button => {
@@ -2393,16 +2552,24 @@ async function adminView(
     }
   );
 
+
+  /* CLOSE COMPETITION BUTTONS */
+
   $$(
     '[data-close-competition]'
-  ).forEach(button => {
-    button.onclick =
-      () =>
-        closeCompetition(
-          button.dataset
-            .closeCompetition
-        );
-  });
+  ).forEach(
+    button => {
+      button.onclick =
+        () =>
+          closeCompetition(
+            button.dataset
+              .closeCompetition
+          );
+    }
+  );
+
+
+  /* DRAW WINNER BUTTONS */
 
   $$('[data-winner]').forEach(
     button => {
