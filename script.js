@@ -205,6 +205,93 @@ async function loadCompetitionsFromSupabase() {
   }));
 
   renderDraws();
+  renderDraws()
+}
+
+function renderFeaturedDraw() {
+  const host = $('#featuredDrawContent');
+
+  if (!host) return;
+
+  const competition = competitions.find(
+    item => item.status === 'live'
+  );
+
+  if (!competition) {
+    host.innerHTML = '';
+    return;
+  }
+
+  const percentage = competition.max > 0
+    ? Math.min(
+        100,
+        Math.round(
+          (competition.sold / competition.max) * 100
+        )
+      )
+    : 0;
+
+  const free = isFreeCompetition(competition);
+
+  host.innerHTML = `
+    <div class="featured-draw-card">
+
+      <div class="featured-draw-image">
+        <img
+          src="${escapeHtml(competition.image)}"
+          alt="${escapeHtml(competition.title)}"
+        >
+      </div>
+
+      <div class="featured-draw-info">
+
+        <p class="eyebrow">
+          ${free ? '🔥 CURRENT FREE DRAW' : '🔥 CURRENT DRAW'}
+        </p>
+
+        <h2>
+          ${escapeHtml(competition.title)}
+        </h2>
+
+        <div class="detail-price">
+          ${free ? 'FREE ENTRY' : money(competition.price)}
+        </div>
+
+        <p>
+          ${daysLeft(competition.closes)}
+        </p>
+
+        <div class="bar">
+          <i style="width:${percentage}%"></i>
+        </div>
+
+        <div class="stats">
+          <b>${percentage}% entered</b>
+
+          <span>
+            ${competition.sold.toLocaleString()}
+            /
+            ${competition.max.toLocaleString()}
+          </span>
+        </div>
+
+        <button
+          class="btn gold full"
+          id="featuredEnterBtn"
+          type="button"
+        >
+          ${free ? 'ENTER FREE DRAW' : 'ENTER NOW'}
+        </button>
+
+      </div>
+
+    </div>
+  `;
+
+  $('#featuredEnterBtn')?.addEventListener(
+    'click',
+    () => showCompetition(competition.id)
+  );
 }
 
 function renderDraws() {
