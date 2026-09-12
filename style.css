@@ -409,3 +409,58 @@ body.age-locked {
     font-size: 13px;
   }
 }
+
+/* =========================================================
+   NEXA DRAW NEWS TICKER
+   ========================================================= */
+
+.nexa-news-ticker {
+  width: 100%;
+  overflow: hidden;
+  background: #d4af37;
+  color: #080808;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+}
+
+.nexa-news-track {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  animation: nexaNewsScroll 24s linear infinite;
+}
+
+.nexa-news-track span {
+  display: inline-block;
+  padding: 9px 32px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1.4px;
+}
+
+@keyframes nexaNewsScroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 600px) {
+  .nexa-news-track {
+    animation-duration: 20s;
+  }
+
+  .nexa-news-track span {
+    padding: 8px 22px;
+    font-size: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nexa-news-track {
+    animation: none;
+  }
+}
