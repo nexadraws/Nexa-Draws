@@ -2082,77 +2082,752 @@ async function renderWinners() {
 
 async function drawWinnerSecurely(id) {
   if (!(await isAdminSession())) {
-    alert(
-      'Administrator access required.'
-    );
-
+    alert('Administrator access required.');
     return;
   }
 
-  const competition =
-    competitions.find(
-      item =>
-        item.id === String(id)
-    );
+  const competition = competitions.find(
+    item => item.id === String(id)
+  );
 
-  if (!competition) return;
+  if (!competition) {
+    alert('Competition could not be found.');
+    return;
+  }
 
-  const confirmed =
-    window.confirm(
-      `Draw a winner for "${competition.title}"?\n\n` +
-      'Only eligible issued tickets should be included. ' +
-      'The winner must be selected by the secure server-side draw function.'
-    );
+  const confirmed = window.confirm(
+    `Draw a winner for "${competition.title}"?\n\n` +
+    'The secure server will select the winning ticket. ' +
+    'The Draw Room animation will then reveal that result.'
+  );
 
   if (!confirmed) return;
 
-  const { data, error } =
-    await supabaseClient.functions.invoke(
-      'draw-winner',
-      {
-        body: {
-          competition_id:
-            competition.id
-        }
-      }
-    );
+  /*
+    Open the Draw Room BEFORE calling the server.
 
-  if (error) {
+    IMPORTANT:
+    The animation does NOT choose the winner.
+    The server-side draw-winner function does.
+  */
+  openNexaDrawRoom(competition);
+
+  setDrawRoomStatus(
+    'SECURELY SELECTING WINNER...'
+  );
+
+  try {
+    const { data, error } =
+      await supabaseClient.functions.invoke(
+        'draw-winner',
+        {
+          body: {
+            competition_id: competition.id
+          }
+        }
+      );
+
+    if (error) {
+      console.error(
+        'Winner draw error:',
+        error
+      );
+
+      closeNexaDrawRoom();
+
+      alert(
+        await functionErrorMessage(
+          error,
+          'Secure winner draw failed. No new winner has been selected.'
+        )
+      );
+
+      return;
+    }
+
+    if (!data?.winner) {
+      closeNexaDrawRoom();
+
+      alert(
+        data?.message ||
+        'No eligible tickets were found.'
+      );
+
+      return;
+    }
+
+    /*
+      THIS is the authoritative winner returned
+      by the secure server-side draw.
+    */
+    const winner = data.winner;
+
+    const winnerName =
+      winner.winner_name ||
+      winner.name ||
+      winner.customer_name ||
+      'Winner';
+
+    const winningTicket =
+      winner.ticket_number ||
+      winner.ticket ||
+      winner.number ||
+      '';
+
+    const winnerEmail =
+      winner.winner_email ||
+      winner.email ||
+      '';
+
+    /*
+      Run the visual spinner for about 5 seconds
+      and land on the REAL server-selected ticket.
+    */
+    await runNexaWinnerSpinner({
+      competition,
+      winnerName,
+      winningTicket,
+      winnerEmail
+    });
+
+    /*
+      Refresh public/admin information only after
+      the reveal has completed.
+    */
+    await renderWinners();
+
+    await loadCompetitionsFromSupabase();
+
+    toast('Winner drawn and published');
+
+  } catch (error) {
     console.error(
-      'Winner draw error:',
+      'Draw Room error:',
       error
     );
 
+    closeNexaDrawRoom();
+
     alert(
-      await functionErrorMessage(
-        error,
-        'Secure winner draw failed. No new winner has been selected.'
-      )
+      'The winner draw could not be completed.'
     );
-
-    return;
   }
-
-  if (!data?.winner) {
-    alert(
-      data?.message ||
-      'No eligible tickets were found.'
-    );
-
-    return;
-  }
-
-  await renderWinners();
-
-  await loadCompetitionsFromSupabase();
-
-  toast(
-    'Winner drawn and published'
-  );
-
-  await adminView();
 }
 
+}
+
+/* =========================================================
+   NEXA DRAW — ADMIN DRAW ROOM
+   ========================================================= */
+
+let nexaDrawRoomTimer = null;
+
+function ensureNexaDrawRoom() {
+  if ($('#nexaDrawRoom')) return;
+
+  document.body.insertAdjacentHTML(
+    'beforeend',
+    `
+      <div id="nexaDrawRoom" class="nexa-draw-room">
+
+        <style>
+          .nexa-draw-room {
+            position: fixed;
+            inset: 0;
+            z-index: 999999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background:
+              radial-gradient(
+                circle at center,
+                #24200f 0%,
+                #0d0d0d 45%,
+                #000 100%
+              );
+            color: #fff;
+          }
+
+          .nexa-draw-room.show {
+            display: flex;
+          }
+
+          .nexa-draw-room-inner {
+            width: min(760px, 100%);
+            text-align: center;
+          }
+
+          .nexa-draw-room-brand {
+            margin-bottom: 8px;
+            color: #d4af37;
+            font-size: 14px;
+            font-weight: 900;
+            letter-spacing: 5px;
+          }
+
+          .nexa-draw-room h1 {
+            margin: 0 0 10px;
+            color: #fff;
+            font-size: clamp(30px, 7vw, 58px);
+            line-height: 1;
+          }
+
+          .nexa-draw-room-title {
+            margin: 0 auto 30px;
+            max-width: 620px;
+            color: #aaa;
+            font-size: 16px;
+          }
+
+          .nexa-spinner-frame {
+            position: relative;
+            overflow: hidden;
+            margin: 25px auto;
+            padding: 3px;
+            border-radius: 20px;
+            background:
+              linear-gradient(
+                135deg,
+                #8f6b12,
+                #f6d365,
+                #8f6b12
+              );
+            box-shadow:
+              0 0 45px rgba(212, 175, 55, 0.22);
+          }
+
+          .nexa-spinner-window {
+            position: relative;
+            display: flex;
+            min-height: 155px;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: 17px;
+            background: #070707;
+          }
+
+          .nexa-spinner-window::before,
+          .nexa-spinner-window::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            z-index: 2;
+            height: 45px;
+            pointer-events: none;
+          }
+
+          .nexa-spinner-window::before {
+            top: 0;
+            background:
+              linear-gradient(
+                to bottom,
+                #070707,
+                transparent
+              );
+          }
+
+          .nexa-spinner-window::after {
+            bottom: 0;
+            background:
+              linear-gradient(
+                to top,
+                #070707,
+                transparent
+              );
+          }
+
+          .nexa-spinner-ticket {
+            position: relative;
+            z-index: 1;
+            padding: 30px 15px;
+            color: #d4af37;
+            font-family: monospace;
+            font-size: clamp(34px, 9vw, 70px);
+            font-weight: 900;
+            letter-spacing: 5px;
+            text-shadow:
+              0 0 22px rgba(212, 175, 55, 0.35);
+          }
+
+          .nexa-spinner-ticket.spinning {
+            animation:
+              nexaTicketPulse 0.12s linear infinite;
+          }
+
+          @keyframes nexaTicketPulse {
+            0% {
+              opacity: 0.4;
+              transform: translateY(-8px);
+            }
+
+            50% {
+              opacity: 1;
+              transform: translateY(0);
+            }
+
+            100% {
+              opacity: 0.4;
+              transform: translateY(8px);
+            }
+          }
+
+          .nexa-draw-status {
+            min-height: 24px;
+            margin-top: 18px;
+            color: #d4af37;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 2px;
+          }
+
+          .nexa-winner-result {
+            display: none;
+            margin-top: 25px;
+            padding: 25px;
+            border: 1px solid rgba(212, 175, 55, 0.45);
+            border-radius: 16px;
+            background: rgba(212, 175, 55, 0.06);
+          }
+
+          .nexa-winner-result.show {
+            display: block;
+            animation: nexaWinnerReveal 0.7s ease;
+          }
+
+          @keyframes nexaWinnerReveal {
+            from {
+              opacity: 0;
+              transform: scale(0.9);
+            }
+
+            to {
+              opacity: 1;
+              transform: scale(1);
+            }
+          }
+
+          .nexa-winner-trophy {
+            font-size: 55px;
+          }
+
+          .nexa-winner-result h2 {
+            margin: 5px 0;
+            color: #d4af37;
+            font-size: clamp(28px, 6vw, 45px);
+          }
+
+          .nexa-winner-name {
+            margin: 12px 0 5px;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 900;
+          }
+
+          .nexa-winner-ticket {
+            margin-bottom: 20px;
+            color: #d4af37;
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: 900;
+          }
+
+          .nexa-draw-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+          }
+
+          .nexa-draw-room button {
+            min-width: 160px;
+          }
+
+          @media (max-width: 520px) {
+            .nexa-draw-room {
+              padding: 14px;
+            }
+
+            .nexa-spinner-ticket {
+              letter-spacing: 2px;
+            }
+
+            .nexa-draw-actions {
+              display: grid;
+              grid-template-columns: 1fr;
+            }
+
+            .nexa-draw-actions button,
+            .nexa-draw-actions a {
+              width: 100%;
+            }
+          }
+        </style>
+
+        <div class="nexa-draw-room-inner">
+
+          <div class="nexa-draw-room-brand">
+            NEXA DRAW
+          </div>
+
+          <h1>
+            WINNER DRAW
+          </h1>
+
+          <p
+            class="nexa-draw-room-title"
+            id="nexaDrawCompetition"
+          ></p>
+
+          <div class="nexa-spinner-frame">
+            <div class="nexa-spinner-window">
+
+              <div
+                class="nexa-spinner-ticket"
+                id="nexaSpinnerTicket"
+              >
+                ----------
+              </div>
+
+            </div>
+          </div>
+
+          <div
+            class="nexa-draw-status"
+            id="nexaDrawStatus"
+          >
+            PREPARING SECURE DRAW...
+          </div>
+
+          <div
+            class="nexa-winner-result"
+            id="nexaWinnerResult"
+          >
+
+            <div class="nexa-winner-trophy">
+              🏆
+            </div>
+
+            <h2>
+              WINNER
+            </h2>
+
+            <div
+              class="nexa-winner-name"
+              id="nexaWinnerName"
+            >
+              Winner
+            </div>
+
+            <div
+              class="nexa-winner-ticket"
+              id="nexaWinnerTicket"
+            ></div>
+
+            <div class="nexa-draw-actions">
+
+              <a
+                class="btn gold"
+                id="nexaContactWinner"
+                href="#"
+              >
+                CONTACT WINNER
+              </a>
+
+              <button
+                class="btn outline"
+                id="nexaBackToAdmin"
+                type="button"
+              >
+                BACK TO ADMIN
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    `
+  );
+
+  $('#nexaBackToAdmin')?.addEventListener(
+    'click',
+    async () => {
+      closeNexaDrawRoom();
+
+      await adminView();
+
+      openModal('#adminModal');
+    }
+  );
+}
+
+
+function openNexaDrawRoom(competition) {
+  ensureNexaDrawRoom();
+
+  if (nexaDrawRoomTimer) {
+    clearTimeout(nexaDrawRoomTimer);
+    nexaDrawRoomTimer = null;
+  }
+
+  const room =
+    $('#nexaDrawRoom');
+
+  const competitionHost =
+    $('#nexaDrawCompetition');
+
+  const ticketHost =
+    $('#nexaSpinnerTicket');
+
+  const result =
+    $('#nexaWinnerResult');
+
+  const contact =
+    $('#nexaContactWinner');
+
+  if (competitionHost) {
+    competitionHost.textContent =
+      competition?.title || 'Competition';
+  }
+
+  if (ticketHost) {
+    ticketHost.textContent = '----------';
+    ticketHost.classList.remove('spinning');
+  }
+
+  if (result) {
+    result.classList.remove('show');
+  }
+
+  if (contact) {
+    contact.style.display = 'none';
+    contact.removeAttribute('href');
+  }
+
+  setDrawRoomStatus(
+    'PREPARING SECURE DRAW...'
+  );
+
+  if (room) {
+    room.classList.add('show');
+  }
+
+  document.body.style.overflow = 'hidden';
+}
+
+
+function closeNexaDrawRoom() {
+  if (nexaDrawRoomTimer) {
+    clearTimeout(nexaDrawRoomTimer);
+    nexaDrawRoomTimer = null;
+  }
+
+  const room =
+    $('#nexaDrawRoom');
+
+  room?.classList.remove('show');
+
+  document.body.style.overflow = '';
+}
+
+
+function setDrawRoomStatus(message) {
+  const host =
+    $('#nexaDrawStatus');
+
+  if (host) {
+    host.textContent = message;
+  }
+}
+
+
+function randomSpinnerTicket(length = 10) {
+  const characters =
+    '0123456789ABCDEF';
+
+  let result = '';
+
+  for (let i = 0; i < length; i += 1) {
+    result += characters[
+      Math.floor(
+        Math.random() * characters.length
+      )
+    ];
+  }
+
+  return result;
+}
+
+
+function waitForDrawRoom(milliseconds) {
+  return new Promise(resolve => {
+    nexaDrawRoomTimer =
+      setTimeout(
+        resolve,
+        milliseconds
+      );
+  });
+}
+
+
+async function runNexaWinnerSpinner({
+  competition,
+  winnerName,
+  winningTicket,
+  winnerEmail
+}) {
+  ensureNexaDrawRoom();
+
+  const ticketHost =
+    $('#nexaSpinnerTicket');
+
+  const resultHost =
+    $('#nexaWinnerResult');
+
+  const nameHost =
+    $('#nexaWinnerName');
+
+  const winnerTicketHost =
+    $('#nexaWinnerTicket');
+
+  const contactHost =
+    $('#nexaContactWinner');
+
+  if (!ticketHost) return;
+
+  /*
+    These changing numbers are VISUAL ONLY.
+
+    They are NOT real entrants and are NOT used
+    to determine the winner.
+
+    The real winner has already been selected
+    securely by the server.
+  */
+
+  ticketHost.classList.add('spinning');
+
+  setDrawRoomStatus(
+    'SECURE DRAW IN PROGRESS...'
+  );
+
+  const started =
+    Date.now();
+
+  const duration =
+    5000;
+
+  while (
+    Date.now() - started < duration
+  ) {
+    const elapsed =
+      Date.now() - started;
+
+    const progress =
+      elapsed / duration;
+
+    ticketHost.textContent =
+      randomSpinnerTicket(
+        Math.max(
+          6,
+          String(
+            winningTicket || ''
+          ).length || 10
+        )
+      );
+
+    /*
+      Gradually slow the animation.
+    */
+    const delay =
+      45 +
+      Math.floor(
+        Math.pow(progress, 3) * 430
+      );
+
+    await waitForDrawRoom(delay);
+  }
+
+  ticketHost.classList.remove(
+    'spinning'
+  );
+
+  /*
+    LAND ON THE EXACT SERVER WINNER.
+  */
+  ticketHost.textContent =
+    winningTicket || 'WINNER';
+
+  setDrawRoomStatus(
+    'WINNING TICKET CONFIRMED'
+  );
+
+  await waitForDrawRoom(650);
+
+  if (nameHost) {
+    nameHost.textContent =
+      winnerName || 'Winner';
+  }
+
+  if (winnerTicketHost) {
+    winnerTicketHost.textContent =
+      winningTicket
+        ? `TICKET ${winningTicket}`
+        : 'WINNING ENTRY';
+  }
+
+  /*
+    Build the Contact Winner email locally.
+  */
+  if (
+    contactHost &&
+    winnerEmail
+  ) {
+    const subject =
+      `Nexa Draw Winner - ${
+        competition?.title ||
+        'Competition'
+      }`;
+
+    const body =
+      `Hi ${winnerName || 'Winner'},\n\n` +
+      `Congratulations! You have been drawn as the winner of ${
+        competition?.title ||
+        'the Nexa Draw competition'
+      }.\n\n` +
+      (
+        winningTicket
+          ? `Your winning ticket number is: ${winningTicket}\n\n`
+          : ''
+      ) +
+      `Please reply to this email so we can arrange your prize.\n\n` +
+      `Kind regards,\n` +
+      `Nexa Draw`;
+
+    contactHost.href =
+      `mailto:${encodeURIComponent(
+        winnerEmail
+      )}` +
+      `?subject=${encodeURIComponent(
+        subject
+      )}` +
+      `&body=${encodeURIComponent(
+        body
+      )}`;
+
+    contactHost.style.display =
+      '';
+  }
+
+  resultHost?.classList.add(
+    'show'
+  );
+}
 
 /* =========================================================
    ADMIN
