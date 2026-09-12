@@ -545,7 +545,6 @@ function showCompetition(id) {
                 This competition has no entries remaining.
               </p>
             `
-        }
 
         ${
           free
