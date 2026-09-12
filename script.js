@@ -205,7 +205,7 @@ async function loadCompetitionsFromSupabase() {
   }));
 
   renderDraws();
-  renderDraws()
+renderFeaturedDraw();
 }
 
 function renderFeaturedDraw() {
@@ -1005,42 +1005,49 @@ async function openCart() {
   const checkoutButton = $('#checkoutBtn');
 
   if (checkoutButton) {
-  const currentUser =
-    (await supabaseClient.auth.getUser())
-      .data?.user;
+    const {
+      data: { user: currentUser }
+    } = await supabaseClient.auth.getUser();
 
-  const isPaymentTester =
-    currentUser?.id === ADMIN_UID;
+    const isPaymentTester =
+      currentUser?.id === ADMIN_UID;
 
-  checkoutButton.disabled =
-    !cart.length ||
-    (
-      PAYMENT_MODE !== 'live' &&
-      !isPaymentTester
-    );
+    checkoutButton.disabled =
+      !cart.length ||
+      (
+        PAYMENT_MODE !== 'live' &&
+        !isPaymentTester
+      );
 
-  checkoutButton.textContent =
-    isPaymentTester
-      ? 'TEST NOCHEX CHECKOUT'
-      : PAYMENT_MODE === 'live'
-        ? 'SECURE CHECKOUT'
-        : 'CHECKOUT — COMING SOON';
-}
+    checkoutButton.textContent =
+      isPaymentTester
+        ? 'TEST NOCHEX CHECKOUT'
+        : PAYMENT_MODE === 'live'
+          ? 'SECURE CHECKOUT'
+          : 'CHECKOUT — COMING SOON';
   }
 
   const micro =
     $('#cartModal .micro');
 
   if (micro) {
+    const {
+      data: { user: currentUser }
+    } = await supabaseClient.auth.getUser();
+
+    const isPaymentTester =
+      currentUser?.id === ADMIN_UID;
+
     micro.innerHTML =
-      PAYMENT_MODE === 'live'
-        ? `Secure payment powered by ${escapeHtml(PAYMENT_PROVIDER)}.`
-        : 'Payment setup is being prepared. No card or wallet can be charged yet.';
+      isPaymentTester
+        ? 'Nochex TEST MODE — no real payment will be taken.'
+        : PAYMENT_MODE === 'live'
+          ? `Secure payment powered by ${escapeHtml(PAYMENT_PROVIDER)}.`
+          : 'Payment setup is being prepared. No card or wallet can be charged yet.';
   }
 
   openModal('#cartModal');
 }
-
 
 /* =========================================================
    CUSTOMER ACCOUNT
