@@ -485,17 +485,58 @@ function showCompetition(id) {
                 </button>
               `
               : `
-                <label class="field">
-                  Number of entries
+                <div class="ticket-selector">
 
-                  <input
-                    id="entryQty"
-                    type="number"
-                    min="1"
-                    max="${maximumChoice}"
-                    value="1"
-                  >
-                </label>
+  <div class="ticket-selector-head">
+    <span>Number of tickets</span>
+
+    <strong id="ticketQtyDisplay">
+      ${Math.min(5, maximumChoice)}
+    </strong>
+  </div>
+
+  <input
+    id="entryQty"
+    class="ticket-slider"
+    type="range"
+    min="1"
+    max="${maximumChoice}"
+    value="${Math.min(5, maximumChoice)}"
+    step="1"
+  >
+
+  <div class="ticket-slider-labels">
+    <span>1</span>
+    <span>${maximumChoice}</span>
+  </div>
+
+  <div class="ticket-quick-options">
+    ${[5, 10, 15, 20]
+      .filter(qty => qty <= maximumChoice)
+      .map(qty => `
+        <button
+          type="button"
+          class="ticket-quick-btn"
+          data-ticket-qty="${qty}"
+        >
+          ${qty}
+        </button>
+      `)
+      .join('')}
+  </div>
+
+</div>
+
+<button
+  class="btn gold full"
+  id="addToCart"
+>
+  ADD ${Math.min(5, maximumChoice)} TICKETS —
+  ${money(
+    competition.price *
+    Math.min(5, maximumChoice)
+  )}
+</button>
 
                 <button
                   class="btn gold full"
@@ -529,6 +570,68 @@ function showCompetition(id) {
     </div>
   `;
 
+const ticketSlider =
+  $('#entryQty');
+
+const ticketDisplay =
+  $('#ticketQtyDisplay');
+
+const addButton =
+  $('#addToCart');
+
+function updateTicketSelector(quantity) {
+  if (!ticketSlider || !addButton) return;
+
+  const qty = Math.max(
+    1,
+    Math.min(
+      Number(quantity) || 1,
+      maximumChoice
+    )
+  );
+
+  ticketSlider.value = qty;
+
+  if (ticketDisplay) {
+    ticketDisplay.textContent = qty;
+  }
+
+  addButton.textContent =
+    `ADD ${qty} TICKET${qty === 1 ? '' : 'S'} — ` +
+    money(competition.price * qty);
+
+  $$('.ticket-quick-btn').forEach(button => {
+    button.classList.toggle(
+      'active',
+      Number(button.dataset.ticketQty) === qty
+    );
+  });
+}
+
+ticketSlider?.addEventListener(
+  'input',
+  () => {
+    updateTicketSelector(
+      ticketSlider.value
+    );
+  }
+);
+
+$$('.ticket-quick-btn').forEach(button => {
+  button.addEventListener(
+    'click',
+    () => {
+      updateTicketSelector(
+        button.dataset.ticketQty
+      );
+    }
+  );
+});
+
+updateTicketSelector(
+  Math.min(5, maximumChoice)
+);
+   
   $('#addToCart')?.addEventListener(
     'click',
     () => {
