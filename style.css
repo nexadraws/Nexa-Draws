@@ -292,3 +292,120 @@ body.age-locked {
     font-size: 13px;
   }
 }
+
+/* =========================================================
+   TICKET QUANTITY SELECTOR
+   ========================================================= */
+
+.ticket-selector {
+  margin: 20px 0;
+  padding: 18px;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.ticket-selector-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 14px;
+}
+
+.ticket-selector-head span {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ticket-selector-head strong {
+  min-width: 46px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: #d4af37;
+  color: #080808;
+  text-align: center;
+  font-size: 18px;
+}
+
+.ticket-slider {
+  width: 100%;
+  height: 6px;
+  margin: 8px 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 999px;
+  background: #d4af37;
+}
+
+.ticket-slider::-webkit-slider-thumb {
+  width: 22px;
+  height: 22px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 3px solid #d4af37;
+  border-radius: 50%;
+  background: #111;
+  cursor: pointer;
+}
+
+.ticket-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #d4af37;
+  border-radius: 50%;
+  background: #111;
+  cursor: pointer;
+}
+
+.ticket-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  color: #999;
+  font-size: 11px;
+}
+
+.ticket-quick-options {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.ticket-quick-btn {
+  padding: 11px 5px;
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  border-radius: 9px;
+  background: #111;
+  color: #d4af37;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.ticket-quick-btn:hover,
+.ticket-quick-btn.active {
+  background: #d4af37;
+  color: #080808;
+  border-color: #d4af37;
+}
+
+@media (max-width: 480px) {
+  .ticket-selector {
+    padding: 15px;
+  }
+
+  .ticket-quick-options {
+    gap: 6px;
+  }
+
+  .ticket-quick-btn {
+    padding: 10px 3px;
+    font-size: 13px;
+  }
+}
