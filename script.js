@@ -2212,7 +2212,6 @@ async function drawWinnerSecurely(id) {
       'The winner draw could not be completed.'
     );
   }
-}
 
 }
 
