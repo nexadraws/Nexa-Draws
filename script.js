@@ -538,17 +538,7 @@ function showCompetition(id) {
   )}
 </button>
 
-                <button
-                  class="btn gold full"
-                  id="addToCart"
-                >
-                  ADD TO BASKET
-                </button>
-              `
-            : `
-              <p>
-                This competition has no entries remaining.
-              </p>
+               
             `
         }
 
