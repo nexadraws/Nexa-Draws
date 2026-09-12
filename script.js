@@ -540,10 +540,16 @@ function showCompetition(id) {
 
                
             `
+            : `
+              <p>
+                This competition has no entries remaining.
+              </p>
+            `
         }
 
         ${
           free
+       
             ? `
               <p class="micro">
                 No payment is required for this draw.
