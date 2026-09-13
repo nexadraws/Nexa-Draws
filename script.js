@@ -1514,6 +1514,9 @@ async function renderAccount(
         const formData =
           new FormData(event.target);
 
+         const emailMarketing =
+  formData.get('email_marketing') === 'yes';
+
         const { error } =
           await supabaseClient.auth.signUp({
             email: String(
