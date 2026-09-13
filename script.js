@@ -1422,45 +1422,12 @@ async function renderAccount(
           >
         </label>
 
-</label>
-
-<label
-  style="
-    display:flex;
-    align-items:flex-start;
-    gap:10px;
-    margin:16px 0;
-    font-size:13px;
-    line-height:1.5;
-    color:#bbb;
-    cursor:pointer;
-  "
->
-  <input
-    type="checkbox"
-    name="email_marketing"
-    value="yes"
-    style="
-      width:auto;
-      margin-top:3px;
-      accent-color:#d4af37;
-    "
-  >
-
-  <span>
-    Keep me updated with new draws, prizes and
-    Nexa Draw offers by email. I can unsubscribe
-    at any time.
-  </span>
-</label>
-
-<button
-  class="btn gold full"
-  type="submit"
->
-  CREATE ACCOUNT
-</button>
-
+        <button
+          class="btn gold full"
+          type="submit"
+        >
+          CREATE ACCOUNT
+        </button>
       </form>
 
       <hr>
@@ -1508,9 +1475,6 @@ async function renderAccount(
         const formData =
           new FormData(event.target);
 
-         const emailMarketing =
-  formData.get('email_marketing') === 'yes';
-
         const { error } =
           await supabaseClient.auth.signUp({
             email: String(
@@ -1522,18 +1486,11 @@ async function renderAccount(
             ),
 
             options: {
-            data: {
-  name: String(
-    formData.get('name') || ''
-  ).trim(),
-
-  email_marketing: emailMarketing,
-
-  marketing_consented_at:
-    emailMarketing
-      ? new Date().toISOString()
-      : null
-},
+              data: {
+                name: String(
+                  formData.get('name') || ''
+                ).trim()
+              },
 
               emailRedirectTo:
                 window.location.origin + '/'
@@ -2255,6 +2212,7 @@ async function drawWinnerSecurely(id) {
       'The winner draw could not be completed.'
     );
   }
+}
 
 }
 
