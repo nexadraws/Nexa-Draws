@@ -1461,12 +1461,6 @@ async function renderAccount(
   CREATE ACCOUNT
 </button>
 
-        <button
-          class="btn gold full"
-          type="submit"
-        >
-          CREATE ACCOUNT
-        </button>
       </form>
 
       <hr>
