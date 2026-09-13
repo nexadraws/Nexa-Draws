@@ -1422,6 +1422,45 @@ async function renderAccount(
           >
         </label>
 
+</label>
+
+<label
+  style="
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    margin:16px 0;
+    font-size:13px;
+    line-height:1.5;
+    color:#bbb;
+    cursor:pointer;
+  "
+>
+  <input
+    type="checkbox"
+    name="email_marketing"
+    value="yes"
+    style="
+      width:auto;
+      margin-top:3px;
+      accent-color:#d4af37;
+    "
+  >
+
+  <span>
+    Keep me updated with new draws, prizes and
+    Nexa Draw offers by email. I can unsubscribe
+    at any time.
+  </span>
+</label>
+
+<button
+  class="btn gold full"
+  type="submit"
+>
+  CREATE ACCOUNT
+</button>
+
         <button
           class="btn gold full"
           type="submit"
