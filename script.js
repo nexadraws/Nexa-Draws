@@ -1528,11 +1528,18 @@ async function renderAccount(
             ),
 
             options: {
-              data: {
-                name: String(
-                  formData.get('name') || ''
-                ).trim()
-              },
+            data: {
+  name: String(
+    formData.get('name') || ''
+  ).trim(),
+
+  email_marketing: emailMarketing,
+
+  marketing_consented_at:
+    emailMarketing
+      ? new Date().toISOString()
+      : null
+},
 
               emailRedirectTo:
                 window.location.origin + '/'
