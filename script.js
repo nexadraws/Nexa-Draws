@@ -2152,8 +2152,10 @@ openModal('#nochexPaymentModal');
 
   if (checkoutButton) {
     checkoutButton.disabled = false;
+    }
   }
-  }
+}
+
 /* =========================================================
    WINNERS
    ========================================================= */
