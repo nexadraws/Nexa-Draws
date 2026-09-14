@@ -1152,6 +1152,43 @@ async function openCart() {
 /* =========================================================
    CUSTOMER ACCOUNT
    ========================================================= */
+async function getMarketingPreference(userId) {
+  const { data, error } = await supabaseClient
+    .from('marketing_preferences')
+    .select('email_marketing')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Marketing preference load error:', error);
+    return false;
+  }
+
+  return data?.email_marketing === true;
+}
+
+async function saveMarketingPreference(userId, enabled) {
+  const now = new Date().toISOString();
+
+  const { error } = await supabaseClient
+    .from('marketing_preferences')
+    .upsert(
+      {
+        user_id: userId,
+        email_marketing: enabled,
+        consented_at: enabled ? now : null,
+        updated_at: now
+      },
+      {
+        onConflict: 'user_id'
+      }
+    );
+
+  if (error) {
+    console.error('Marketing preference save error:', error);
+    throw error;
+  }
+}
 
 async function getCurrentCustomer() {
   const {
@@ -1366,11 +1403,18 @@ async function renderAccount(
 ) {
   await getCurrentCustomer();
 
-  const host = $('#accountContent');
+ const host = $('#accountContent');
 
-  if (!host) return;
+if (!host) return;
 
-  if (!user) {
+let emailMarketingEnabled = false;
+
+if (user) {
+  emailMarketingEnabled =
+    await getMarketingPreference(user.id);
+}
+
+if (!user) {
     host.innerHTML = `
       <p class="eyebrow">
         MY NEXA
@@ -1692,6 +1736,43 @@ async function renderAccount(
       Your entries & orders
     </h3>
 
+<div
+  style="
+    margin:18px 0 24px;
+    padding:16px;
+    border:1px solid rgba(212,175,55,.35);
+    border-radius:12px;
+  "
+>
+  <strong>Email preferences</strong>
+
+  <label
+    style="
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      margin-top:12px;
+      cursor:pointer;
+    "
+  >
+    <input
+      type="checkbox"
+      id="marketingPreference"
+      ${emailMarketingEnabled ? 'checked' : ''}
+      style="
+        width:auto;
+        margin-top:4px;
+        accent-color:#d4af37;
+      "
+    >
+
+    <span>
+      Email me about new draws, prizes and
+      Nexa Draw offers. I can unsubscribe at any time.
+    </span>
+  </label>
+</div>
+
     ${orderSection}
 
     <button
@@ -1702,6 +1783,39 @@ async function renderAccount(
     </button>
   `;
 
+const marketingPreference =
+  $('#marketingPreference');
+
+if (marketingPreference) {
+  marketingPreference.onchange =
+    async event => {
+      const enabled = event.target.checked;
+
+      event.target.disabled = true;
+
+      try {
+        await saveMarketingPreference(
+          user.id,
+          enabled
+        );
+
+        toast(
+          enabled
+            ? 'Email updates enabled'
+            : 'Email updates disabled'
+        );
+      } catch {
+        event.target.checked = !enabled;
+
+        alert(
+          'Could not save your email preference. Please try again.'
+        );
+      } finally {
+        event.target.disabled = false;
+      }
+    };
+}
+   
   $('#logoutBtn').onclick =
     async () => {
       await supabaseClient.auth.signOut();
