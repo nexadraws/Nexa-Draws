@@ -2082,15 +2082,14 @@ async function checkout() {
         $('#nochexPaymentModal');
 
       $('#closeNochexPayment')
-        ?.addEventListener(
-          'click',
-          () => {
-            paymentModal
-              ?.classList.remove('open');
-          }
-        );
+  ?.addEventListener(
+    'click',
+    () => {
+      closeModals();
     }
-
+  );
+    }         
+ 
     const widgetContainer =
       $('#nochexWidgetContainer');
 
@@ -2137,8 +2136,7 @@ async function checkout() {
 
     document.body.appendChild(script);
 
-    paymentModal
-      ?.classList.add('open');
+openModal('#nochexPaymentModal');
 
   } catch (error) {
     console.error(
@@ -2149,11 +2147,13 @@ async function checkout() {
     alert(
       'The test checkout could not be started.'
     );
-  } finally {
-    renderCart();
-  }
-}
+ } finally {
+  const checkoutButton = $('#checkoutBtn');
 
+  if (checkoutButton) {
+    checkoutButton.disabled = false;
+  }
+  }
 /* =========================================================
    WINNERS
    ========================================================= */
