@@ -2176,25 +2176,26 @@ async function checkout() {
       );
     };
 
-    document.body.appendChild(script);
+   document.body.appendChild(script);
 
-    paymentModal
-      ?.classList.add('open');
+openModal('#nochexPaymentModal');
 
-  } catch (error) {
-    console.error(
-      'Checkout error:',
-      error
-    );
+} catch (error) {
+  console.error(
+    'Checkout error:',
+    error
+  );
 
-    alert(
-      'The test checkout could not be started.'
-    );
-  } finally {
-    renderCart();
+  alert(
+    'The test checkout could not be started.'
+  );
+} finally {
+  const checkoutButton = $('#checkoutBtn');
+
+  if (checkoutButton) {
+    checkoutButton.disabled = false;
   }
 }
-
 /* =========================================================
    WINNERS
    ========================================================= */
