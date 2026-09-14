@@ -1164,48 +1164,7 @@ async function getMarketingPreference(userId) {
     return false;
   }
 
-  // Existing preference always wins.
-  // This prevents an opted-out user being subscribed again.
-  if (data) {
-    return data.email_marketing === true;
-  }
-
-  // No preference row yet — check the signup choice.
-  const {
-    data: { user: authUser }
-  } = await supabaseClient.auth.getUser();
-
-  const optedIn =
-    authUser?.id === userId &&
-    authUser?.user_metadata?.email_marketing === true;
-
-  if (!optedIn) {
-    return false;
-  }
-
-  // First-time signup opt-in: create their preference row.
-  const now = new Date().toISOString();
-
-  const { error: insertError } = await supabaseClient
-    .from('marketing_preferences')
-    .insert({
-      user_id: userId,
-      email_marketing: true,
-      consented_at:
-        authUser.user_metadata?.marketing_consented_at || now,
-      updated_at: now
-    });
-
-  if (insertError) {
-    console.error(
-      'Marketing preference sync error:',
-      insertError
-    );
-
-    return false;
-  }
-
-  return true;
+  return data?.email_marketing === true;
 }
 
 async function saveMarketingPreference(userId, enabled) {
@@ -2176,26 +2135,25 @@ async function checkout() {
       );
     };
 
-   document.body.appendChild(script);
+    document.body.appendChild(script);
 
-openModal('#nochexPaymentModal');
+    paymentModal
+      ?.classList.add('open');
 
-} catch (error) {
-  console.error(
-    'Checkout error:',
-    error
-  );
+  } catch (error) {
+    console.error(
+      'Checkout error:',
+      error
+    );
 
-  alert(
-    'The test checkout could not be started.'
-  );
-} finally {
-  const checkoutButton = $('#checkoutBtn');
-
-  if (checkoutButton) {
-    checkoutButton.disabled = false;
+    alert(
+      'The test checkout could not be started.'
+    );
+  } finally {
+    renderCart();
   }
 }
+
 /* =========================================================
    WINNERS
    ========================================================= */
