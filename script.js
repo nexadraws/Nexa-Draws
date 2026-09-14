@@ -2150,10 +2150,10 @@ openModal('#nochexPaymentModal');
  } finally {
   const checkoutButton = $('#checkoutBtn');
 
-  if (checkoutButton) {
-    checkoutButton.disabled = false;
-    }
-  }
+ if (checkoutButton) {
+  checkoutButton.disabled = false;
+}
+}
 }
 
 /* =========================================================
