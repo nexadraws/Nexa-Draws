@@ -1746,25 +1746,28 @@ if (!user) {
 >
   <strong>Email preferences</strong>
 
-  <label
+    <label
+  style="
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    margin-top:12px;
+    cursor:pointer;
+  "
+>
+  <input
+    type="checkbox"
+    id="marketingPreference"
+    ${emailMarketingEnabled ? 'checked' : ''}
     style="
-      display:flex;
-      align-items:flex-start;
-      gap:10px;
-      margin-top:12px;
+      width:24px;
+      height:24px;
+      min-width:24px;
+      margin-top:1px;
+      accent-color:#d4af37;
       cursor:pointer;
     "
   >
-    <input
-      type="checkbox"
-      id="marketingPreference"
-      ${emailMarketingEnabled ? 'checked' : ''}
-      style="
-        width:auto;
-        margin-top:4px;
-        accent-color:#d4af37;
-      "
-    >
 
     <span>
       Email me about new draws, prizes and
