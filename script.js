@@ -1720,21 +1720,51 @@ if (!user) {
   } =
     await loadCustomerOrders(user);
 
-  const orderSection =
-    orders.length
-      ? orders
-          .map(customerOrderCard)
-          .join('')
-      : `
-          <p class="empty">
-            ${
-              error
-                ? 'Your entries could not be loaded. Please try again.'
-                : 'No entries yet.'
-            }
-          </p>
-        `;
+const activeOrders = [];
+const previousOrders = [];
 
+orders.forEach(order => {
+  const hasLiveCompetition = (order.tickets || []).some(ticket => {
+    const competition = competitions.find(
+      item =>
+        item.id === String(ticket.competition_id)
+    );
+
+    return competition?.status === 'live';
+  });
+
+  if (hasLiveCompetition) {
+    activeOrders.push(order);
+  } else {
+    previousOrders.push(order);
+  }
+});
+
+const activeOrderSection =
+  activeOrders.length
+    ? activeOrders
+        .map(customerOrderCard)
+        .join('')
+    : `
+        <p class="empty">
+          ${
+            error
+              ? 'Your entries could not be loaded. Please try again.'
+              : 'You have no active entries.'
+          }
+        </p>
+      `;
+
+const previousOrderSection =
+  previousOrders.length
+    ? previousOrders
+        .map(customerOrderCard)
+        .join('')
+    : `
+        <p class="empty">
+          No previous entries yet.
+        </p>
+      `;
   host.innerHTML = `
     <p class="eyebrow">
       MY NEXA
@@ -1749,9 +1779,31 @@ if (!user) {
       ${escapeHtml(user.email)}
     </p>
 
-    <h3>
-      Your entries & orders
-    </h3>
+   <div
+  style="
+    display:flex;
+    gap:10px;
+    margin:20px 0;
+  "
+>
+  <button
+    type="button"
+    class="btn gold"
+    id="activeEntriesTab"
+    style="flex:1;"
+  >
+    ACTIVE ENTRIES
+  </button>
+
+  <button
+    type="button"
+    class="btn outline"
+    id="previousHistoryTab"
+    style="flex:1;"
+  >
+    PREVIOUS HISTORY
+  </button>
+</div>
 
 <div
   style="
@@ -1793,7 +1845,16 @@ if (!user) {
   </label>
 </div>
 
-    ${orderSection}
+   <div id="activeEntriesSection">
+  ${activeOrderSection}
+</div>
+
+<div
+  id="previousHistorySection"
+  style="display:none;"
+>
+  ${previousOrderSection}
+</div>
 
     <button
       class="btn outline full"
@@ -1803,10 +1864,38 @@ if (!user) {
     </button>
   `;
 
-const marketingPreference =
-  $('#marketingPreference');
+const activeEntriesTab = $('#activeEntriesTab');
+const previousHistoryTab = $('#previousHistoryTab');
 
-if (marketingPreference) {
+const activeEntriesSection = $('#activeEntriesSection');
+const previousHistorySection = $('#previousHistorySection');
+
+activeEntriesTab?.addEventListener('click', () => {
+  activeEntriesSection.style.display = '';
+  previousHistorySection.style.display = 'none';
+
+  activeEntriesTab.classList.add('gold');
+  activeEntriesTab.classList.remove('outline');
+
+  previousHistoryTab.classList.add('outline');
+  previousHistoryTab.classList.remove('gold');
+});
+
+previousHistoryTab?.addEventListener('click', () => {
+  activeEntriesSection.style.display = 'none';
+  previousHistorySection.style.display = '';
+
+  previousHistoryTab.classList.add('gold');
+  previousHistoryTab.classList.remove('outline');
+
+  activeEntriesTab.classList.add('outline');
+  activeEntriesTab.classList.remove('gold');
+});
+
+   const marketingPreference =
+  $('#marketingPreference');
+   
+   if (marketingPreference) {
   marketingPreference.onchange =
     async event => {
       const enabled = event.target.checked;
