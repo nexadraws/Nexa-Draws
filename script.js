@@ -3863,7 +3863,116 @@ async function adminView(
     </div>
   `;
 
+  /* POSTAL FREE ENTRY */
 
+  const postalEntryForm =
+    $('#postalEntryForm');
+
+  if (postalEntryForm) {
+    postalEntryForm.onsubmit =
+      async event => {
+        event.preventDefault();
+
+        const result =
+          $('#postalEntryResult');
+
+        const formData =
+          new FormData(
+            postalEntryForm
+          );
+
+        const competitionId =
+          Number(
+            formData.get(
+              'competition_id'
+            )
+          );
+
+        const customerEmail =
+          String(
+            formData.get(
+              'customer_email'
+            ) || ''
+          )
+            .trim()
+            .toLowerCase();
+
+        if (result) {
+          result.textContent =
+            'Processing postal entry...';
+        }
+
+        try {
+          const {
+            data,
+            error
+          } =
+            await supabaseClient
+              .functions
+              .invoke(
+                'create-postal-entry',
+                {
+                  body: {
+                    competition_id:
+                      competitionId,
+
+                    customer_email:
+                      customerEmail
+                  }
+                }
+              );
+
+          if (error) {
+            throw error;
+          }
+
+          if (!data?.success) {
+            throw new Error(
+              data?.error ||
+              'Unable to create postal entry'
+            );
+          }
+
+          if (result) {
+            result.textContent =
+              `Entry created. Ticket: ${
+                data.ticket
+                  ?.ticket_number ||
+                'Created'
+              }`;
+          }
+
+          toast(
+            'Postal entry created'
+          );
+
+          postalEntryForm.reset();
+
+          await loadCompetitionsFromSupabase();
+
+        } catch (error) {
+          console.error(
+            'Postal entry error:',
+            error
+          );
+
+          if (result) {
+            result.textContent =
+              error instanceof Error
+                ? error.message
+                : 'Unable to create postal entry';
+          }
+
+          toast(
+            'Postal entry failed'
+          );
+        }
+      };
+  }
+
+
+  /* ADMIN LOGOUT */
+   
   /* ADMIN LOGOUT */
 
   $('#adminLogout').onclick =
