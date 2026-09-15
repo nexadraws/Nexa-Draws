@@ -3691,6 +3691,60 @@ async function adminView(
     </div>
 
 
+    <!-- POSTAL FREE ENTRY -->
+
+    <div style="margin-top: 32px;">
+
+      <h3>
+        Process Postal Free Entry
+      </h3>
+
+      <p class="micro">
+        Use this only after a valid postal entry
+        has been received and checked.
+      </p>
+
+      <form id="postalEntryForm">
+
+        <label class="field">
+          Competition ID
+
+          <input
+            name="competition_id"
+            type="number"
+            min="1"
+            required
+          >
+        </label>
+
+        <label class="field">
+          Customer account email
+
+          <input
+            name="customer_email"
+            type="email"
+            required
+          >
+        </label>
+
+        <button
+          class="btn gold"
+          type="submit"
+        >
+          PROCESS POSTAL ENTRY
+        </button>
+
+      </form>
+
+      <p
+        class="micro"
+        id="postalEntryResult"
+        style="margin-top: 12px;"
+      ></p>
+
+    </div>
+
+
     <!-- PRIVATE WINNER CONTACT DETAILS -->
 
     <div style="margin-top: 32px;">
