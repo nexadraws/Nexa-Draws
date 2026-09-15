@@ -485,7 +485,24 @@ function showCompetition(id) {
                 </button>
               `
               : `
-                <div class="ticket-selector">
+  <div class="free-entry-notice">
+    <strong>FREE ENTRY ROUTE AVAILABLE</strong>
+
+    <p>
+      You can also enter this competition by post using our
+      free entry route.
+    </p>
+
+    <button
+      type="button"
+      class="link-btn"
+      data-legal="free"
+    >
+      VIEW FREE ENTRY ROUTE
+    </button>
+  </div>
+
+  <div class="ticket-selector">
 
   <div class="ticket-selector-head">
     <span>Number of tickets</span>
