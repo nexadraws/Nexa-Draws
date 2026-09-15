@@ -4424,1250 +4424,1242 @@ async function deleteCompetition(id) {
    ========================================================= */
 
 const legalPages = {
- 
-terms: `
-  <p class="eyebrow">
-    LEGAL
-  </p>
-
-  <h2>
-    Terms &amp; Conditions
-  </h2>
-
-  <p>
-    <strong>Last updated: 7 September 2026</strong>
-  </p>
-
-  <p>
-    These Terms and Conditions apply to competitions operated through
-    nexadraw.co.uk by Nexa Draw. By entering a competition, you agree
-    to these Terms and Conditions together with any specific terms
-    displayed on the relevant competition page.
-  </p>
-
-<h3>1. Promoter</h3>
-
-<p>
-  The promoter is <strong>Nexa Draw Limited</strong>,
-  trading as <strong>Nexa Draw</strong>.
-</p>
-
-<p>
-  Company number:
-  <strong>17442068</strong>
-</p>
-
-<p>
-  Registered office:
-  <strong>[YOUR VERIFIED REGISTERED OFFICE ADDRESS]</strong>
-</p>
-
-<p>
-  Email:
-  <strong>hello@nexadraw.co.uk</strong>
-</p>
-  
-  <h3>2. Eligibility</h3>
-
-  <p>
-    Competitions are open to individuals aged 18 or over who are legally
-    resident in the United Kingdom, unless a particular competition
-    expressly states otherwise.
-  </p>
-
-  <p>
-    Employees, directors, contractors and immediate family members of
-    Nexa Draw, and anyone professionally connected with the administration
-    of a competition, may not enter.
-  </p>
-
-  <p>
-    Nexa Draw may require reasonable proof of age, identity and address
-    before accepting an entry or awarding a prize.
-  </p>
-
-
-  <h3>3. How to Enter</h3>
-
-  <p>
-    Each competition will display its entry price, closing date,
-    maximum number of entries, prize details and any applicable
-    entry limits.
-  </p>
-
-  <p>
-    To enter online, entrants must:
-  </p>
-
-  <ul>
-    <li>Create or log in to a Nexa Draw account.</li>
-    <li>Select the relevant competition.</li>
-    <li>Select the required number of entries.</li>
-    <li>Answer any competition question presented.</li>
-    <li>Complete the entry process.</li>
-    <li>Where applicable, successfully complete payment.</li>
-  </ul>
-
-  <p>
-    An entry is not valid until it has been accepted by Nexa Draw and
-    a valid competition ticket or entry number has been issued.
-  </p>
-
-  <p>
-    Entrants are responsible for ensuring that the information supplied
-    on their account is accurate and up to date.
-  </p>
-
-
-  <h3>4. Free Entry Route</h3>
-
-  <p>
-    Where a competition offers a free entry route, full instructions
-    for using that route will be displayed on the relevant competition
-    page or on the Nexa Draw Free Entry Route page.
-  </p>
 
-  <p>
-    Valid free entries will be treated in the same manner as valid paid
-    entries when a winner is selected.
-  </p>
+  terms: `
+    <p class="eyebrow">
+      LEGAL
+    </p>
+
+    <h2>
+      Terms &amp; Conditions
+    </h2>
+
+    <p>
+      <strong>Last updated: 15 September 2026</strong>
+    </p>
+
+    <p>
+      These Terms and Conditions apply to competitions operated through
+      nexadraw.co.uk by Nexa Draw Limited, trading as Nexa Draw.
+      By entering a competition, you agree to these Terms and Conditions
+      together with any specific terms displayed on the relevant
+      competition page.
+    </p>
+
+    <h3>1. Promoter</h3>
+
+    <p>
+      The promoter is <strong>Nexa Draw Limited</strong>,
+      trading as <strong>Nexa Draw</strong>.
+    </p>
+
+    <p>
+      Company number:
+      <strong>17442068</strong>
+    </p>
+
+    <p>
+      Registered office:
+      <strong>7 High Street, Kington, HR5 3AX, United Kingdom</strong>
+    </p>
+
+    <p>
+      Email:
+      <strong>reciepts@nexadraw.co.uk</strong>
+    </p>
+
+    <h3>2. Eligibility</h3>
+
+    <p>
+      Competitions are open to individuals aged 18 or over who are legally
+      resident in the United Kingdom, unless a particular competition
+      expressly states otherwise.
+    </p>
+
+    <p>
+      Employees, directors, contractors and immediate family members of
+      Nexa Draw, and anyone professionally connected with the administration
+      of a competition, may not enter.
+    </p>
+
+    <p>
+      Nexa Draw may require reasonable proof of age, identity and address
+      before accepting an entry or awarding a prize.
+    </p>
+
+    <h3>3. How to Enter</h3>
+
+    <p>
+      Each competition will display its entry price, closing date,
+      maximum number of entries, prize details and any applicable
+      entry limits.
+    </p>
+
+    <p>To enter online, entrants must:</p>
+
+    <ul>
+      <li>Create or log in to a Nexa Draw account.</li>
+      <li>Select the relevant competition.</li>
+      <li>Select the required number of entries.</li>
+      <li>Answer any competition question presented.</li>
+      <li>Complete the entry process.</li>
+      <li>Where applicable, successfully complete payment.</li>
+    </ul>
+
+    <p>
+      An entry is not valid until it has been accepted by Nexa Draw and
+      a valid competition ticket or entry number has been issued.
+    </p>
+
+    <p>
+      Entrants are responsible for ensuring that the information supplied
+      on their account is accurate and up to date.
+    </p>
+
+    <h3>4. Free Entry Route</h3>
+
+    <p>
+      Where a competition offers a free entry route, full instructions
+      for using that route will be displayed on the relevant competition
+      page or on the Nexa Draw Free Entry Route page.
+    </p>
+
+    <p>
+      Valid free entries will be treated in the same manner as valid paid
+      entries when a winner is selected.
+    </p>
+
+    <p>
+      Entrants using a free entry route must follow all stated instructions
+      and ensure their entry is received before the applicable closing
+      deadline.
+    </p>
+
+    <p>
+      Free entries that are incomplete, illegible, received late or do
+      not comply with the stated requirements may be rejected.
+    </p>
+
+    <h3>5. Competition Questions</h3>
+
+    <p>
+      A competition may require an entrant to answer a question before an
+      entry can be accepted.
+    </p>
+
+    <p>
+      Where the rules of a competition require a correct answer, an
+      incorrect answer may result in the entry being rejected.
+    </p>
+
+    <h3>6. Entry Limits</h3>
+
+    <p>
+      Competitions may have a maximum number of entries overall and may
+      also have a maximum number of entries permitted per person.
+    </p>
+
+    <p>
+      Nexa Draw may reject or cancel entries where it reasonably believes
+      that an entrant has attempted to bypass an entry limit through
+      multiple accounts, false identities, automated systems or another
+      unfair method.
+    </p>
+
+    <h3>7. Competition Closing Dates</h3>
+
+    <p>
+      The closing date for each competition will be displayed on the
+      relevant competition page.
+    </p>
+
+    <p>
+      Entries received after the applicable closing date will not normally
+      be included.
+    </p>
+
+    <p>
+      Nexa Draw will only amend a closing date or other material competition
+      condition where reasonably necessary and permitted by applicable law.
+    </p>
+
+    <h3>8. Payment</h3>
+
+    <p>
+      Where payment is required, payment must be successfully completed
+      using one of the payment methods made available by Nexa Draw.
+    </p>
+
+    <p>
+      An entry may be cancelled if payment is declined, reversed,
+      charged back or otherwise not successfully received.
+    </p>
+
+    <p>
+      Entry prices are displayed in pounds sterling.
+    </p>
+
+    <h3>9. Selection of Winners</h3>
+
+    <p>
+      Once a competition has closed, a winner will be selected fairly from
+      all valid eligible entries included in that competition.
+    </p>
+
+    <p>
+      Valid paid entries and valid free entries will be included on an
+      equal basis.
+    </p>
+
+    <p>
+      Nexa Draw will maintain appropriate records of competition results
+      and winning entries.
+    </p>
+
+    <h3>10. Winner Notification</h3>
+
+    <p>
+      Winners will be contacted using the contact information associated
+      with their Nexa Draw account.
+    </p>
+
+    <p>
+      Entrants are responsible for keeping their contact details accurate
+      and up to date.
+    </p>
+
+    <p>
+      Before a prize is released, Nexa Draw may require reasonable proof
+      of identity, age, address and eligibility.
+    </p>
+
+    <p>
+      If a winner cannot be contacted after reasonable attempts, fails
+      to provide requested verification, is found to be ineligible or
+      refuses the prize, Nexa Draw may select an alternative winner where
+      permitted.
+    </p>
+
+    <h3>11. Publication of Winners</h3>
+
+    <p>
+      Nexa Draw may publish reasonable winner information, including the
+      winner's name, competition won, winning ticket number and draw date.
+    </p>
+
+    <p>
+      Nexa Draw will not publicly display a winner's email address,
+      telephone number, home address or other unnecessary personal
+      information.
+    </p>
+
+    <h3>12. Prizes</h3>
+
+    <p>
+      The exact prize offered in each competition will be described on the
+      relevant competition page.
+    </p>
+
+    <p>
+      Nexa Draw may offer prizes including cash, technology products,
+      gaming products, Pokémon products, trading cards, graded cards,
+      sealed collectible products, other collectibles and consumer goods.
+    </p>
+
+    <p>
+      Images used on the website may be illustrative unless expressly
+      stated otherwise.
+    </p>
+
+    <p>
+      Where brand, model, edition, specification, condition, grading,
+      authenticity, packaging or another characteristic is material to
+      the prize, relevant information will be stated on the competition
+      page where available.
+    </p>
+
+    <p>
+      A winner may not demand a cash alternative for a physical prize
+      unless a cash alternative is expressly offered for that competition.
+    </p>
+
+    <p>
+      Where a cash alternative is offered, the amount displayed on the
+      relevant competition page will apply.
+    </p>
+
+    <h3>13. Cash Prizes</h3>
+
+    <p>
+      Where the advertised prize is cash, the amount of the cash prize
+      will be clearly stated on the relevant competition page.
+    </p>
+
+    <p>
+      Cash prizes will be paid to the verified winner using a reasonable
+      payment method selected by Nexa Draw.
+    </p>
+
+    <p>
+      Nexa Draw may require the winner to provide identity verification
+      and appropriate payment details before a cash prize is released.
+    </p>
+
+    <p>
+      Nexa Draw will not knowingly send a cash prize to an account or
+      payment method belonging to another person unless reasonably
+      satisfied that it is appropriate and lawful to do so.
+    </p>
+
+    <h3>14. Technology and Gaming Prizes</h3>
+
+    <p>
+      Technology and gaming prizes may include items such as smartphones,
+      tablets, laptops, televisions, games consoles, gaming equipment,
+      accessories and other electronic products.
+    </p>
+
+    <p>
+      The relevant competition page will identify the material details of
+      the prize, such as brand, model, storage capacity, specification or
+      condition where applicable.
+    </p>
+
+    <p>
+      Unless otherwise stated, technology prizes will be supplied in the
+      condition described on the competition page.
+    </p>
+
+    <p>
+      Any manufacturer warranty or retailer warranty will be subject to
+      the terms of the relevant manufacturer or retailer and is not
+      provided separately by Nexa Draw unless expressly stated.
+    </p>
+
+    <h3>15. Pokémon and Collectible Prizes</h3>
+
+    <p>
+      Pokémon and other collectible prizes may include individual cards,
+      graded cards, sealed products, booster boxes, collections,
+      merchandise or other collectible items.
+    </p>
+
+    <p>
+      Where relevant, the competition page will describe material details
+      such as the item name, set, edition, language, condition, grading
+      company, grade, certification details or whether the product is sealed.
+    </p>
+
+    <p>
+      Where a collectible has been professionally graded, any stated grade
+      will be the grade issued by the grading company identified in the
+      competition description.
+    </p>
+
+    <p>
+      Nexa Draw does not guarantee that a collectible will increase or
+      maintain its market value after the winner receives it.
+    </p>
+
+    <p>
+      Market values of trading cards and collectibles can change over time.
+      Any approximate value stated in connection with a competition is not
+      a guarantee of future resale value.
+    </p>
+
+    <h3>16. Prize Delivery or Collection</h3>
+
+    <p>
+      Delivery or collection arrangements will be agreed with the winner
+      following successful verification.
+    </p>
+
+    <p>
+      Any material delivery restrictions or costs payable by the winner
+      will be stated on the relevant competition page where applicable.
+    </p>
+
+    <p>
+      Nexa Draw may require a signature or other confirmation of receipt
+      for valuable prizes.
+    </p>
+
+    <p>
+      Winners are responsible for providing accurate delivery information.
+    </p>
+
+    <h3>17. Refunds and Cancellations</h3>
+
+    <p>
+      Competition entries are generally final once successfully submitted,
+      except where a refund is required by law or Nexa Draw chooses to
+      provide one.
+    </p>
+
+    <p>
+      Nexa Draw may cancel, suspend or postpone a competition where
+      circumstances outside its reasonable control make this necessary.
+    </p>
+
+    <p>
+      If a competition is cancelled without a winner being selected,
+      Nexa Draw will communicate what will happen to affected entries and
+      provide refunds where required by law.
+    </p>
+
+    <h3>18. Disqualification</h3>
+
+    <p>
+      Nexa Draw may reject or disqualify an entrant where it reasonably
+      believes that the entrant:
+    </p>
+
+    <ul>
+      <li>Has breached these Terms and Conditions.</li>
+      <li>Has provided false or misleading information.</li>
+      <li>Is not eligible to enter.</li>
+      <li>Has attempted to manipulate a competition.</li>
+      <li>Has used bots, scripts or automated entry methods.</li>
+      <li>Has created multiple accounts to bypass restrictions.</li>
+      <li>Has interfered with the website or entry system.</li>
+      <li>Has engaged in fraudulent or abusive behaviour.</li>
+    </ul>
+
+    <h3>19. Website Availability</h3>
+
+    <p>
+      Nexa Draw will take reasonable steps to keep its website and
+      competition systems available and secure.
+    </p>
+
+    <p>
+      Nexa Draw cannot guarantee uninterrupted availability and is not
+      responsible for failures caused by an entrant's device, internet
+      connection or other circumstances outside Nexa Draw's reasonable
+      control.
+    </p>
+
+    <h3>20. Limitation of Liability</h3>
+
+    <p>
+      Nothing in these Terms excludes or limits liability where it would
+      be unlawful to do so, including liability for death or personal
+      injury caused by negligence, fraud or fraudulent misrepresentation.
+    </p>
+
+    <p>
+      Subject to the above, Nexa Draw will not be responsible for losses
+      that were not reasonably foreseeable when an entrant entered a
+      competition.
+    </p>
+
+    <p>
+      Nothing in these Terms affects an entrant's statutory rights as a
+      consumer.
+    </p>
+
+    <h3>21. Personal Information</h3>
+
+    <p>
+      Nexa Draw will process personal information in accordance with its
+      Privacy Policy and applicable UK data protection law.
+    </p>
+
+    <p>
+      Personal information may be used to administer competitions,
+      process entries and payments, verify winners, deliver prizes,
+      prevent fraud and comply with legal obligations.
+    </p>
+
+    <p>
+      Marketing communications will only be sent where Nexa Draw has an
+      appropriate lawful basis to do so, and recipients may unsubscribe
+      from marketing communications.
+    </p>
+
+    <h3>22. Responsible Participation</h3>
+
+    <p>
+      Entrants should participate responsibly and should never spend more
+      than they can comfortably afford.
+    </p>
+
+    <p>
+      Nexa Draw may implement entry limits or other responsible
+      participation measures where appropriate.
+    </p>
+
+    <h3>23. Changes to These Terms</h3>
+
+    <p>
+      Nexa Draw may update these general Terms and Conditions from time
+      to time.
+    </p>
+
+    <p>
+      The terms applying to an entry will normally be those in force at
+      the time the entry was made, except where a change is required by
+      law or is necessary to correct an obvious error without unfairly
+      disadvantaging entrants.
+    </p>
+
+    <h3>24. Governing Law</h3>
+
+    <p>
+      These Terms and Conditions are governed by the laws of England and
+      Wales.
+    </p>
+
+    <p>
+      Entrants living elsewhere in the United Kingdom will retain any
+      mandatory consumer protections that apply where they live.
+    </p>
+
+    <p>
+      Nothing in these Terms affects your statutory rights as a consumer.
+    </p>
+
+    <h3>25. Complaints</h3>
+
+    <p>
+      If you have a complaint concerning a competition or Nexa Draw,
+      please contact:
+    </p>
+
+    <p>
+      <strong>reciepts@nexadraw.co.uk</strong>
+    </p>
+
+    <p>
+      Or write to:
+    </p>
+
+    <p>
+      <strong>
+        Nexa Draw Limited<br>
+        7 High Street<br>
+        Kington<br>
+        HR5 3AX<br>
+        United Kingdom
+      </strong>
+    </p>
+
+    <p>
+      Please include your name, account email, the competition concerned
+      and enough information for us to investigate the matter.
+    </p>
+
+    <h3>26. Contact</h3>
+
+    <p>
+      Questions about these Terms and Conditions can be sent to:
+    </p>
+
+    <p>
+      <strong>reciepts@nexadraw.co.uk</strong>
+    </p>
+
+    <p>
+      Postal correspondence can be sent to:
+    </p>
+
+    <p>
+      <strong>
+        Nexa Draw Limited<br>
+        7 High Street<br>
+        Kington<br>
+        HR5 3AX<br>
+        United Kingdom
+      </strong>
+    </p>
+  `,
+
+
+  privacy: `
+    <p class="eyebrow">
+      LEGAL
+    </p>
+
+    <h2>
+      Privacy Policy
+    </h2>
+
+    <p>
+      <strong>Last updated: 15 September 2026</strong>
+    </p>
+
+    <p>
+      This Privacy Policy explains how Nexa Draw collects, uses and protects
+      personal information when you use nexadraw.co.uk, create an account,
+      enter competitions or contact us.
+    </p>
+
+    <h3>1. Who We Are</h3>
+
+    <p>
+      Nexa Draw is the trading name of
+      <strong>Nexa Draw Limited</strong>.
+    </p>
+
+    <p>
+      Company number:
+      <strong>17442068</strong>
+    </p>
+
+    <p>
+      Registered office:
+      <strong>7 High Street, Kington, HR5 3AX, United Kingdom</strong>
+    </p>
+
+    <p>
+      Nexa Draw Limited is responsible for the personal information
+      collected through nexadraw.co.uk.
+    </p>
+
+    <p>
+      Contact:
+      <strong>reciepts@nexadraw.co.uk</strong>
+    </p>
+
+    <h3>2. Information We May Collect</h3>
+
+    <p>We may collect information including:</p>
+
+    <ul>
+      <li>Your name.</li>
+      <li>Your email address.</li>
+      <li>Your account details.</li>
+      <li>Your competition entries and ticket numbers.</li>
+      <li>Your order and payment status.</li>
+      <li>Your winner and prize information.</li>
+      <li>Messages or enquiries you send to us.</li>
+      <li>Technical information relating to your use of the website.</li>
+    </ul>
+
+    <h3>3. Account Information</h3>
+
+    <p>
+      When you create a Nexa Draw account, we use your information to create
+      and manage your account, authenticate you and provide access to your
+      competition entries and account features.
+    </p>
+
+    <h3>4. Competition Entries</h3>
+
+    <p>
+      We process information relating to your competition entries so that we
+      can administer competitions, issue ticket numbers, determine valid
+      entries, select winners and maintain competition records.
+    </p>
+
+    <h3>5. Payments</h3>
+
+    <p>
+      Where paid competitions are available, payments may be processed by
+      third-party payment service providers.
+    </p>
+
+    <p>
+      Nexa Draw does not need to store your full payment card details where
+      those details are handled securely by the payment provider.
+    </p>
+
+    <p>
+      We may receive limited payment information such as payment status,
+      transaction references and amounts paid.
+    </p>
+
+    <h3>6. Emails and Communications</h3>
+
+    <p>
+      We may use your email address to send important service communications
+      such as account verification, entry confirmations, winner notifications
+      and information relating to competitions you have entered.
+    </p>
+
+    <p>
+      Email communications may be delivered using third-party email service
+      providers.
+    </p>
+
+    <h3>7. Marketing</h3>
+
+    <p>
+      We will only send marketing communications where we have an appropriate
+      lawful basis to do so.
+    </p>
+
+    <p>
+      You can unsubscribe from marketing communications at any time using
+      the unsubscribe option provided or by contacting us.
+    </p>
+
+    <p>
+      Service messages that are necessary to operate your account or
+      competition entries may still be sent.
+    </p>
+
+    <h3>8. How We Use Personal Information</h3>
+
+    <p>We may use personal information to:</p>
+
+    <ul>
+      <li>Create and manage user accounts.</li>
+      <li>Administer competitions and entries.</li>
+      <li>Process and record orders and payments.</li>
+      <li>Issue and manage competition tickets.</li>
+      <li>Select, verify and contact winners.</li>
+      <li>Arrange prize delivery or payment.</li>
+      <li>Respond to enquiries and complaints.</li>
+      <li>Detect and prevent fraud or misuse.</li>
+      <li>Maintain the security of our website and systems.</li>
+      <li>Meet legal, regulatory and accounting obligations.</li>
+      <li>Improve our website and services.</li>
+    </ul>
+
+    <h3>9. Our Lawful Bases</h3>
+
+    <p>
+      Depending on the circumstances, we may process personal information
+      because:
+    </p>
+
+    <ul>
+      <li>It is necessary to perform a contract with you.</li>
+      <li>It is necessary to comply with a legal obligation.</li>
+      <li>We have a legitimate interest in operating and protecting Nexa Draw.</li>
+      <li>You have provided consent where consent is required.</li>
+    </ul>
+
+    <h3>10. Service Providers</h3>
+
+    <p>
+      We may use trusted third-party service providers to help operate
+      Nexa Draw, including providers of website hosting, databases,
+      authentication, email delivery and payment processing.
+    </p>
+
+    <p>
+      These providers may process personal information only as necessary
+      to provide their services and subject to applicable data protection
+      requirements.
+    </p>
+
+    <h3>11. Supabase</h3>
+
+    <p>
+      Nexa Draw uses Supabase for services including database storage,
+      authentication and backend functionality.
+    </p>
+
+    <p>
+      Information relating to your account and competition activity may
+      therefore be processed through Supabase systems.
+    </p>
+
+    <h3>12. Email Delivery</h3>
+
+    <p>
+      Nexa Draw may use third-party email providers, including Resend,
+      to deliver account and competition-related emails.
+    </p>
+
+    <p>
+      Information such as your email address and the content necessary
+      to send the relevant message may be processed by the email provider.
+    </p>
+
+    <h3>13. Payment Providers</h3>
+
+    <p>
+      Where Nexa Draw offers paid entries, payment information may be
+      processed by the payment provider selected by Nexa Draw.
+    </p>
+
+    <p>
+      The payment provider will process information in accordance with
+      its own privacy and security requirements.
+    </p>
+
+    <h3>14. Sharing Personal Information</h3>
+
+    <p>
+      We do not sell your personal information.
+    </p>
+
+    <p>We may share information where necessary with:</p>
+
+    <ul>
+      <li>Service providers acting on our behalf.</li>
+      <li>Payment processors.</li>
+      <li>Email service providers.</li>
+      <li>Professional advisers where necessary.</li>
+      <li>Law enforcement, regulators or public authorities where required.</li>
+    </ul>
+
+    <h3>15. Winner Information</h3>
+
+    <p>
+      We may publish limited information about competition winners where
+      appropriate, including a winner's name, the competition won,
+      winning ticket number and draw date.
+    </p>
+
+    <p>
+      We will not publicly publish a winner's email address, telephone
+      number or home address.
+    </p>
+
+    <h3>16. Data Security</h3>
+
+    <p>
+      Nexa Draw takes reasonable technical and organisational measures
+      to protect personal information against unauthorised access,
+      loss, misuse or disclosure.
+    </p>
+
+    <p>
+      No internet-based service can guarantee complete security, but
+      we take reasonable steps to protect the information we process.
+    </p>
+
+    <h3>17. How Long We Keep Information</h3>
+
+    <p>
+      We keep personal information only for as long as reasonably necessary
+      for the purposes for which it was collected and to meet legal,
+      accounting, fraud-prevention and dispute-resolution requirements.
+    </p>
+
+    <p>
+      Different categories of information may be retained for different
+      periods.
+    </p>
+
+    <h3>18. Your Data Protection Rights</h3>
+
+    <p>
+      Depending on the circumstances, you may have rights including the
+      right to:
+    </p>
+
+    <ul>
+      <li>Request access to your personal information.</li>
+      <li>Request correction of inaccurate information.</li>
+      <li>Request deletion of personal information.</li>
+      <li>Request restriction of processing.</li>
+      <li>Object to certain processing.</li>
+      <li>Request transfer of your information where applicable.</li>
+      <li>Withdraw consent where processing is based on consent.</li>
+    </ul>
+
+    <p>
+      These rights are subject to applicable legal conditions and exemptions.
+    </p>
+
+    <h3>19. Exercising Your Rights</h3>
+
+    <p>
+      To make a privacy request, contact:
+    </p>
+
+    <p>
+      <strong>reciepts@nexadraw.co.uk</strong>
+    </p>
+
+    <p>
+      We may need to verify your identity before responding to a request.
+    </p>
+
+    <h3>20. Cookies and Similar Technologies</h3>
+
+    <p>
+      Nexa Draw may use cookies, local storage and similar technologies
+      where necessary to provide website functionality, maintain sessions
+      and improve the user experience.
+    </p>
+
+    <p>
+      Additional cookie information may be provided separately where required.
+    </p>
+
+    <h3>21. International Processing</h3>
+
+    <p>
+      Some service providers may process information outside the United
+      Kingdom.
+    </p>
+
+    <p>
+      Where required, appropriate safeguards will be used for international
+      transfers of personal information.
+    </p>
+
+    <h3>22. Children</h3>
+
+    <p>
+      Nexa Draw competitions are intended for adults aged 18 or over.
+    </p>
+
+    <p>
+      We do not knowingly allow anyone under 18 to enter competitions.
+    </p>
+
+    <h3>23. Changes to This Privacy Policy</h3>
+
+    <p>
+      We may update this Privacy Policy from time to time to reflect
+      changes to our services, technology or legal requirements.
+    </p>
+
+    <p>
+      The latest version will be made available on nexadraw.co.uk.
+    </p>
+
+    <h3>24. Complaints</h3>
+
+    <p>
+      If you have concerns about how Nexa Draw handles your personal
+      information, please contact us first so that we can investigate.
+    </p>
+
+    <p>
+      You also have the right to raise a complaint with the UK Information
+      Commissioner's Office where applicable.
+    </p>
+
+    <h3>25. Contact</h3>
+
+    <p>
+      For privacy questions or requests, contact:
+    </p>
+
+    <p>
+      <strong>reciepts@nexadraw.co.uk</strong>
+    </p>
+
+    <p>
+      Postal correspondence can be sent to:
+    </p>
+
+    <p>
+      <strong>
+        Nexa Draw Limited<br>
+        7 High Street<br>
+        Kington<br>
+        HR5 3AX<br>
+        United Kingdom
+      </strong>
+    </p>
+  `,
+
+
+  free: `
+    <p class="eyebrow">
+      LEGAL
+    </p>
+
+    <h2>
+      Free Entry Route
+    </h2>
+
+    <p>
+      <strong>Last updated: 15 September 2026</strong>
+    </p>
+
+    <p>
+      Nexa Draw provides a postal free entry route for eligible paid
+      competitions. A valid free postal entry has the same chance of
+      winning as a valid paid entry.
+    </p>
+
+    <h3>1. Who Can Enter</h3>
+
+    <p>
+      Free postal entry is available to eligible entrants aged 18 or over
+      who are legally resident in the United Kingdom, subject to the
+      specific rules of the relevant competition.
+    </p>
+
+    <p>
+      You must have a valid Nexa Draw account before submitting a free
+      postal entry.
+    </p>
+
+    <h3>2. How to Enter for Free</h3>
+
+    <p>
+      To enter an eligible competition without paying the online entry
+      price, send your entry by ordinary first-class or second-class post to:
+    </p>
+
+    <p>
+      <strong>
+        Nexa Draw Limited<br>
+        7 High Street<br>
+        Kington<br>
+        Herefordshire<br>
+        HR5 3AX<br>
+        United Kingdom
+      </strong>
+    </p>
+
+    <p>Your postal entry must clearly include:</p>
+
+    <ul>
+      <li>Your full name.</li>
+      <li>Your date of birth.</li>
+      <li>Your full postal address.</li>
+      <li>The email address registered to your Nexa Draw account.</li>
+      <li>The exact name of the competition you wish to enter.</li>
+      <li>Your answer to the competition question.</li>
+    </ul>
+
+    <p>
+      Please write clearly. Nexa Draw must be able to identify you,
+      your account and the competition you wish to enter.
+    </p>
+
+    <h3>3. One Free Entry Per Person</h3>
+
+    <p>
+      Each eligible person may submit a maximum of
+      <strong>one free postal entry per competition</strong>.
+    </p>
+
+    <p>
+      Multiple free entries submitted by the same person for the same
+      competition may be rejected.
+    </p>
+
+    <h3>4. Postal Requirements</h3>
+
+    <p>
+      Free entries must be sent using ordinary first-class or second-class
+      post.
+    </p>
+
+    <p>
+      There is no requirement to use Special Delivery, Signed For or any
+      other premium postal service.
+    </p>
+
+    <p>
+      The entrant is responsible for the ordinary cost of postage.
+    </p>
+
+    <h3>5. Closing Deadline</h3>
+
+    <p>
+      Postal entries must be received by Nexa Draw before the closing
+      deadline stated for the relevant competition.
+    </p>
+
+    <p>
+      Posting an entry before the closing date does not guarantee that it
+      will arrive before the deadline. Entrants should allow sufficient
+      time for delivery.
+    </p>
+
+    <p>
+      Entries received after the competition has closed will not be included.
+    </p>
+
+    <h3>6. Competition Question</h3>
+
+    <p>
+      Where a competition requires a competition question to be answered,
+      the postal entrant must provide their answer as part of the free entry.
+    </p>
+
+    <p>
+      Where the competition rules require a correct answer, an incorrect
+      answer may result in the entry being rejected.
+    </p>
+
+    <h3>7. Processing Your Free Entry</h3>
+
+    <p>
+      Once a valid postal entry has been received and verified, Nexa Draw
+      will allocate an entry or ticket number to that entrant for the
+      relevant competition.
+    </p>
+
+    <p>
+      The entry will then be included in the competition in the same way
+      as a valid paid entry.
+    </p>
+
+    <p>
+      Nexa Draw may contact the entrant using the email address registered
+      to their account if further information is reasonably required to
+      process the entry.
+    </p>
+
+    <h3>8. Equal Treatment</h3>
+
+    <p>
+      Valid free entries and valid paid entries are treated equally when
+      a winner is selected.
+    </p>
+
+    <p>
+      Paying for an entry does not give an entrant preferential treatment
+      over someone who has submitted a valid free postal entry.
+    </p>
+
+    <h3>9. Invalid Entries</h3>
+
+    <p>A free entry may be rejected if:</p>
+
+    <ul>
+      <li>It is received after the competition closing deadline.</li>
+      <li>Required information is missing or illegible.</li>
+      <li>The entrant cannot be matched to a valid Nexa Draw account.</li>
+      <li>The entrant is under 18 or otherwise ineligible.</li>
+      <li>The wrong competition is identified.</li>
+      <li>A required competition answer is missing or invalid.</li>
+      <li>The entrant has already used their free entry for that competition.</li>
+      <li>The entry does not comply with these instructions.</li>
+    </ul>
+
+    <h3>10. Proof of Posting</h3>
+
+    <p>
+      Proof of posting is not proof that an entry was received by Nexa Draw.
+    </p>
+
+    <p>
+      Nexa Draw cannot be responsible for postal entries that are lost,
+      delayed, damaged or incorrectly addressed before they are received.
+    </p>
+
+    <h3>11. Winner Selection</h3>
+
+    <p>
+      A valid free postal entry will be included in the same winner
+      selection process as every other valid entry in the competition.
+    </p>
+
+    <h3>12. Contact</h3>
+
+    <p>
+      Questions about the Nexa Draw Free Entry Route can be sent to:
+    </p>
+
+    <p>
+      <strong>reciepts@nexadraw.co.uk</strong>
+    </p>
+  `,
+
+
+  responsible: `
+    <p class="eyebrow">
+      CUSTOMER CARE
+    </p>
+
+    <h2>
+      Responsible Play
+    </h2>
+
+    <p>
+      <strong>Last updated: 15 September 2026</strong>
+    </p>
+
+    <p>
+      Nexa Draw competitions are intended to be an enjoyable form of
+      entertainment. We encourage all customers to participate responsibly.
+    </p>
+
+    <h3>1. Age Requirement</h3>
+
+    <p>
+      Nexa Draw competitions are intended only for people aged 18 or over.
+    </p>
+
+    <p>
+      We may request proof of age or identity before allowing participation
+      or releasing a prize.
+    </p>
+
+    <h3>2. Spend Responsibly</h3>
+
+    <p>
+      Never spend more on competition entries than you can comfortably afford.
+    </p>
+
+    <p>
+      Competition entries should never be treated as a way to make money
+      or solve financial difficulties.
+    </p>
+
+    <h3>3. Set Personal Limits</h3>
+
+    <p>
+      Consider setting yourself a personal budget before entering
+      competitions and do not exceed it.
+    </p>
+
+    <p>
+      Take regular breaks and avoid entering competitions when upset,
+      under financial pressure or otherwise unable to make considered
+      decisions.
+    </p>
+
+    <h3>4. Entry Limits</h3>
+
+    <p>
+      Nexa Draw may apply entry limits to individual competitions and may
+      introduce additional customer protection measures where appropriate.
+    </p>
+
+    <h3>5. Account Concerns</h3>
+
+    <p>
+      If you are concerned about your participation or would like help
+      regarding your Nexa Draw account, contact us and we will consider
+      what reasonable account controls are available.
+    </p>
+
+    <h3>6. Protecting Your Account</h3>
+
+    <p>
+      Keep your account login details secure and do not allow anyone under
+      18 to use your Nexa Draw account.
+    </p>
+
+    <p>
+      Contact us promptly if you believe someone else has accessed your
+      account without permission.
+    </p>
+
+    <h3>7. Free Entry</h3>
+
+    <p>
+      Where a competition offers a free entry route, details will be
+      available on the relevant competition page and through the Nexa Draw
+      Free Entry Route information.
+    </p>
+
+    <h3>8. Getting Support</h3>
+
+    <p>
+      If competition participation is causing you financial stress or
+      affecting your wellbeing, consider stopping participation and seeking
+      independent support.
+    </p>
+
+    <h3>9. Contact</h3>
+
+    <p>
+      For responsible participation or account-related enquiries, contact:
+    </p>
+
+    <p>
+      <strong>reciepts@nexadraw.co.uk</strong>
+    </p>
+  `
 
-  <p>
-    Entrants using a free entry route must follow all stated instructions
-    and ensure their entry is received before the applicable closing
-    deadline.
-  </p>
-
-  <p>
-    Free entries that are incomplete, illegible, received late or do
-    not comply with the stated requirements may be rejected.
-  </p>
-
-
-  <h3>5. Competition Questions</h3>
-
-  <p>
-    A competition may require an entrant to answer a question before an
-    entry can be accepted.
-  </p>
-
-  <p>
-    Where the rules of a competition require a correct answer, an
-    incorrect answer may result in the entry being rejected.
-  </p>
-
-
-  <h3>6. Entry Limits</h3>
-
-  <p>
-    Competitions may have a maximum number of entries overall and may
-    also have a maximum number of entries permitted per person.
-  </p>
-
-  <p>
-    Nexa Draw may reject or cancel entries where it reasonably believes
-    that an entrant has attempted to bypass an entry limit through
-    multiple accounts, false identities, automated systems or another
-    unfair method.
-  </p>
-
-
-  <h3>7. Competition Closing Dates</h3>
-
-  <p>
-    The closing date for each competition will be displayed on the
-    relevant competition page.
-  </p>
-
-  <p>
-    Entries received after the applicable closing date will not normally
-    be included.
-  </p>
-
-  <p>
-    Nexa Draw will only amend a closing date or other material competition
-    condition where reasonably necessary and permitted by applicable law.
-  </p>
-
-
-  <h3>8. Payment</h3>
-
-  <p>
-    Where payment is required, payment must be successfully completed
-    using one of the payment methods made available by Nexa Draw.
-  </p>
-
-  <p>
-    An entry may be cancelled if payment is declined, reversed,
-    charged back or otherwise not successfully received.
-  </p>
-
-  <p>
-    Entry prices are displayed in pounds sterling.
-  </p>
-
-
-  <h3>9. Selection of Winners</h3>
-
-  <p>
-    Once a competition has closed, a winner will be selected fairly from
-    all valid eligible entries included in that competition.
-  </p>
-
-  <p>
-    Valid paid entries and valid free entries will be included on an
-    equal basis.
-  </p>
-
-  <p>
-    Nexa Draw will maintain appropriate records of competition results
-    and winning entries.
-  </p>
-
-
-  <h3>10. Winner Notification</h3>
-
-  <p>
-    Winners will be contacted using the contact information associated
-    with their Nexa Draw account.
-  </p>
-
-  <p>
-    Entrants are responsible for keeping their contact details accurate
-    and up to date.
-  </p>
-
-  <p>
-    Before a prize is released, Nexa Draw may require reasonable proof
-    of identity, age, address and eligibility.
-  </p>
-
-  <p>
-    If a winner cannot be contacted after reasonable attempts, fails
-    to provide requested verification, is found to be ineligible or
-    refuses the prize, Nexa Draw may select an alternative winner where
-    permitted.
-  </p>
-
-
-  <h3>11. Publication of Winners</h3>
-
-  <p>
-    Nexa Draw may publish reasonable winner information, including the
-    winner's name, competition won, winning ticket number and draw date.
-  </p>
-
-  <p>
-    Nexa Draw will not publicly display a winner's email address,
-    telephone number, home address or other unnecessary personal
-    information.
-  </p>
-
-
-  <h3>12. Prizes</h3>
-
-  <p>
-    The exact prize offered in each competition will be described on the
-    relevant competition page.
-  </p>
-
-  <p>
-    Nexa Draw may offer prizes including cash, technology products,
-    gaming products, Pokémon products, trading cards, graded cards,
-    sealed collectible products, other collectibles and consumer goods.
-  </p>
-
-  <p>
-    Images used on the website may be illustrative unless expressly
-    stated otherwise.
-  </p>
-
-  <p>
-    Where brand, model, edition, specification, condition, grading,
-    authenticity, packaging or another characteristic is material to
-    the prize, relevant information will be stated on the competition
-    page where available.
-  </p>
-
-  <p>
-    A winner may not demand a cash alternative for a physical prize
-    unless a cash alternative is expressly offered for that competition.
-  </p>
-
-  <p>
-    Where a cash alternative is offered, the amount displayed on the
-    relevant competition page will apply.
-  </p>
-
-
-  <h3>13. Cash Prizes</h3>
-
-  <p>
-    Where the advertised prize is cash, the amount of the cash prize
-    will be clearly stated on the relevant competition page.
-  </p>
-
-  <p>
-    Cash prizes will be paid to the verified winner using a reasonable
-    payment method selected by Nexa Draw.
-  </p>
-
-  <p>
-    Nexa Draw may require the winner to provide identity verification
-    and appropriate payment details before a cash prize is released.
-  </p>
-
-  <p>
-    Nexa Draw will not knowingly send a cash prize to an account or
-    payment method belonging to another person unless reasonably
-    satisfied that it is appropriate and lawful to do so.
-  </p>
-
-
-  <h3>14. Technology and Gaming Prizes</h3>
-
-  <p>
-    Technology and gaming prizes may include items such as smartphones,
-    tablets, laptops, televisions, games consoles, gaming equipment,
-    accessories and other electronic products.
-  </p>
-
-  <p>
-    The relevant competition page will identify the material details of
-    the prize, such as brand, model, storage capacity, specification or
-    condition where applicable.
-  </p>
-
-  <p>
-    Unless otherwise stated, technology prizes will be supplied in the
-    condition described on the competition page.
-  </p>
-
-  <p>
-    Any manufacturer warranty or retailer warranty will be subject to
-    the terms of the relevant manufacturer or retailer and is not
-    provided separately by Nexa Draw unless expressly stated.
-  </p>
-
-
-  <h3>15. Pokémon and Collectible Prizes</h3>
-
-  <p>
-    Pokémon and other collectible prizes may include individual cards,
-    graded cards, sealed products, booster boxes, collections,
-    merchandise or other collectible items.
-  </p>
-
-  <p>
-    Where relevant, the competition page will describe material details
-    such as the item name, set, edition, language, condition, grading
-    company, grade, certification details or whether the product is
-    sealed.
-  </p>
-
-  <p>
-    Where a collectible has been professionally graded, any stated grade
-    will be the grade issued by the grading company identified in the
-    competition description.
-  </p>
-
-  <p>
-    Nexa Draw does not guarantee that a collectible will increase or
-    maintain its market value after the winner receives it.
-  </p>
-
-  <p>
-    Market values of trading cards and collectibles can change over time.
-    Any approximate value stated in connection with a competition is not
-    a guarantee of future resale value.
-  </p>
-
-
-  <h3>16. Prize Delivery or Collection</h3>
-
-  <p>
-    Delivery or collection arrangements will be agreed with the winner
-    following successful verification.
-  </p>
-
-  <p>
-    Any material delivery restrictions or costs payable by the winner
-    will be stated on the relevant competition page where applicable.
-  </p>
-
-  <p>
-    Nexa Draw may require a signature or other confirmation of receipt
-    for valuable prizes.
-  </p>
-
-  <p>
-    Winners are responsible for providing accurate delivery information.
-  </p>
-
-
-  <h3>17. Refunds and Cancellations</h3>
-
-  <p>
-    Competition entries are generally final once successfully submitted,
-    except where a refund is required by law or Nexa Draw chooses to
-    provide one.
-  </p>
-
-  <p>
-    Nexa Draw may cancel, suspend or postpone a competition where
-    circumstances outside its reasonable control make this necessary.
-  </p>
-
-  <p>
-    If a competition is cancelled without a winner being selected,
-    Nexa Draw will communicate what will happen to affected entries and
-    provide refunds where required by law.
-  </p>
-
-
-  <h3>18. Disqualification</h3>
-
-  <p>
-    Nexa Draw may reject or disqualify an entrant where it reasonably
-    believes that the entrant:
-  </p>
-
-  <ul>
-    <li>Has breached these Terms and Conditions.</li>
-    <li>Has provided false or misleading information.</li>
-    <li>Is not eligible to enter.</li>
-    <li>Has attempted to manipulate a competition.</li>
-    <li>Has used bots, scripts or automated entry methods.</li>
-    <li>Has created multiple accounts to bypass restrictions.</li>
-    <li>Has interfered with the website or entry system.</li>
-    <li>Has engaged in fraudulent or abusive behaviour.</li>
-  </ul>
-
-
-  <h3>19. Website Availability</h3>
-
-  <p>
-    Nexa Draw will take reasonable steps to keep its website and
-    competition systems available and secure.
-  </p>
-
-  <p>
-    Nexa Draw cannot guarantee uninterrupted availability and is not
-    responsible for failures caused by an entrant's device, internet
-    connection or other circumstances outside Nexa Draw's reasonable
-    control.
-  </p>
-
-
-  <h3>20. Limitation of Liability</h3>
-
-  <p>
-    Nothing in these Terms excludes or limits liability where it would
-    be unlawful to do so, including liability for death or personal
-    injury caused by negligence, fraud or fraudulent misrepresentation.
-  </p>
-
-  <p>
-    Subject to the above, Nexa Draw will not be responsible for losses
-    that were not reasonably foreseeable when an entrant entered a
-    competition.
-  </p>
-
-  <p>
-    Nothing in these Terms affects an entrant's statutory rights as a
-    consumer.
-  </p>
-
-
-  <h3>21. Personal Information</h3>
-
-  <p>
-    Nexa Draw will process personal information in accordance with its
-    Privacy Policy and applicable UK data protection law.
-  </p>
-
-  <p>
-    Personal information may be used to administer competitions,
-    process entries and payments, verify winners, deliver prizes,
-    prevent fraud and comply with legal obligations.
-  </p>
-
-  <p>
-    Marketing communications will only be sent where Nexa Draw has an
-    appropriate lawful basis to do so, and recipients may unsubscribe
-    from marketing communications.
-  </p>
-
-
-  <h3>22. Responsible Participation</h3>
-
-  <p>
-    Entrants should participate responsibly and should never spend more
-    than they can comfortably afford.
-  </p>
-
-  <p>
-    Nexa Draw may implement entry limits or other responsible
-    participation measures where appropriate.
-  </p>
-
-
-  <h3>23. Changes to These Terms</h3>
-
-  <p>
-    Nexa Draw may update these general Terms and Conditions from time
-    to time.
-  </p>
-
-  <p>
-    The terms applying to an entry will normally be those in force at
-    the time the entry was made, except where a change is required by
-    law or is necessary to correct an obvious error without unfairly
-    disadvantaging entrants.
-  </p>
-
-
-  <h3>24. Governing Law</h3>
-
-  <p>
-    These Terms and Conditions are governed by the laws of England and
-    Wales.
-  </p>
-
-  <p>
-    Entrants living elsewhere in the United Kingdom will retain any
-    mandatory consumer protections that apply where they live.
-  </p>
-
-  <p>
-    Nothing in these Terms affects your statutory rights as a consumer.
-  </p>
-
-
-  <h3>25. Complaints</h3>
-
-  <p>
-    If you have a complaint concerning a competition or Nexa Draw,
-    please contact:
-  </p>
-
-  <p>
-    <strong>hello@nexadraw.co.uk</strong>
-  </p>
-
-  <p>
-    Please include your name, account email, the competition concerned
-    and enough information for us to investigate the matter.
-  </p>
-
-
-  <h3>26. Contact</h3>
-
-  <p>
-    Questions about these Terms and Conditions can be sent to:
-  </p>
-
-  <p>
-    <strong>hello@nexadraw.co.uk</strong>
-  </p>
-`,
-
-   privacy: `
-  <p class="eyebrow">
-    LEGAL
-  </p>
-
-  <h2>
-    Privacy Policy
-  </h2>
-
-  <p>
-    <strong>Last updated: 7 September 2026</strong>
-  </p>
-
-  <p>
-    This Privacy Policy explains how Nexa Draw collects, uses and protects
-    personal information when you use nexadraw.co.uk, create an account,
-    enter competitions or contact us.
-  </p>
-
-<h3>1. Who We Are</h3>
-
-<p>
-  Nexa Draw is the trading name of
-  <strong>Nexa Draw Limited</strong>.
-</p>
-
-<p>
-  Company number:
-  <strong>17442068</strong>
-</p>
-
-<p>
-  Registered office:
-  <strong>[YOUR VERIFIED REGISTERED OFFICE ADDRESS]</strong>
-</p>
-
-<p>
-  Nexa Draw Limited is responsible for the personal information
-  collected through nexadraw.co.uk.
-</p>
-
-<p>
-  Contact:
-  <strong>hello@nexadraw.co.uk</strong>
-</p>
- 
-  <h3>2. Information We May Collect</h3>
-
-  <p>
-    We may collect information including:
-  </p>
-
-  <ul>
-    <li>Your name.</li>
-    <li>Your email address.</li>
-    <li>Your account details.</li>
-    <li>Your competition entries and ticket numbers.</li>
-    <li>Your order and payment status.</li>
-    <li>Your winner and prize information.</li>
-    <li>Messages or enquiries you send to us.</li>
-    <li>Technical information relating to your use of the website.</li>
-  </ul>
-
-  <h3>3. Account Information</h3>
-
-  <p>
-    When you create a Nexa Draw account, we use your information to create
-    and manage your account, authenticate you and provide access to your
-    competition entries and account features.
-  </p>
-
-  <h3>4. Competition Entries</h3>
-
-  <p>
-    We process information relating to your competition entries so that we
-    can administer competitions, issue ticket numbers, determine valid
-    entries, select winners and maintain competition records.
-  </p>
-
-  <h3>5. Payments</h3>
-
-  <p>
-    Where paid competitions are available, payments may be processed by
-    third-party payment service providers.
-  </p>
-
-  <p>
-    Nexa Draw does not need to store your full payment card details where
-    those details are handled securely by the payment provider.
-  </p>
-
-  <p>
-    We may receive limited payment information such as payment status,
-    transaction references and amounts paid.
-  </p>
-
-  <h3>6. Emails and Communications</h3>
-
-  <p>
-    We may use your email address to send important service communications
-    such as account verification, entry confirmations, winner notifications
-    and information relating to competitions you have entered.
-  </p>
-
-  <p>
-    Email communications may be delivered using third-party email service
-    providers.
-  </p>
-
-  <h3>7. Marketing</h3>
-
-  <p>
-    We will only send marketing communications where we have an appropriate
-    lawful basis to do so.
-  </p>
-
-  <p>
-    You can unsubscribe from marketing communications at any time using
-    the unsubscribe option provided or by contacting us.
-  </p>
-
-  <p>
-    Service messages that are necessary to operate your account or
-    competition entries may still be sent.
-  </p>
-
-  <h3>8. How We Use Personal Information</h3>
-
-  <p>
-    We may use personal information to:
-  </p>
-
-  <ul>
-    <li>Create and manage user accounts.</li>
-    <li>Administer competitions and entries.</li>
-    <li>Process and record orders and payments.</li>
-    <li>Issue and manage competition tickets.</li>
-    <li>Select, verify and contact winners.</li>
-    <li>Arrange prize delivery or payment.</li>
-    <li>Respond to enquiries and complaints.</li>
-    <li>Detect and prevent fraud or misuse.</li>
-    <li>Maintain the security of our website and systems.</li>
-    <li>Meet legal, regulatory and accounting obligations.</li>
-    <li>Improve our website and services.</li>
-  </ul>
-
-  <h3>9. Our Lawful Bases</h3>
-
-  <p>
-    Depending on the circumstances, we may process personal information
-    because:
-  </p>
-
-  <ul>
-    <li>It is necessary to perform a contract with you.</li>
-    <li>It is necessary to comply with a legal obligation.</li>
-    <li>We have a legitimate interest in operating and protecting Nexa Draw.</li>
-    <li>You have provided consent where consent is required.</li>
-  </ul>
-
-  <h3>10. Service Providers</h3>
-
-  <p>
-    We may use trusted third-party service providers to help operate
-    Nexa Draw, including providers of website hosting, databases,
-    authentication, email delivery and payment processing.
-  </p>
-
-  <p>
-    These providers may process personal information only as necessary
-    to provide their services and subject to applicable data protection
-    requirements.
-  </p>
-
-  <h3>11. Supabase</h3>
-
-  <p>
-    Nexa Draw uses Supabase for services including database storage,
-    authentication and backend functionality.
-  </p>
-
-  <p>
-    Information relating to your account and competition activity may
-    therefore be processed through Supabase systems.
-  </p>
-
-  <h3>12. Email Delivery</h3>
-
-  <p>
-    Nexa Draw may use third-party email providers, including Resend,
-    to deliver account and competition-related emails.
-  </p>
-
-  <p>
-    Information such as your email address and the content necessary
-    to send the relevant message may be processed by the email provider.
-  </p>
-
-  <h3>13. Payment Providers</h3>
-
-  <p>
-    If Nexa Draw introduces paid entry processing, payment information
-    may be processed by the payment provider selected by Nexa Draw.
-  </p>
-
-  <p>
-    The payment provider will process information in accordance with
-    its own privacy and security requirements.
-  </p>
-
-  <h3>14. Sharing Personal Information</h3>
-
-  <p>
-    We do not sell your personal information.
-  </p>
-
-  <p>
-    We may share information where necessary with:
-  </p>
-
-  <ul>
-    <li>Service providers acting on our behalf.</li>
-    <li>Payment processors.</li>
-    <li>Email service providers.</li>
-    <li>Professional advisers where necessary.</li>
-    <li>Law enforcement, regulators or public authorities where required.</li>
-  </ul>
-
-  <h3>15. Winner Information</h3>
-
-  <p>
-    We may publish limited information about competition winners where
-    appropriate, including a winner's name, the competition won,
-    winning ticket number and draw date.
-  </p>
-
-  <p>
-    We will not publicly publish a winner's email address, telephone
-    number or home address.
-  </p>
-
-  <h3>16. Data Security</h3>
-
-  <p>
-    Nexa Draw takes reasonable technical and organisational measures
-    to protect personal information against unauthorised access,
-    loss, misuse or disclosure.
-  </p>
-
-  <p>
-    No internet-based service can guarantee complete security, but
-    we take reasonable steps to protect the information we process.
-  </p>
-
-  <h3>17. How Long We Keep Information</h3>
-
-  <p>
-    We keep personal information only for as long as reasonably necessary
-    for the purposes for which it was collected and to meet legal,
-    accounting, fraud-prevention and dispute-resolution requirements.
-  </p>
-
-  <p>
-    Different categories of information may be retained for different
-    periods.
-  </p>
-
-  <h3>18. Your Data Protection Rights</h3>
-
-  <p>
-    Depending on the circumstances, you may have rights including the
-    right to:
-  </p>
-
-  <ul>
-    <li>Request access to your personal information.</li>
-    <li>Request correction of inaccurate information.</li>
-    <li>Request deletion of personal information.</li>
-    <li>Request restriction of processing.</li>
-    <li>Object to certain processing.</li>
-    <li>Request transfer of your information where applicable.</li>
-    <li>Withdraw consent where processing is based on consent.</li>
-  </ul>
-
-  <p>
-    These rights are subject to applicable legal conditions and
-    exemptions.
-  </p>
-
-  <h3>19. Exercising Your Rights</h3>
-
-  <p>
-    To make a privacy request, contact:
-  </p>
-
-  <p>
-    <strong>hello@nexadraw.co.uk</strong>
-  </p>
-
-  <p>
-    We may need to verify your identity before responding to a request.
-  </p>
-
-  <h3>20. Cookies and Similar Technologies</h3>
-
-  <p>
-    Nexa Draw may use cookies, local storage and similar technologies
-    where necessary to provide website functionality, maintain sessions
-    and improve the user experience.
-  </p>
-
-  <p>
-    Additional cookie information may be provided separately where
-    required.
-  </p>
-
-  <h3>21. International Processing</h3>
-
-  <p>
-    Some service providers may process information outside the United
-    Kingdom.
-  </p>
-
-  <p>
-    Where required, appropriate safeguards will be used for international
-    transfers of personal information.
-  </p>
-
-  <h3>22. Children</h3>
-
-  <p>
-    Nexa Draw competitions are intended for adults aged 18 or over.
-  </p>
-
-  <p>
-    We do not knowingly allow anyone under 18 to enter competitions.
-  </p>
-
-  <h3>23. Changes to This Privacy Policy</h3>
-
-  <p>
-    We may update this Privacy Policy from time to time to reflect
-    changes to our services, technology or legal requirements.
-  </p>
-
-  <p>
-    The latest version will be made available on nexadraw.co.uk.
-  </p>
-
-  <h3>24. Complaints</h3>
-
-  <p>
-    If you have concerns about how Nexa Draw handles your personal
-    information, please contact us first so that we can investigate.
-  </p>
-
-  <p>
-    You also have the right to raise a complaint with the UK Information
-    Commissioner's Office where applicable.
-  </p>
-
-  <h3>25. Contact</h3>
-
-  <p>
-    For privacy questions or requests, contact:
-  </p>
-
-  <p>
-    <strong>hello@nexadraw.co.uk</strong>
-  </p>
-`,
-
-free: `
-  <p class="eyebrow">
-    LEGAL
-  </p>
-
-  <h2>
-    Free Entry Route
-  </h2>
-
-  <p>
-    <strong>Last updated: 7 September 2026</strong>
-  </p>
-
-  <p>
-    Nexa Draw provides a postal free entry route for eligible paid
-    competitions. A valid free postal entry has the same chance of
-    winning as a valid paid entry.
-  </p>
-
-  <h3>1. Who Can Enter</h3>
-
-  <p>
-    Free postal entry is available to eligible entrants aged 18 or over
-    who are legally resident in the United Kingdom, subject to the
-    specific rules of the relevant competition.
-  </p>
-
-  <p>
-    You must have a valid Nexa Draw account before submitting a free
-    postal entry.
-  </p>
-
-
-  <h3>2. How to Enter for Free</h3>
-
-  <p>
-    To enter an eligible competition without paying the online entry
-    price, send your entry by ordinary first-class or second-class post
-    to:
-  </p>
-
-  <p>
-    <strong>
-      Nexa Draw<br>
-      7 High Street<br>
-      Kington<br>
-      Herefordshire<br>
-      HR5 3AX
-    </strong>
-  </p>
-
-  <p>
-    Your postal entry must clearly include:
-  </p>
-
-  <ul>
-    <li>Your full name.</li>
-    <li>Your date of birth.</li>
-    <li>Your full postal address.</li>
-    <li>The email address registered to your Nexa Draw account.</li>
-    <li>The exact name of the competition you wish to enter.</li>
-    <li>Your answer to the competition question.</li>
-  </ul>
-
-  <p>
-    Please write clearly. Nexa Draw must be able to identify you,
-    your account and the competition you wish to enter.
-  </p>
-
-
-  <h3>3. One Free Entry Per Person</h3>
-
-  <p>
-    Each eligible person may submit a maximum of
-    <strong>one free postal entry per competition</strong>.
-  </p>
-
-  <p>
-    Multiple free entries submitted by the same person for the same
-    competition may be rejected.
-  </p>
-
-
-  <h3>4. Postal Requirements</h3>
-
-  <p>
-    Free entries must be sent using ordinary first-class or second-class
-    post.
-  </p>
-
-  <p>
-    There is no requirement to use Special Delivery, Signed For or any
-    other premium postal service.
-  </p>
-
-  <p>
-    The entrant is responsible for the ordinary cost of postage.
-  </p>
-
-
-  <h3>5. Closing Deadline</h3>
-
-  <p>
-    Postal entries must be received by Nexa Draw before the closing
-    deadline stated for the relevant competition.
-  </p>
-
-  <p>
-    Posting an entry before the closing date does not guarantee that it
-    will arrive before the deadline. Entrants should allow sufficient
-    time for delivery.
-  </p>
-
-  <p>
-    Entries received after the competition has closed will not be
-    included.
-  </p>
-
-
-  <h3>6. Competition Question</h3>
-
-  <p>
-    Where a competition requires a competition question to be answered,
-    the postal entrant must provide their answer as part of the free
-    entry.
-  </p>
-
-  <p>
-    Where the competition rules require a correct answer, an incorrect
-    answer may result in the entry being rejected.
-  </p>
-
-
-  <h3>7. Processing Your Free Entry</h3>
-
-  <p>
-    Once a valid postal entry has been received and verified, Nexa Draw
-    will allocate an entry or ticket number to that entrant for the
-    relevant competition.
-  </p>
-
-  <p>
-    The entry will then be included in the competition in the same way
-    as a valid paid entry.
-  </p>
-
-  <p>
-    Nexa Draw may contact the entrant using the email address registered
-    to their account if further information is reasonably required to
-    process the entry.
-  </p>
-
-
-  <h3>8. Equal Treatment</h3>
-
-  <p>
-    Valid free entries and valid paid entries are treated equally when
-    a winner is selected.
-  </p>
-
-  <p>
-    Paying for an entry does not give an entrant preferential treatment
-    over someone who has submitted a valid free postal entry.
-  </p>
-
-
-  <h3>9. Invalid Entries</h3>
-
-  <p>
-    A free entry may be rejected if:
-  </p>
-
-  <ul>
-    <li>It is received after the competition closing deadline.</li>
-    <li>Required information is missing or illegible.</li>
-    <li>The entrant cannot be matched to a valid Nexa Draw account.</li>
-    <li>The entrant is under 18 or otherwise ineligible.</li>
-    <li>The wrong competition is identified.</li>
-    <li>A required competition answer is missing or invalid.</li>
-    <li>The entrant has already used their free entry for that competition.</li>
-    <li>The entry does not comply with these instructions.</li>
-  </ul>
-
-
-  <h3>10. Proof of Posting</h3>
-
-  <p>
-    Proof of posting is not proof that an entry was received by
-    Nexa Draw.
-  </p>
-
-  <p>
-    Nexa Draw cannot be responsible for postal entries that are lost,
-    delayed, damaged or incorrectly addressed before they are received.
-  </p>
-
-
-  <h3>11. Winner Selection</h3>
-
-  <p>
-    A valid free postal entry will be included in the same winner
-    selection process as every other valid entry in the competition.
-  </p>
-
-
-  <h3>12. Contact</h3>
-
-  <p>
-    Questions about the Nexa Draw Free Entry Route can be sent to:
-  </p>
-
-  <p>
-    <strong>hello@nexadraw.co.uk</strong>
-  </p>
-`,
-
-responsible: `
-  <p class="eyebrow">
-    CUSTOMER CARE
-  </p>
-
-  <h2>
-    Responsible Play
-  </h2>
-
-  <p>
-    <strong>Last updated: 7 September 2026</strong>
-  </p>
-
-  <p>
-    Nexa Draw competitions are intended to be an enjoyable form of
-    entertainment. We encourage all customers to participate responsibly.
-  </p>
-
-  <h3>1. Age Requirement</h3>
-
-  <p>
-    Nexa Draw competitions are intended only for people aged 18 or over.
-  </p>
-
-  <p>
-    We may request proof of age or identity before allowing participation
-    or releasing a prize.
-  </p>
-
-  <h3>2. Spend Responsibly</h3>
-
-  <p>
-    Never spend more on competition entries than you can comfortably
-    afford.
-  </p>
-
-  <p>
-    Competition entries should never be treated as a way to make money
-    or solve financial difficulties.
-  </p>
-
-  <h3>3. Set Personal Limits</h3>
-
-  <p>
-    Consider setting yourself a personal budget before entering
-    competitions and do not exceed it.
-  </p>
-
-  <p>
-    Take regular breaks and avoid entering competitions when upset,
-    under financial pressure or otherwise unable to make considered
-    decisions.
-  </p>
-
-  <h3>4. Entry Limits</h3>
-
-  <p>
-    Nexa Draw may apply entry limits to individual competitions and may
-    introduce additional customer protection measures where appropriate.
-  </p>
-
-  <h3>5. Account Concerns</h3>
-
-  <p>
-    If you are concerned about your participation or would like help
-    regarding your Nexa Draw account, contact us and we will consider
-    what reasonable account controls are available.
-  </p>
-
-  <h3>6. Protecting Your Account</h3>
-
-  <p>
-    Keep your account login details secure and do not allow anyone under
-    18 to use your Nexa Draw account.
-  </p>
-
-  <p>
-    Contact us promptly if you believe someone else has accessed your
-    account without permission.
-  </p>
-
-  <h3>7. Free Entry</h3>
-
-  <p>
-    Where a competition offers a free entry route, details will be
-    available on the relevant competition page and through the Nexa Draw
-    Free Entry Route information.
-  </p>
-
-  <h3>8. Getting Support</h3>
-
-  <p>
-    If competition participation is causing you financial stress or
-    affecting your wellbeing, consider stopping participation and seeking
-    independent support.
-  </p>
-
-  <h3>9. Contact</h3>
-
-  <p>
-    For responsible participation or account-related enquiries, contact:
-  </p>
-
-  <p>
-    <strong>hello@nexadraw.co.uk</strong>
-  </p>
-`
-   
 };
 
 function openLegalPage(key) {
@@ -5682,7 +5674,6 @@ function openLegalPage(key) {
 
   openModal('#legalModal');
 }
-
 
 /* =========================================================
    PAGE EVENTS
