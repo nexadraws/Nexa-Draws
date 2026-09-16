@@ -2207,7 +2207,7 @@ async function checkout() {
 
     widgetContainer.innerHTML = `
       <form
-        action="${window.location.origin}/"
+        action="${window.location.origin}/?payment=return"
         class="paymentWidgets"
         data-brands="VISA MASTER"
       ></form>
