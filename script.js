@@ -2007,7 +2007,7 @@ async function checkout() {
   /*
     PAYMENT TESTING:
     Only the Nexa Draw admin account
-    can access Nochex test checkout.
+    can currently access Nochex checkout.
   */
   const isPaymentTester =
     authUser.id === ADMIN_UID;
@@ -2020,246 +2020,532 @@ async function checkout() {
     return;
   }
 
-  try {
-    const checkoutButton =
-      $('#checkoutBtn');
+  /*
+    NOCHEX BILLING DETAILS
 
-    if (checkoutButton) {
-      checkoutButton.disabled = true;
-      checkoutButton.textContent =
-        'CREATING TEST CHECKOUT...';
-    }
+    These fields have been confirmed
+    by Nochex as mandatory for our
+    merchant configuration.
+  */
+  closeModals();
 
-    /*
-      STEP 1:
-      Create secure pending order.
-    */
-    const items =
-      cart.map(item => ({
-        competition_id:
-          Number(item.id),
+  let billingModal =
+    $('#nochexBillingModal');
 
-        quantity:
-          Number(item.qty)
-      }));
+  if (!billingModal) {
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `
+        <div
+          class="modal"
+          id="nochexBillingModal"
+        >
+          <div class="modal-card">
 
-    const {
-      data: orderData,
-      error: orderError
-    } =
-      await supabaseClient.functions.invoke(
-        'create-order',
-        {
-          body: { items }
-        }
-      );
+            <button
+              class="modal-close"
+              type="button"
+              id="closeNochexBilling"
+              aria-label="Close checkout"
+            >
+              ×
+            </button>
 
-    if (orderError) {
-      console.error(
-        'Create order error:',
-        orderError
-      );
+            <h2>
+              Billing Details
+            </h2>
 
-      alert(
-        await functionErrorMessage(
-          orderError,
-          'The secure order could not be created.'
-        )
-      );
+            <p class="micro">
+              Enter the billing details
+              associated with your payment card.
+            </p>
 
-      return;
-    }
+            <form id="nochexBillingForm">
 
-    if (
-      !orderData?.success ||
-      !orderData?.order?.id
-    ) {
-      alert(
-        orderData?.error ||
-        'The secure order could not be created.'
-      );
+              <label>
+                First name
+                <input
+                  type="text"
+                  id="nochexGivenName"
+                  autocomplete="given-name"
+                  required
+                >
+              </label>
 
-      return;
-    }
+              <label>
+                Surname
+                <input
+                  type="text"
+                  id="nochexSurname"
+                  autocomplete="family-name"
+                  required
+                >
+              </label>
 
-    const orderId =
-      orderData.order.id;
+              <label>
+                Phone number
+                <input
+                  type="tel"
+                  id="nochexPhone"
+                  autocomplete="tel"
+                  required
+                >
+              </label>
 
-    /*
-      STEP 2:
-      Ask our server to create a
-      Nochex CopyPay TEST checkout.
-    */
-    const {
-      data: nochexData,
-      error: nochexError
-    } =
-      await supabaseClient.functions.invoke(
-        'create-nochex-checkout',
-        {
-          body: {
-            order_id: orderId
-          }
-        }
-      );
+              <label>
+                Address line 1
+                <input
+                  type="text"
+                  id="nochexStreet1"
+                  autocomplete="address-line1"
+                  required
+                >
+              </label>
 
-    if (nochexError) {
-      console.error(
-        'Nochex checkout error:',
-        nochexError
-      );
+              <label>
+                City
+                <input
+                  type="text"
+                  id="nochexCity"
+                  autocomplete="address-level2"
+                  required
+                >
+              </label>
 
-      alert(
-        await functionErrorMessage(
-          nochexError,
-          'The Nochex test checkout could not be created.'
-        )
-      );
+              <label>
+                Postcode
+                <input
+                  type="text"
+                  id="nochexPostcode"
+                  autocomplete="postal-code"
+                  required
+                >
+              </label>
 
-      return;
-    }
-
-    if (
-      !nochexData?.success ||
-      !nochexData?.checkout_id
-    ) {
-      console.error(
-        'Invalid Nochex response:',
-        nochexData
-      );
-
-      alert(
-        nochexData?.error ||
-        'The Nochex test checkout could not be created.'
-      );
-
-      return;
-    }
-
-    /*
-      STEP 3:
-      Render Nochex CopyPay TEST widget.
-
-      IMPORTANT:
-      create-nochex-checkout is currently
-      hard-coded to eu-test.oppwa.com.
-    */
-    closeModals();
-
-    let paymentModal =
-      $('#nochexPaymentModal');
-
-    if (!paymentModal) {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        `
-          <div
-            class="modal"
-            id="nochexPaymentModal"
-          >
-            <div class="modal-card">
               <button
-                class="modal-close"
-                type="button"
-                id="closeNochexPayment"
-                aria-label="Close payment"
+                class="btn primary"
+                type="submit"
+                id="continueNochexPayment"
               >
-                ×
+                CONTINUE TO PAYMENT
               </button>
 
-              <h2>
-                Nochex Test Payment
-              </h2>
+            </form>
 
-              <p class="micro">
-                TEST MODE — no real payment
-                will be taken.
-              </p>
-
-              <div
-                id="nochexWidgetContainer"
-              ></div>
-            </div>
           </div>
-        `
+        </div>
+      `
+    );
+
+    billingModal =
+      $('#nochexBillingModal');
+
+    $('#closeNochexBilling')
+      ?.addEventListener(
+        'click',
+        () => {
+          closeModals();
+        }
       );
+  }
 
-      paymentModal =
-        $('#nochexPaymentModal');
+  /*
+    Pre-fill the customer's name where
+    possible, but still allow them to
+    enter/correct the billing name.
+  */
+  const customerName =
+    String(
+      authUser.name ||
+      authUser.user_metadata
+        ?.full_name ||
+      authUser.user_metadata
+        ?.name ||
+      ''
+    ).trim();
 
-      $('#closeNochexPayment')
-  ?.addEventListener(
-    'click',
-    () => {
-      closeModals();
+  if (customerName) {
+    const nameParts =
+      customerName.split(/\s+/);
+
+    const firstName =
+      nameParts.shift() || '';
+
+    const surname =
+      nameParts.join(' ');
+
+    const givenNameInput =
+      $('#nochexGivenName');
+
+    const surnameInput =
+      $('#nochexSurname');
+
+    if (
+      givenNameInput &&
+      !givenNameInput.value
+    ) {
+      givenNameInput.value =
+        firstName;
+    }
+
+    if (
+      surnameInput &&
+      !surnameInput.value
+    ) {
+      surnameInput.value =
+        surname;
+    }
+  }
+
+  openModal('#nochexBillingModal');
+
+  const billingForm =
+    $('#nochexBillingForm');
+
+  if (!billingForm) {
+    alert(
+      'Billing form could not be loaded.'
+    );
+
+    return;
+  }
+
+  /*
+    Replace any previous submit handler
+    by cloning the form.
+  */
+  const freshBillingForm =
+    billingForm.cloneNode(true);
+
+  billingForm.replaceWith(
+    freshBillingForm
+  );
+
+  freshBillingForm.addEventListener(
+    'submit',
+    async event => {
+      event.preventDefault();
+
+      const givenName =
+        $('#nochexGivenName')
+          ?.value.trim();
+
+      const surname =
+        $('#nochexSurname')
+          ?.value.trim();
+
+      const phone =
+        $('#nochexPhone')
+          ?.value.trim();
+
+      const street1 =
+        $('#nochexStreet1')
+          ?.value.trim();
+
+      const city =
+        $('#nochexCity')
+          ?.value.trim();
+
+      const postcode =
+        $('#nochexPostcode')
+          ?.value.trim()
+          .toUpperCase();
+
+      if (
+        !givenName ||
+        !surname ||
+        !phone ||
+        !street1 ||
+        !city ||
+        !postcode
+      ) {
+        alert(
+          'Please complete all billing details.'
+        );
+
+        return;
+      }
+
+      const continueButton =
+        $('#continueNochexPayment');
+
+      try {
+        if (continueButton) {
+          continueButton.disabled =
+            true;
+
+          continueButton.textContent =
+            'CREATING CHECKOUT...';
+        }
+
+        /*
+          STEP 1:
+          Create secure pending order.
+        */
+        const items =
+          cart.map(item => ({
+            competition_id:
+              Number(item.id),
+
+            quantity:
+              Number(item.qty)
+          }));
+
+        const {
+          data: orderData,
+          error: orderError
+        } =
+          await supabaseClient
+            .functions.invoke(
+              'create-order',
+              {
+                body: { items }
+              }
+            );
+
+        if (orderError) {
+          console.error(
+            'Create order error:',
+            orderError
+          );
+
+          alert(
+            await functionErrorMessage(
+              orderError,
+              'The secure order could not be created.'
+            )
+          );
+
+          return;
+        }
+
+        if (
+          !orderData?.success ||
+          !orderData?.order?.id
+        ) {
+          alert(
+            orderData?.error ||
+            'The secure order could not be created.'
+          );
+
+          return;
+        }
+
+        const orderId =
+          orderData.order.id;
+
+        /*
+          STEP 2:
+          Create the Nochex checkout
+          with the customer's real
+          billing/contact details.
+        */
+        const {
+          data: nochexData,
+          error: nochexError
+        } =
+          await supabaseClient
+            .functions.invoke(
+              'create-nochex-checkout',
+              {
+                body: {
+                  order_id:
+                    orderId,
+
+                  given_name:
+                    givenName,
+
+                  surname:
+                    surname,
+
+                  phone:
+                    phone,
+
+                  billing_street1:
+                    street1,
+
+                  billing_city:
+                    city,
+
+                  billing_postcode:
+                    postcode
+                }
+              }
+            );
+
+        if (nochexError) {
+          console.error(
+            'Nochex checkout error:',
+            nochexError
+          );
+
+          alert(
+            await functionErrorMessage(
+              nochexError,
+              'The Nochex checkout could not be created.'
+            )
+          );
+
+          return;
+        }
+
+        if (
+          !nochexData?.success ||
+          !nochexData?.checkout_id
+        ) {
+          console.error(
+            'Invalid Nochex response:',
+            nochexData
+          );
+
+          alert(
+            nochexData?.error ||
+            'The Nochex checkout could not be created.'
+          );
+
+          return;
+        }
+
+        /*
+          STEP 3:
+          Render Nochex CopyPay
+          production widget.
+
+          Returning to the website is
+          NOT proof of payment.
+          Server-side verification is
+          handled separately.
+        */
+        closeModals();
+
+        let paymentModal =
+          $('#nochexPaymentModal');
+
+        if (!paymentModal) {
+          document.body
+            .insertAdjacentHTML(
+              'beforeend',
+              `
+                <div
+                  class="modal"
+                  id="nochexPaymentModal"
+                >
+                  <div class="modal-card">
+
+                    <button
+                      class="modal-close"
+                      type="button"
+                      id="closeNochexPayment"
+                      aria-label="Close payment"
+                    >
+                      ×
+                    </button>
+
+                    <h2>
+                      Secure Payment
+                    </h2>
+
+                    <p class="micro">
+                      Complete your payment
+                      securely with Nochex.
+                    </p>
+
+                    <div
+                      id="nochexWidgetContainer"
+                    ></div>
+
+                  </div>
+                </div>
+              `
+            );
+
+          paymentModal =
+            $('#nochexPaymentModal');
+
+          $('#closeNochexPayment')
+            ?.addEventListener(
+              'click',
+              () => {
+                closeModals();
+              }
+            );
+        }
+
+        const widgetContainer =
+          $('#nochexWidgetContainer');
+
+        if (!widgetContainer) {
+          throw new Error(
+            'Payment container missing'
+          );
+        }
+
+        widgetContainer.innerHTML = `
+          <form
+            action="${window.location.origin}/?payment=return"
+            class="paymentWidgets"
+            data-brands="VISA MASTER"
+          ></form>
+        `;
+
+        /*
+          Remove an old widget script
+          before loading the new checkout.
+        */
+        $('#nochexWidgetScript')
+          ?.remove();
+
+        const script =
+          document.createElement(
+            'script'
+          );
+
+        script.id =
+          'nochexWidgetScript';
+
+        script.src =
+          nochexData
+            .payment_widget_url;
+
+        script.async = true;
+
+        script.onerror = () => {
+          console.error(
+            'Nochex payment widget failed to load'
+          );
+
+          alert(
+            'The Nochex payment form could not be loaded.'
+          );
+        };
+
+        document.body.appendChild(
+          script
+        );
+
+        openModal(
+          '#nochexPaymentModal'
+        );
+      } catch (error) {
+        console.error(
+          'Checkout error:',
+          error
+        );
+
+        alert(
+          'The checkout could not be started.'
+        );
+      } finally {
+        if (continueButton) {
+          continueButton.disabled =
+            false;
+
+          continueButton.textContent =
+            'CONTINUE TO PAYMENT';
+        }
+      }
     }
   );
-    }         
- 
-    const widgetContainer =
-      $('#nochexWidgetContainer');
-
-    if (!widgetContainer) {
-      throw new Error(
-        'Payment container missing'
-      );
-    }
-
-    widgetContainer.innerHTML = `
-      <form
-        action="${window.location.origin}/?payment=return"
-        class="paymentWidgets"
-        data-brands="VISA MASTER"
-      ></form>
-    `;
-
-    /*
-      Remove an old widget script if the
-      tester starts another checkout.
-    */
-    $('#nochexWidgetScript')?.remove();
-
-    const script =
-      document.createElement('script');
-
-    script.id =
-      'nochexWidgetScript';
-
-    script.src =
-      nochexData.payment_widget_url;
-
-    script.async = true;
-
-    script.onerror = () => {
-      console.error(
-        'Nochex payment widget failed to load'
-      );
-
-      alert(
-        'The Nochex test payment form could not be loaded.'
-      );
-    };
-
-    document.body.appendChild(script);
-
-openModal('#nochexPaymentModal');
-
-  } catch (error) {
-    console.error(
-      'Checkout error:',
-      error
-    );
-
-    alert(
-      'The test checkout could not be started.'
-    );
- } finally {
-  const checkoutButton = $('#checkoutBtn');
-
- if (checkoutButton) {
-  checkoutButton.disabled = false;
-}
-}
 }
 
 /* =========================================================
