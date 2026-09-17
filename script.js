@@ -2005,21 +2005,20 @@ async function checkout() {
   }
 
   /*
-    PAYMENT TESTING:
-    Only the Nexa Draw admin account
-    can currently access Nochex checkout.
-  */
-  const isPaymentTester =
-    authUser.id === ADMIN_UID;
 
-  if (!isPaymentTester) {
-    alert(
-      'Checkout is coming soon.'
-    );
+/*
+  PAID CHECKOUT:
+  When payment mode is live, authenticated
+  customers can continue to Nochex.
+*/
+if (PAYMENT_MODE !== 'live') {
+  alert(
+    'Checkout is coming soon.'
+  );
 
-    return;
-  }
-
+  return;
+}
+    
   /*
     NOCHEX BILLING DETAILS
 
