@@ -6449,30 +6449,37 @@ async function handleNochexReturn() {
     return;
   }
 
+  /*
+    TEMPORARY DIAGNOSTIC.
+
+    If this alert appears, we know the
+    latest script.js is running and the
+    payment-return handler has started.
+  */
+  alert(
+    'NEXA DIAGNOSTIC: Payment return detected.'
+  );
+
   const resourcePath =
     params.get('resourcePath');
 
-  /*
-    Nochex should append resourcePath
-    after the shopper submits payment.
-  */
   if (!resourcePath) {
-    console.warn(
-      'Nochex return received without resourcePath'
-    );
-
     alert(
-      'Your payment is still being processed. Please do not try to pay again.'
+      'NEXA DIAGNOSTIC: resourcePath is missing.'
     );
 
     return;
   }
 
-  try {
-    console.log(
-      'Nochex payment return received'
-    );
+  /*
+    If this appears, the returned URL has
+    supplied resourcePath successfully.
+  */
+  alert(
+    'NEXA DIAGNOSTIC: resourcePath detected. Calling verifier now.'
+  );
 
+  try {
     const {
       data,
       error
@@ -6493,7 +6500,7 @@ async function handleNochexReturn() {
       );
 
       alert(
-        'We could not confirm your payment yet. Please do not try to pay again.'
+        'NEXA DIAGNOSTIC: Verifier returned an invocation error.'
       );
 
       return;
@@ -6504,18 +6511,15 @@ async function handleNochexReturn() {
       data
     );
 
+    alert(
+      'NEXA DIAGNOSTIC: Verifier responded. State: ' +
+      String(data?.state || 'unknown')
+    );
+
     if (
       data?.verified &&
       data?.state === 'success'
     ) {
-      /*
-        IMPORTANT:
-        verify-nochex-payment is currently
-        Stage 1 only.
-
-        It verifies the payment but DOES NOT
-        mark the order paid or issue tickets.
-      */
       alert(
         'Payment received and verified. Your order is being processed.'
       );
@@ -6544,11 +6548,10 @@ async function handleNochexReturn() {
     );
 
     alert(
-      'We could not confirm your payment yet. Please do not try to pay again.'
+      'NEXA DIAGNOSTIC: JavaScript error while calling verifier.'
     );
   }
 }
-
 /* =========================================================
    START SITE
    ========================================================= */
