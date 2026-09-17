@@ -4034,11 +4034,10 @@ async function adminView(
                     No competitions.
                   </p>
                 `
-          }
+                   }
 
-              </div>
+        </div>
       </div>
-
 
       <!-- MARKETING EMAIL -->
 
