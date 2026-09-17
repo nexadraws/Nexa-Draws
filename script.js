@@ -4404,17 +4404,98 @@ async function adminView(
   );
 
 
-  /* DRAW WINNER BUTTONS */
+ /* DRAW WINNER BUTTONS */
 
-  $$('[data-winner]').forEach(
-    button => {
-      button.onclick =
-        () =>
-          drawWinnerSecurely(
-            button.dataset.winner
+$$('[data-winner]').forEach(
+  button => {
+    button.onclick =
+      () =>
+        drawWinnerSecurely(
+          button.dataset.winner
+        );
+  }
+);
+
+
+/* MARKETING EMAIL */
+
+const marketingButton =
+  $('#sendMarketingEmail');
+
+if (marketingButton) {
+  marketingButton.onclick =
+    async () => {
+
+      const confirmed =
+        confirm(
+          'Send the Pokémon draw announcement to all customers currently opted in to marketing emails?\n\nThis will send real emails.'
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      marketingButton.disabled = true;
+      marketingButton.textContent =
+        'SENDING...';
+
+      try {
+        const {
+          data,
+          error,
+        } =
+          await supabaseClient
+            .functions
+            .invoke(
+              'send-marketing-email',
+              {
+                body: {},
+              }
+            );
+
+        if (error) {
+          console.error(
+            'Marketing email error:',
+            error
           );
-    }
-  );
+
+          alert(
+            'The marketing email send could not be completed.\n\nCheck the Edge Function logs before trying again.'
+          );
+
+          return;
+        }
+
+        console.log(
+          'Marketing email result:',
+          data
+        );
+
+        alert(
+          `Marketing campaign finished.\n\n` +
+          `Eligible: ${data?.eligible ?? 0}\n` +
+          `Sent: ${data?.sent ?? 0}\n` +
+          `Skipped: ${data?.skipped ?? 0}\n` +
+          `Failed: ${data?.failed ?? 0}`
+        );
+
+      } catch (error) {
+        console.error(
+          'Marketing email unexpected error:',
+          error
+        );
+
+        alert(
+          'Something went wrong while sending the marketing campaign.\n\nCheck the Edge Function logs before trying again.'
+        );
+
+      } finally {
+        marketingButton.disabled = false;
+        marketingButton.textContent =
+          'SEND MARKETING EMAIL';
+      }
+    };
+}
 }
 
 
