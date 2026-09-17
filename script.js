@@ -13,7 +13,7 @@ const SUPABASE_KEY =
 const ADMIN_UID =
   '2b4b64c6-b96f-4b85-bce3-be28c141311e';
 
-const PAYMENT_MODE = 'disabled';
+const PAYMENT_MODE = 'live';
 const PAYMENT_PROVIDER = 'Nochex';
 
 const supabaseClient = window.supabase.createClient(
