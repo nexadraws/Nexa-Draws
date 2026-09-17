@@ -1121,51 +1121,29 @@ async function openCart() {
 
   const checkoutButton = $('#checkoutBtn');
 
-  if (checkoutButton) {
-    const {
-      data: { user: currentUser }
-    } = await supabaseClient.auth.getUser();
+if (checkoutButton) {
+  checkoutButton.disabled =
+    !cart.length ||
+    PAYMENT_MODE !== 'live';
 
-    const isPaymentTester =
-      currentUser?.id === ADMIN_UID;
-
-    checkoutButton.disabled =
-      !cart.length ||
-      (
-        PAYMENT_MODE !== 'live' &&
-        !isPaymentTester
-      );
-
-    checkoutButton.textContent =
-      isPaymentTester
-        ? 'TEST NOCHEX CHECKOUT'
-        : PAYMENT_MODE === 'live'
-          ? 'SECURE CHECKOUT'
-          : 'CHECKOUT — COMING SOON';
-  }
-
-  const micro =
-    $('#cartModal .micro');
-
-  if (micro) {
-    const {
-      data: { user: currentUser }
-    } = await supabaseClient.auth.getUser();
-
-    const isPaymentTester =
-      currentUser?.id === ADMIN_UID;
-
-    micro.innerHTML =
-      isPaymentTester
-        ? 'Nochex TEST MODE — no real payment will be taken.'
-        : PAYMENT_MODE === 'live'
-          ? `Secure payment powered by ${escapeHtml(PAYMENT_PROVIDER)}.`
-          : 'Payment setup is being prepared. No card or wallet can be charged yet.';
-  }
-
-  openModal('#cartModal');
+  checkoutButton.textContent =
+    PAYMENT_MODE === 'live'
+      ? 'SECURE CHECKOUT'
+      : 'CHECKOUT — COMING SOON';
 }
 
+const micro =
+  $('#cartModal .micro');
+
+if (micro) {
+  micro.innerHTML =
+    PAYMENT_MODE === 'live'
+      ? `Secure payment powered by ${escapeHtml(PAYMENT_PROVIDER)}.`
+      : 'Payment setup is being prepared. Checkout is currently unavailable.';
+}
+
+openModal('#cartModal');
+}
 /* =========================================================
    CUSTOMER ACCOUNT
    ========================================================= */
@@ -2005,8 +1983,7 @@ async function checkout() {
   }
 
   /*
-
-/*
+  
   PAID CHECKOUT:
   When payment mode is live, authenticated
   customers can continue to Nochex.
