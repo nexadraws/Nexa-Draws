@@ -6550,4 +6550,68 @@ async function startNexaDraw() {
   await loadCompetitionsFromSupabase();
 }
 
+// =========================================================
+// TEMPORARY NOCHEX RECONCILIATION TEST
+// REMOVE AFTER TESTING
+// =========================================================
+
+window.testNochexReconciliation = async function () {
+  const orderId =
+    '51fd8ae5-9e46-4f1e-ada8-f3437545d5eb';
+
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+
+  if (!session) {
+    alert('TEST: You are not logged in.');
+    return;
+  }
+
+  if (session.user.id !== ADMIN_UID) {
+    alert('TEST: You are not logged in as admin.');
+    return;
+  }
+
+  alert(
+    'TEST: Calling reconciliation for the UNPAID order now.'
+  );
+
+  const { data, error } =
+    await supabaseClient.functions.invoke(
+      'reconcile-nochex-payment',
+      {
+        body: {
+          order_id: orderId
+        }
+      }
+    );
+
+  if (error) {
+    console.error(
+      'Reconciliation test error:',
+      error
+    );
+
+    alert(
+      await functionErrorMessage(
+        error,
+        'TEST: Reconciliation invocation failed.'
+      )
+    );
+
+    return;
+  }
+
+  console.log(
+    'Reconciliation test result:',
+    data
+  );
+
+  alert(
+    'TEST RESULT:\n\n' +
+    JSON.stringify(data, null, 2)
+  );
+};
+
 startNexaDraw();
