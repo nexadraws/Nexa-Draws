@@ -6430,10 +6430,11 @@ document.addEventListener(
   initAgeGate
 );
 
-document.addEventListener(
-  'DOMContentLoaded',
-  handleNochexReturn
-);
+// TEMPORARY RECONCILIATION TEST
+// document.addEventListener(
+//   'DOMContentLoaded',
+//   handleNochexReturn
+// );
 
 async function handleNochexReturn() {
   const params =
