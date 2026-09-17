@@ -6430,6 +6430,125 @@ document.addEventListener(
   initAgeGate
 );
 
+document.addEventListener(
+  'DOMContentLoaded',
+  handleNochexReturn
+);
+
+async function handleNochexReturn() {
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const isPaymentReturn =
+    params.get('payment') ===
+    'return';
+
+  if (!isPaymentReturn) {
+    return;
+  }
+
+  const resourcePath =
+    params.get('resourcePath');
+
+  /*
+    Nochex should append resourcePath
+    after the shopper submits payment.
+  */
+  if (!resourcePath) {
+    console.warn(
+      'Nochex return received without resourcePath'
+    );
+
+    alert(
+      'Your payment is still being processed. Please do not try to pay again.'
+    );
+
+    return;
+  }
+
+  try {
+    console.log(
+      'Nochex payment return received'
+    );
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.functions.invoke(
+        'verify-nochex-payment',
+        {
+          body: {
+            resourcePath
+          }
+        }
+      );
+
+    if (error) {
+      console.error(
+        'Nochex verification error:',
+        error
+      );
+
+      alert(
+        'We could not confirm your payment yet. Please do not try to pay again.'
+      );
+
+      return;
+    }
+
+    console.log(
+      'Nochex verification response:',
+      data
+    );
+
+    if (
+      data?.verified &&
+      data?.state === 'success'
+    ) {
+      /*
+        IMPORTANT:
+        verify-nochex-payment is currently
+        Stage 1 only.
+
+        It verifies the payment but DOES NOT
+        mark the order paid or issue tickets.
+      */
+      alert(
+        'Payment received and verified. Your order is being processed.'
+      );
+
+      return;
+    }
+
+    if (
+      data?.verified &&
+      data?.state === 'pending'
+    ) {
+      alert(
+        'Your payment is still being processed. Please do not try to pay again.'
+      );
+
+      return;
+    }
+
+    alert(
+      'We could not confirm the payment. Please do not try to pay again.'
+    );
+  } catch (error) {
+    console.error(
+      'Nochex return error:',
+      error
+    );
+
+    alert(
+      'We could not confirm your payment yet. Please do not try to pay again.'
+    );
+  }
+}
+
 /* =========================================================
    START SITE
    ========================================================= */
