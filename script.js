@@ -2036,7 +2036,7 @@ if (PAYMENT_MODE !== 'live') {
               associated with your payment card.
             </p>
 
-            <form id="nochexBillingForm">
+            <form id="nochexBillingForm" class="nochex-billing-form">
 
               <label>
                 First name
