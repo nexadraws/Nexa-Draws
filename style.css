@@ -513,3 +513,56 @@ body.age-locked {
     object-position: center;
   }
 }
+
+/* =========================
+   NOCHEX BILLING DETAILS
+   ========================= */
+
+.nochex-billing-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.nochex-billing-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.nochex-billing-form input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+}
+
+/* Phone and address full width */
+.nochex-billing-form label:nth-of-type(3),
+.nochex-billing-form label:nth-of-type(4) {
+  grid-column: 1 / -1;
+}
+
+/* Continue button full width */
+.nochex-billing-form .btn {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-top: 6px;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .nochex-billing-form {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .nochex-billing-form label,
+  .nochex-billing-form label:nth-of-type(3),
+  .nochex-billing-form label:nth-of-type(4),
+  .nochex-billing-form .btn {
+    grid-column: 1;
+  }
+}
