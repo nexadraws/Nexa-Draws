@@ -6449,37 +6449,26 @@ async function handleNochexReturn() {
     return;
   }
 
-  /*
-    TEMPORARY DIAGNOSTIC.
-
-    If this alert appears, we know the
-    latest script.js is running and the
-    payment-return handler has started.
-  */
-  alert(
-    'NEXA DIAGNOSTIC: Payment return detected.'
-  );
-
   const resourcePath =
     params.get('resourcePath');
 
   if (!resourcePath) {
+    console.warn(
+      'Nochex return received without resourcePath'
+    );
+
     alert(
-      'NEXA DIAGNOSTIC: resourcePath is missing.'
+      'Your payment is still being processed. Please do not try to pay again.'
     );
 
     return;
   }
 
-  /*
-    If this appears, the returned URL has
-    supplied resourcePath successfully.
-  */
-  alert(
-    'NEXA DIAGNOSTIC: resourcePath detected. Calling verifier now.'
-  );
-
   try {
+    console.log(
+      'Nochex payment return received'
+    );
+
     const {
       data,
       error
@@ -6500,7 +6489,7 @@ async function handleNochexReturn() {
       );
 
       alert(
-        'NEXA DIAGNOSTIC: Verifier returned an invocation error.'
+        'We could not confirm your payment yet. Please do not try to pay again.'
       );
 
       return;
@@ -6509,11 +6498,6 @@ async function handleNochexReturn() {
     console.log(
       'Nochex verification response:',
       data
-    );
-
-    alert(
-      'NEXA DIAGNOSTIC: Verifier responded. State: ' +
-      String(data?.state || 'unknown')
     );
 
     if (
@@ -6548,7 +6532,7 @@ async function handleNochexReturn() {
     );
 
     alert(
-      'NEXA DIAGNOSTIC: JavaScript error while calling verifier.'
+      'We could not confirm your payment yet. Please do not try to pay again.'
     );
   }
 }
