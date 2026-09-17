@@ -4439,18 +4439,40 @@ if (marketingButton) {
         'SENDING...';
 
       try {
-        const {
-          data,
-          error,
-        } =
-          await supabaseClient
-            .functions
-            .invoke(
-              'send-marketing-email',
-              {
-                body: {},
-              }
-            );
+       const {
+  data: sessionData,
+  error: sessionError,
+} =
+  await supabaseClient.auth
+    .getSession();
+
+if (
+  sessionError ||
+  !sessionData.session
+) {
+  alert(
+    'Your admin session could not be verified. Please log in again.'
+  );
+
+  return;
+}
+
+const {
+  data,
+  error,
+} =
+  await supabaseClient
+    .functions
+    .invoke(
+      'send-marketing-email',
+      {
+        body: {},
+        headers: {
+          Authorization:
+            `Bearer ${sessionData.session.access_token}`,
+        },
+      }
+    );
 
         if (error) {
           console.error(
