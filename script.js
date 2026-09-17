@@ -6452,13 +6452,30 @@ async function handleNochexReturn() {
   const resourcePath =
     params.get('resourcePath');
 
+  /*
+    Remove the payment-return parameters from
+    the address bar so refreshing the page does
+    not attempt verification again.
+  */
+  const clearPaymentReturnUrl = () => {
+    window.history.replaceState(
+      {},
+      document.title,
+      window.location.pathname
+    );
+  };
+
   if (!resourcePath) {
     console.warn(
       'Nochex return received without resourcePath'
     );
 
+    clearPaymentReturnUrl();
+
     alert(
-      'Your payment is still being processed. Please do not try to pay again.'
+      'Payment received — we are confirming your entry.\n\n' +
+      'Please do not make another payment. ' +
+      'Your entry will appear in My Account once confirmation is complete.'
     );
 
     return;
@@ -6488,8 +6505,12 @@ async function handleNochexReturn() {
         error
       );
 
+      clearPaymentReturnUrl();
+
       alert(
-        'We could not confirm your payment yet. Please do not try to pay again.'
+        'Payment received — we are confirming your entry.\n\n' +
+        'Please do not make another payment. ' +
+        'Your entry will appear in My Account once confirmation is complete.'
       );
 
       return;
@@ -6504,9 +6525,25 @@ async function handleNochexReturn() {
       data?.verified &&
       data?.state === 'success'
     ) {
+      /*
+        Payment has been securely verified
+        and the order has been finalized.
+      */
+      store.set('nexa_cart', []);
+      cart = [];
+      updateCartCount();
+
+      clearPaymentReturnUrl();
+
+      await loadCompetitionsFromSupabase();
+
       alert(
-        'Payment received and verified. Your order is being processed.'
+        'Payment confirmed!\n\n' +
+        'Your competition entry has been created and your ticket is saved in My Account.'
       );
+
+      await renderAccount(false);
+      openModal('#accountModal');
 
       return;
     }
@@ -6515,15 +6552,32 @@ async function handleNochexReturn() {
       data?.verified &&
       data?.state === 'pending'
     ) {
+      clearPaymentReturnUrl();
+
       alert(
-        'Your payment is still being processed. Please do not try to pay again.'
+        'Payment received — we are confirming your entry.\n\n' +
+        'Please do not make another payment. ' +
+        'Your entry will appear in My Account once confirmation is complete.'
       );
 
       return;
     }
 
+    /*
+      Nochex can occasionally return before the
+      completed payment is available through the
+      checkout-status request.
+
+      Do NOT describe this as a failed payment.
+      Automatic server-side reconciliation will
+      safely check the payment again.
+    */
+    clearPaymentReturnUrl();
+
     alert(
-      'We could not confirm the payment. Please do not try to pay again.'
+      'Payment received — we are confirming your entry.\n\n' +
+      'Please do not make another payment. ' +
+      'Your entry will appear in My Account once confirmation is complete.'
     );
   } catch (error) {
     console.error(
@@ -6531,11 +6585,16 @@ async function handleNochexReturn() {
       error
     );
 
+    clearPaymentReturnUrl();
+
     alert(
-      'We could not confirm your payment yet. Please do not try to pay again.'
+      'Payment received — we are confirming your entry.\n\n' +
+      'Please do not make another payment. ' +
+      'Your entry will appear in My Account once confirmation is complete.'
     );
   }
 }
+
 /* =========================================================
    START SITE
    ========================================================= */
