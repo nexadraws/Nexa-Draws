@@ -6558,7 +6558,7 @@ async function startNexaDraw() {
 
 window.testNochexReconciliation = async function () {
   const orderId =
-    '51fd8ae5-9e46-4f1e-ada8-f3437545d5eb';
+  '51fd8ae5-9e46-4f1e-ada8-f3437545d5eb';
 
   const {
     data: { session }
