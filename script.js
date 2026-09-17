@@ -4036,7 +4036,35 @@ async function adminView(
                 `
           }
 
-        </div>
+              </div>
+      </div>
+
+
+      <!-- MARKETING EMAIL -->
+
+      <div
+        style="
+          margin-top: 24px;
+          padding-top: 20px;
+          border-top: 1px solid rgba(255,255,255,0.12);
+        "
+      >
+        <h3>
+          Marketing
+        </h3>
+
+        <p class="micro">
+          Send the current Pokémon draw
+          announcement to opted-in customers.
+        </p>
+
+        <button
+          class="btn outline"
+          type="button"
+          id="sendMarketingEmail"
+        >
+          SEND MARKETING EMAIL
+        </button>
       </div>
 
     </div>
