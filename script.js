@@ -6556,9 +6556,11 @@ async function startNexaDraw() {
 // REMOVE AFTER TESTING
 // =========================================================
 
-window.testNochexReconciliation = async function () {
- const orderId =
-  '41ed7f1d-9f85-4563-826c-3f9abbbc2315';
+window.testNochexReconciliation = async function (orderId) {
+  if (!orderId) {
+    alert('TEST: Order ID is required.');
+    return;
+  }
 
   const {
     data: { session }
