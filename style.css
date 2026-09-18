@@ -552,6 +552,14 @@ body.age-locked {
   margin-top: 6px;
 }
 
+.nochex-billing-form label {
+  color: #000;
+}
+
+.nochex-billing-form input {
+  color: #000;
+}
+
 /* Mobile */
 @media (max-width: 600px) {
   .nochex-billing-form {
