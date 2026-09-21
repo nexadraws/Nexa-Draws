@@ -2475,66 +2475,23 @@ if (
   before the CopyPay widget script loads.
 */
 
-         // TEMPORARY APPLE PAY DEBUG
-window.addEventListener('error', function (event) {
-  alert(
-    'APPLE PAY DEBUG:\n\n' +
-    (event.message || 'Unknown JavaScript error') +
-    '\n\nFile: ' + (event.filename || 'unknown') +
-    '\nLine: ' + (event.lineno || 'unknown')
-  );
-});
-
-window.addEventListener('unhandledrejection', function (event) {
-  const reason =
-    event.reason?.message ||
-    String(event.reason || 'Unknown promise error');
-
-  alert(
-    'APPLE PAY PROMISE ERROR:\n\n' +
-    reason
-  );
-});
-         
+     
          window.wpwlOptions = {
   applePay: {
     version: 3,
-
-    checkAvailability:
-      'canMakePayments',
-
+    checkAvailability: 'canMakePayments',
     buttonSource: 'js',
-
-    buttonStyle:
-      'white-outline',
-
+    buttonStyle: 'white-outline',
     buttonType: 'buy',
-
-    displayName:
-      'Nexa Draw',
-total:
-    orderTotal.toFixed(2),
-
-    currencyCode:
-      'GBP',
-
+    displayName: 'Nexa Draw',
+    total: orderTotal.toFixed(2),
+    currencyCode: 'GBP',
     merchantCapabilities: [
       'supports3DS'
     ],
-
     supportedNetworks: [
       'masterCard',
       'visa'
-    ],
-
-    onCancel: function () {
-      console.log(
-        'Apple Pay cancelled'
-      );
-    },
-
-    requiredBillingContactFields: [
-      'postalAddress'
     ]
   }
 };
