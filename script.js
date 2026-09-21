@@ -2474,7 +2474,29 @@ if (
   Apple Pay configuration must exist
   before the CopyPay widget script loads.
 */
-window.wpwlOptions = {
+
+         // TEMPORARY APPLE PAY DEBUG
+window.addEventListener('error', function (event) {
+  alert(
+    'APPLE PAY DEBUG:\n\n' +
+    (event.message || 'Unknown JavaScript error') +
+    '\n\nFile: ' + (event.filename || 'unknown') +
+    '\nLine: ' + (event.lineno || 'unknown')
+  );
+});
+
+window.addEventListener('unhandledrejection', function (event) {
+  const reason =
+    event.reason?.message ||
+    String(event.reason || 'Unknown promise error');
+
+  alert(
+    'APPLE PAY PROMISE ERROR:\n\n' +
+    reason
+  );
+});
+         
+         window.wpwlOptions = {
   applePay: {
     version: 3,
 
