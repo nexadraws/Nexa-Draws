@@ -4780,6 +4780,115 @@ const edit =
   );
 
 
+   /* INSTANT WIN FULFILMENT BUTTONS */
+
+$$('[data-instant-win-id]').forEach(
+  button => {
+    button.onclick =
+      async () => {
+
+        if (!(await isAdminSession())) {
+          alert(
+            'Administrator access required.'
+          );
+          return;
+        }
+
+        const winId =
+          Number(
+            button.dataset.instantWinId
+          );
+
+        const newStatus =
+          String(
+            button.dataset.instantWinStatus ||
+            ''
+          );
+
+        if (
+          !winId ||
+          !['fulfilled', 'paid'].includes(
+            newStatus
+          )
+        ) {
+          alert(
+            'Invalid instant-win update.'
+          );
+          return;
+        }
+
+        const actionText =
+          newStatus === 'paid'
+            ? 'mark this cash prize as PAID'
+            : 'mark this prize as FULFILLED';
+
+        const confirmed =
+          confirm(
+            `Are you sure you want to ${actionText}?`
+          );
+
+        if (!confirmed) {
+          return;
+        }
+
+        button.disabled = true;
+        button.textContent =
+          'UPDATING...';
+
+        try {
+
+          const {
+            data,
+            error
+          } =
+            await supabaseClient.rpc(
+              'update_instant_win_fulfilment',
+              {
+                p_win_id: winId,
+                p_new_status: newStatus
+              }
+            );
+
+          if (error) {
+            throw error;
+          }
+
+          if (!data?.success) {
+            throw new Error(
+              'The instant-win status could not be updated.'
+            );
+          }
+
+          toast(
+            newStatus === 'paid'
+              ? 'Prize marked as paid'
+              : 'Prize marked as fulfilled'
+          );
+
+          await adminView();
+
+        } catch (error) {
+
+          console.error(
+            'Instant win fulfilment error:',
+            error
+          );
+
+          alert(
+            'The instant-win status could not be updated. No change has been made.'
+          );
+
+          button.disabled = false;
+
+          button.textContent =
+            newStatus === 'paid'
+              ? 'MARK PAID'
+              : 'MARK FULFILLED';
+        }
+      };
+  }
+);
+
  /* DRAW WINNER BUTTONS */
 
 $$('[data-winner]').forEach(
