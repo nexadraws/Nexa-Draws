@@ -3763,6 +3763,30 @@ async function loadAdminWinners() {
     : [];
 }
 
+         async function loadAdminInstantWins() {
+  if (!(await isAdminSession())) {
+    return [];
+  }
+
+  const { data, error } =
+    await supabaseClient.rpc(
+      'get_admin_instant_wins'
+    );
+
+  if (error) {
+    console.error(
+      'Admin instant wins error:',
+      error
+    );
+
+    return [];
+  }
+
+  return Array.isArray(data)
+    ? data
+    : [];
+}
+
 
 /* =========================================================
    ADMIN DASHBOARD
@@ -3788,10 +3812,13 @@ async function adminView(
 
   await loadCompetitionsFromSupabase();
 
-  const adminWinners =
-    await loadAdminWinners();
+ const adminWinners =
+  await loadAdminWinners();
 
-  const edit =
+const adminInstantWins =
+  await loadAdminInstantWins();
+
+const edit =
     editId
       ? competitions.find(
           item =>
@@ -4303,6 +4330,175 @@ async function adminView(
 
     </div>
 
+<!-- INSTANT WIN MANAGEMENT -->
+
+<div style="margin-top: 32px;">
+
+  <h3>
+    ⚡ Instant Wins
+  </h3>
+
+  <p class="micro">
+    Manage instant-win prize fulfilment.
+  </p>
+
+  <div class="admin-list">
+
+    ${
+      adminInstantWins.length
+        ? adminInstantWins.map(
+            win => {
+
+              const status =
+                String(
+                  win.fulfilment_status || ''
+                );
+
+              const complete =
+                status === 'fulfilled' ||
+                status === 'paid';
+
+              const actionLabel =
+                win.prize_type === 'cash'
+                  ? 'MARK PAID'
+                  : 'MARK FULFILLED';
+
+              const newStatus =
+                win.prize_type === 'cash'
+                  ? 'paid'
+                  : 'fulfilled';
+
+              const statusLabel =
+                status === 'to_pay'
+                  ? 'TO PAY'
+                  : status === 'to_fulfil'
+                    ? 'TO FULFIL'
+                    : status.toUpperCase();
+
+              return `
+                <div class="admin-row">
+
+                  <div>
+
+                    <strong>
+                      ⚡
+                      ${escapeHtml(
+                        win.prize_name ||
+                        'Instant Prize'
+                      )}
+                    </strong>
+
+                    <p>
+                      ${escapeHtml(
+                        win.competition_title ||
+                        'Competition'
+                      )}
+                    </p>
+
+                    <small>
+                      Winner:
+                      <strong>
+                        ${escapeHtml(
+                          win.winner_name ||
+                          'Winner'
+                        )}
+                      </strong>
+                    </small>
+
+                    <br>
+
+                    <small>
+                      Email:
+                      <strong>
+                        ${escapeHtml(
+                          win.winner_email ||
+                          'Unavailable'
+                        )}
+                      </strong>
+                    </small>
+
+                    <br>
+
+                    <small>
+                      Ticket:
+                      <strong>
+                        ${escapeHtml(
+                          win.ticket_number ||
+                          ''
+                        )}
+                      </strong>
+                    </small>
+
+                    <br>
+
+                    <small>
+                      Won:
+                      <strong>
+                        ${escapeHtml(
+                          formatDate(
+                            win.won_at
+                          )
+                        )}
+                      </strong>
+                    </small>
+
+                    <br>
+
+                    <small>
+                      Status:
+                      <strong>
+                        ${escapeHtml(
+                          statusLabel
+                        )}
+                      </strong>
+                    </small>
+
+                  </div>
+
+                  <div style="margin-top: 12px;">
+
+                    ${
+                      complete
+                        ? `
+                          <button
+                            class="btn outline"
+                            disabled
+                          >
+                            ${
+                              status === 'paid'
+                                ? 'PAID ✓'
+                                : 'FULFILLED ✓'
+                            }
+                          </button>
+                        `
+                        : `
+                          <button
+                            class="btn gold"
+                            type="button"
+                            data-instant-win-id="${win.win_id}"
+                            data-instant-win-status="${newStatus}"
+                          >
+                            ${actionLabel}
+                          </button>
+                        `
+                    }
+
+                  </div>
+
+                </div>
+              `;
+            }
+          ).join('')
+        : `
+            <p class="empty">
+              No instant-win prizes have been won yet.
+            </p>
+          `
+    }
+
+  </div>
+
+</div>
 
     <!-- PRIVATE WINNER CONTACT DETAILS -->
 
