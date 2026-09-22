@@ -393,7 +393,143 @@ function renderDraws() {
   });
 }
 
-function showCompetition(id) {
+async function loadInstantWinDisplay(competitionId) {
+  let prizes = [];
+
+  /*
+    Normal visitors use the public RPC.
+    While the instant-win competition is disabled,
+    the logged-in admin can still preview it.
+  */
+  const { data: publicData, error: publicError } =
+    await supabaseClient.rpc(
+      'get_public_instant_win_prizes',
+      {
+        p_competition_id: Number(competitionId)
+      }
+    );
+
+  if (!publicError && Array.isArray(publicData)) {
+    prizes = publicData;
+  }
+
+  /*
+    No public prizes yet?
+    Try the admin-only preview RPC.
+
+    For normal customers this will simply fail safely
+    and nothing will be displayed.
+  */
+  if (!prizes.length) {
+    const { data: adminData, error: adminError } =
+      await supabaseClient.rpc(
+        'get_admin_instant_win_prizes_preview',
+        {
+          p_competition_id: Number(competitionId)
+        }
+      );
+
+    if (!adminError && Array.isArray(adminData)) {
+      prizes = adminData;
+    }
+  }
+
+  if (!prizes.length) {
+    return '';
+  }
+
+  /*
+    Group prizes with the same name.
+
+    Example:
+    Five Gem Pack rows become:
+    Gem Pack Vol. 6 — 5 / 5 LEFT
+  */
+  const grouped = new Map();
+
+  prizes.forEach(prize => {
+    const name = String(
+      prize.prize_name || 'Instant Prize'
+    ).trim();
+
+    const key = name.toLowerCase();
+
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        name,
+        total: 0,
+        left: 0
+      });
+    }
+
+    const group = grouped.get(key);
+
+    group.total += 1;
+
+    if (prize.won !== true) {
+      group.left += 1;
+    }
+  });
+
+  const totalPrizes = prizes.length;
+
+  const totalLeft = prizes.filter(
+    prize => prize.won !== true
+  ).length;
+
+  const rows = [...grouped.values()]
+    .map(prize => {
+      const gone = prize.left === 0;
+
+      return `
+        <div class="instant-win-row ${gone ? 'instant-win-gone' : ''}">
+          <span class="instant-win-name">
+            ${escapeHtml(prize.name)}
+          </span>
+
+          <strong class="instant-win-left">
+            ${
+              gone
+                ? 'WON'
+                : `${prize.left} / ${prize.total} LEFT`
+            }
+          </strong>
+        </div>
+      `;
+    })
+    .join('');
+
+  return `
+    <div class="instant-win-panel">
+      <div class="instant-win-heading">
+        <div>
+          <span class="instant-win-bolt">⚡</span>
+          <strong>${totalPrizes} INSTANT WINS</strong>
+        </div>
+
+        <span class="instant-win-total">
+          ${totalLeft} LEFT
+        </span>
+      </div>
+
+      <p class="instant-win-copy">
+        Win instantly when your ticket lands on an
+        Instant Win prize.
+      </p>
+
+      <div class="instant-win-list">
+        ${rows}
+      </div>
+
+      <p class="instant-win-note">
+        Instant Win tickets remain entered into the
+        main prize draw.
+      </p>
+    </div>
+  `;
+}
+
+async function showCompetition(id) {
   const competition = competitions.find(
     item => item.id === String(id)
   );
@@ -420,9 +556,12 @@ function showCompetition(id) {
 
   const content = $('#competitionContent');
 
-  if (!content) return;
+if (!content) return;
 
-  content.innerHTML = `
+const instantWinHtml =
+  await loadInstantWinDisplay(competition.id);
+
+content.innerHTML = `
     <div class="competition-detail">
       <img
         src="${escapeHtml(competition.image)}"
@@ -460,12 +599,14 @@ function showCompetition(id) {
           </small>
         </div>
 
-        <p>
-          <strong>
-            ${remaining.toLocaleString()}
-          </strong>
-          entries remaining
-        </p>
+<p>
+  <strong>
+    ${remaining.toLocaleString()}
+  </strong>
+  entries remaining
+</p>
+
+${instantWinHtml}
 
         ${
           remaining > 0
