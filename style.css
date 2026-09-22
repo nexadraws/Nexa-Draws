@@ -567,3 +567,129 @@ body.age-locked {
     grid-column: 1;
   }
 }
+
+/* =========================================================
+   INSTANT WINS
+   ========================================================= */
+
+.instant-win-panel {
+  margin: 22px 0;
+  padding: 18px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(212, 175, 55, 0.12),
+      rgba(0, 0, 0, 0.96)
+    );
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  border-radius: 14px;
+}
+
+.instant-win-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.instant-win-heading > div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.instant-win-heading strong {
+  color: #d4af37;
+  font-size: 17px;
+  letter-spacing: 0.6px;
+}
+
+.instant-win-bolt {
+  font-size: 20px;
+}
+
+.instant-win-total {
+  flex-shrink: 0;
+  padding: 5px 9px;
+  background: #d4af37;
+  color: #000;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.instant-win-copy {
+  margin: 0 0 15px;
+  color: #ddd;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.instant-win-list {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.instant-win-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.instant-win-name {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.instant-win-left {
+  flex-shrink: 0;
+  color: #d4af37;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.instant-win-gone {
+  opacity: 0.45;
+}
+
+.instant-win-gone .instant-win-name {
+  text-decoration: line-through;
+}
+
+.instant-win-gone .instant-win-left {
+  color: #aaa;
+}
+
+.instant-win-note {
+  margin: 13px 0 0;
+  color: #aaa;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .instant-win-panel {
+    padding: 15px;
+  }
+
+  .instant-win-heading strong {
+    font-size: 15px;
+  }
+
+  .instant-win-row {
+    align-items: flex-start;
+  }
+
+  .instant-win-name {
+    font-size: 13px;
+  }
+
+  .instant-win-left {
+    font-size: 12px;
+  }
+}
