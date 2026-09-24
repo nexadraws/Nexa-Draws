@@ -2871,27 +2871,43 @@ function publicWinnerName(name) {
 }
 
 
-function renderWinnersTicker(winners = []) {
+async function renderWinnersTicker(winners = []) {
   const track =
     $('#nexaWinnersTrack');
 
   if (!track) return;
 
-  if (!winners.length) {
-    track.innerHTML = `
-      <span>🏆 WINNERS ANNOUNCED HERE</span>
-      <span>⚡ INSTANT WINNERS COMING SOON</span>
+  /*
+    Load public-safe Instant Win winners.
+  */
+  const {
+    data: instantData,
+    error: instantError
+  } = await supabaseClient.rpc(
+    'get_public_instant_winners'
+  );
 
-      <span>🏆 WINNERS ANNOUNCED HERE</span>
-      <span>⚡ INSTANT WINNERS COMING SOON</span>
-    `;
-
-    return;
+  if (instantError) {
+    console.error(
+      'Public instant winners error:',
+      instantError
+    );
   }
 
-  const messages =
-    winners.slice(0, 12).map(
-      winner => `
+  const instantWinners =
+    !instantError &&
+    Array.isArray(instantData)
+      ? instantData
+      : [];
+
+  /*
+    Normal competition winners.
+  */
+  const normalMessages =
+    winners.map(winner => ({
+      date: winner.drawn_at,
+
+      html: `
         <span>
           🏆
           ${escapeHtml(
@@ -2906,11 +2922,63 @@ function renderWinnersTicker(winners = []) {
           )}
         </span>
       `
-    );
+    }));
 
   /*
-    Duplicate the messages so the CSS
-    -50% animation loops seamlessly.
+    Instant Win winners.
+  */
+  const instantMessages =
+    instantWinners.map(winner => ({
+      date: winner.won_at,
+
+      html: `
+        <span>
+          ⚡
+          ${escapeHtml(
+            publicWinnerName(
+              winner.winner_name
+            )
+          )}
+          INSTANTLY WON
+          ${escapeHtml(
+            winner.prize_name ||
+            'AN INSTANT PRIZE'
+          )}
+        </span>
+      `
+    }));
+
+  /*
+    Combine both winner types,
+    newest first.
+  */
+  const messages = [
+    ...normalMessages,
+    ...instantMessages
+  ]
+    .sort(
+      (a, b) =>
+        new Date(b.date || 0) -
+        new Date(a.date || 0)
+    )
+    .slice(0, 20)
+    .map(item => item.html);
+
+  if (!messages.length) {
+    track.innerHTML = `
+      <span>🏆 WINNERS ANNOUNCED HERE</span>
+      <span>⚡ INSTANT WINNERS ANNOUNCED HERE</span>
+
+      <span>🏆 WINNERS ANNOUNCED HERE</span>
+      <span>⚡ INSTANT WINNERS ANNOUNCED HERE</span>
+    `;
+
+    return;
+  }
+
+  /*
+    Duplicate the complete sequence
+    for the seamless scrolling loop.
   */
   track.innerHTML =
     messages.join('') +
@@ -2947,6 +3015,10 @@ async function renderWinners() {
     Array.isArray(data)
       ? data
       : [];
+
+   renderWinnersTicker(
+  publicWinners
+);
 
   host.innerHTML =
     publicWinners.length
