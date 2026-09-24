@@ -1672,15 +1672,90 @@ if (!user) {
           >
         </label>
 
-        <button
+               <button
           class="btn outline full"
           type="submit"
         >
           LOG IN
         </button>
-      </form>
-    `;
 
+        <button
+          class="link-btn"
+          type="button"
+          id="forgotPasswordBtn"
+          style="
+            display:block;
+            margin:16px auto 0;
+          "
+        >
+          FORGOT PASSWORD?
+        </button>
+      </form>
+          `;
+
+$('#forgotPasswordBtn').onclick =
+  async () => {
+    const email = prompt(
+      'Enter the email address for your Nexa Draw account:'
+    );
+
+    if (!email) {
+      return;
+    }
+
+    const cleanEmail =
+      String(email).trim().toLowerCase();
+
+    if (!cleanEmail) {
+      return;
+    }
+
+    const button =
+      $('#forgotPasswordBtn');
+
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'SENDING...';
+    }
+
+    try {
+      const { error } =
+        await supabaseClient.auth
+          .resetPasswordForEmail(
+            cleanEmail,
+            {
+              redirectTo:
+                window.location.origin + '/?reset-password=1'
+            }
+          );
+
+      if (error) {
+        throw error;
+      }
+
+      alert(
+        'Password reset email sent.\n\n' +
+        'Please check your inbox and follow the link to choose a new password.'
+      );
+
+    } catch (error) {
+      console.error(
+        'Password reset error:',
+        error
+      );
+
+      alert(
+        'We could not send the password reset email. Please try again.'
+      );
+
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = 'FORGOT PASSWORD?';
+      }
+    }
+  };
+   
     $('#signupForm').onsubmit =
       async event => {
         event.preventDefault();
@@ -7191,8 +7266,204 @@ async function handleNochexReturn() {
    START SITE
    ========================================================= */
 
+async function handlePasswordRecovery() {
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const isPasswordReset =
+    params.get('reset-password') === '1';
+
+  if (!isPasswordReset) {
+    return false;
+  }
+
+  /*
+    Supabase processes the recovery token from
+    the email link and establishes the recovery
+    session before the customer changes password.
+  */
+  const {
+    data: { session }
+  } =
+    await supabaseClient.auth.getSession();
+
+  if (!session) {
+    alert(
+      'This password reset link is invalid or has expired.\n\n' +
+      'Please request a new password reset email.'
+    );
+
+    window.history.replaceState(
+      {},
+      document.title,
+      window.location.pathname
+    );
+
+    await renderAccount(false);
+    openModal('#accountModal');
+
+    return true;
+  }
+
+  const host =
+    $('#accountContent');
+
+  if (!host) {
+    return true;
+  }
+
+  host.innerHTML = `
+    <p class="eyebrow">
+      MY NEXA
+    </p>
+
+    <h2>
+      Choose a new password
+    </h2>
+
+    <p class="micro">
+      Enter your new Nexa Draw password below.
+    </p>
+
+    <form id="newPasswordForm">
+
+      <label class="field">
+        New password
+
+        <input
+          name="password"
+          type="password"
+          minlength="8"
+          required
+          autocomplete="new-password"
+        >
+      </label>
+
+      <label class="field">
+        Confirm new password
+
+        <input
+          name="confirm_password"
+          type="password"
+          minlength="8"
+          required
+          autocomplete="new-password"
+        >
+      </label>
+
+      <button
+        class="btn gold full"
+        type="submit"
+        id="saveNewPasswordBtn"
+      >
+        SAVE NEW PASSWORD
+      </button>
+
+    </form>
+  `;
+
+  openModal('#accountModal');
+
+  $('#newPasswordForm').onsubmit =
+    async event => {
+      event.preventDefault();
+
+      const formData =
+        new FormData(event.target);
+
+      const password =
+        String(
+          formData.get('password') || ''
+        );
+
+      const confirmPassword =
+        String(
+          formData.get(
+            'confirm_password'
+          ) || ''
+        );
+
+      if (password.length < 8) {
+        alert(
+          'Your new password must be at least 8 characters.'
+        );
+        return;
+      }
+
+      if (
+        password !== confirmPassword
+      ) {
+        alert(
+          'The passwords do not match.'
+        );
+        return;
+      }
+
+      const button =
+        $('#saveNewPasswordBtn');
+
+      if (button) {
+        button.disabled = true;
+        button.textContent =
+          'SAVING...';
+      }
+
+      try {
+        const { error } =
+          await supabaseClient.auth
+            .updateUser({
+              password
+            });
+
+        if (error) {
+          throw error;
+        }
+
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
+
+        alert(
+          'Your password has been changed successfully.'
+        );
+
+        await updateAccountLabel();
+        await renderAccount(false);
+
+      } catch (error) {
+        console.error(
+          'Password update error:',
+          error
+        );
+
+        alert(
+          'Your password could not be changed. Please request a new reset link and try again.'
+        );
+
+        if (button) {
+          button.disabled = false;
+          button.textContent =
+            'SAVE NEW PASSWORD';
+        }
+      }
+    };
+
+  return true;
+}
+
 async function startNexaDraw() {
   updateCartCount();
+
+  const handlingPasswordRecovery =
+    await handlePasswordRecovery();
+
+  if (handlingPasswordRecovery) {
+    return;
+  }
 
   await renderWinners();
 
