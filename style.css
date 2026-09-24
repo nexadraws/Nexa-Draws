@@ -752,3 +752,371 @@ body.age-locked {
     font-size: 12px;
   }
 }
+
+/* =========================================================
+   NEXA DRAW — FINAL HEADER / MOBILE OVERRIDES
+   Keep this at the VERY BOTTOM of style.css
+   ========================================================= */
+
+
+/* ---------- DESKTOP ---------- */
+
+.mobile-header-logo {
+  display: none;
+}
+
+.header-cart {
+  display: none;
+}
+
+
+/* =========================================================
+   MOBILE HEADER
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  /* Main black navigation bar */
+  .topbar {
+    position: relative;
+    top: auto;
+
+    width: 100%;
+    height: 82px;
+    min-height: 82px;
+
+    display: grid;
+    grid-template-columns: 64px 1fr 64px;
+    align-items: center;
+
+    padding: 0 16px;
+    gap: 0;
+
+    background: #080808;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.28);
+
+    z-index: 50;
+  }
+
+
+  /* =========================
+     HAMBURGER
+     ========================= */
+
+  .topbar .menu-btn {
+    grid-column: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    position: relative;
+
+    width: 48px;
+    height: 48px;
+
+    margin: 0;
+    padding: 0;
+
+    background: transparent;
+    border: 0;
+
+    color: #ffffff;
+
+    font-family: Arial, sans-serif;
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1;
+
+    cursor: pointer;
+    z-index: 3;
+  }
+
+
+  /* =========================
+     CENTRE NEXA LOGO
+     ========================= */
+
+  .mobile-header-logo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 120px;
+    height: 68px;
+
+    margin: 0;
+    padding: 0;
+
+    z-index: 2;
+  }
+
+  .mobile-header-logo img {
+    display: block;
+
+    width: 120px;
+    height: 62px;
+
+    object-fit: contain;
+    object-position: center;
+
+    margin: 0;
+    padding: 0;
+  }
+
+
+  /* =========================
+     CART
+     ========================= */
+
+  .header-cart {
+    grid-column: 3;
+
+    justify-self: end;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 6px;
+
+    width: auto;
+    min-width: 58px;
+    height: 48px;
+
+    margin: 0;
+    padding: 0;
+
+    background: transparent;
+    border: 0;
+
+    color: #ffffff;
+
+    cursor: pointer;
+
+    z-index: 3;
+  }
+
+  .header-cart .cart-icon {
+    display: block;
+
+    font-family: Arial, sans-serif;
+    font-size: 22px;
+    line-height: 1;
+  }
+
+
+  /* Gold basket number */
+
+  .header-cart #cartCount {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 27px;
+
+    width: 27px;
+    height: 27px;
+
+    margin: 0;
+    padding: 0;
+
+    border-radius: 50%;
+
+    background: #d4af37;
+    color: #080808;
+
+    font-family: Inter, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+
+  /* =========================================================
+     MOBILE DROPDOWN MENU
+     ========================================================= */
+
+  .topbar #nav {
+    display: none;
+
+    position: absolute;
+    top: 82px;
+    left: 0;
+    right: 0;
+
+    width: 100%;
+
+    margin: 0;
+    padding: 12px 20px 18px;
+
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 0;
+
+    background: #090a0b;
+
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(212,175,55,0.30);
+
+    box-shadow: 0 14px 30px rgba(0,0,0,0.55);
+
+    z-index: 1000;
+  }
+
+
+  /* Your HTML toggles the "open" class */
+
+  .topbar #nav.open {
+    display: flex;
+  }
+
+
+  .topbar #nav a,
+  .topbar #nav .link-btn {
+
+    display: block;
+
+    width: 100%;
+
+    margin: 0;
+    padding: 13px 4px;
+
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+
+    color: #ffffff;
+
+    font-family: Inter, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+
+    text-align: left;
+    text-decoration: none;
+
+    opacity: 1;
+  }
+
+
+  .topbar #nav a:last-child {
+    border-bottom: 0;
+  }
+
+
+  .topbar #nav a.active,
+  .topbar #nav a:hover,
+  .topbar #nav .link-btn:hover {
+
+    color: #d4af37;
+
+    border-bottom-color: rgba(212,175,55,0.25);
+  }
+
+
+  /* Old header pieces — no longer used */
+
+  .topbar .account,
+  .topbar .topbar-actions {
+    display: none !important;
+  }
+
+
+  /* =========================================================
+     MAKE BOTH TICKERS MATCH
+     ========================================================= */
+
+  .nexa-news-track span,
+  .nexa-winners-track span {
+
+    padding-top: 9px;
+    padding-bottom: 9px;
+
+    font-family: Inter, Arial, sans-serif;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    line-height: 1.2;
+
+    letter-spacing: 1.2px;
+  }
+
+
+  .nexa-news-track span {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+
+  .nexa-winners-track span {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 390px) {
+
+  .topbar {
+    height: 76px;
+    min-height: 76px;
+
+    grid-template-columns: 58px 1fr 58px;
+
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+
+
+  .mobile-header-logo {
+    width: 105px;
+    height: 60px;
+  }
+
+
+  .mobile-header-logo img {
+    width: 105px;
+    height: 56px;
+  }
+
+
+  .topbar .menu-btn {
+    font-size: 27px;
+  }
+
+
+  .header-cart .cart-icon {
+    font-size: 20px;
+  }
+
+
+  .header-cart #cartCount {
+    width: 25px;
+    height: 25px;
+
+    flex-basis: 25px;
+
+    font-size: 12px;
+  }
+
+
+  .topbar #nav {
+    top: 76px;
+  }
+
+}
