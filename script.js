@@ -2761,24 +2761,17 @@ if (
   before the CopyPay widget script loads.
 */
 
-     
-         window.wpwlOptions = {
+   window.wpwlOptions = {
   applePay: {
-    version: 3,
-    checkAvailability: 'canMakePayments',
-    buttonSource: 'js',
     buttonStyle: 'white-outline',
-    buttonType: 'buy',
-    displayName: 'Nexa Draw',
-    total: orderTotal.toFixed(2),
-    currencyCode: 'GBP',
-    merchantCapabilities: [
-      'supports3DS'
-    ],
+    buttonSource: 'js',
     supportedNetworks: [
       'masterCard',
       'visa'
-    ]
+    ],
+    total: {
+      label: 'Nexa Draw'
+    }
   }
 };
 
