@@ -92,95 +92,51 @@
 
   <header class="topbar">
 
- 
-    <nav id="nav">
+  <button
+    class="menu-btn"
+    id="menuBtn"
+    type="button"
+    aria-label="Open menu"
+    onclick="document.getElementById('nav').classList.toggle('open')"
+  >
+    ☰
+  </button>
 
-      <a
-        class="active"
-        href="#home"
-      >
-        Home
-      </a>
+  <!-- CENTRE HEADER LOGO -->
+  <a class="mobile-header-logo" href="#home" aria-label="Nexa Draw home">
+    <img src="logo.png" alt="Nexa Draw">
+  </a>
 
-      <a href="#draws">
-        Current Draws
-      </a>
+  <button
+    class="header-cart"
+    id="cartBtn"
+    type="button"
+    aria-label="Open basket"
+  >
+    <span class="cart-icon">🛒</span>
+    <b id="cartCount">0</b>
+  </button>
 
-      <a href="#winners">
-        Winners
-      </a>
+  <nav id="nav">
+    <a class="active" href="#home">Home</a>
+    <a href="#draws">Current Draws</a>
+    <a href="#winners">Winners</a>
 
-      <button
-        class="link-btn"
-        onclick="renderAccount(false);openModal('#accountModal')"
-      >
-        My Account
-      </button>
+    <button
+      class="link-btn"
+      onclick="renderAccount(false);openModal('#accountModal')"
+    >
+      My Account
+    </button>
 
-      <a href="#how">
-        How It Works
-      </a>
+    <a href="#how">How It Works</a>
+    <a href="#about">About Us</a>
+    <a href="#faqs">FAQs</a>
+    <a href="#contact">Contact</a>
+  </nav>
 
-      <a href="#about">
-        About Us
-      </a>
-
-      <a href="#faqs">
-        FAQs
-      </a>
-
-      <a href="#contact">
-        Contact
-      </a>
-
-    </nav>
-
-
-    <div class="account">
-
-      <button
-        class="text-btn"
-        id="accountBtn"
-        type="button"
-      >
-        👤
-        <span id="accountLabel">
-          My Account
-        </span>
-      </button>
-
-    </div>
-
-
-    <div class="topbar-actions">
-
-      <button
-        class="menu-btn"
-        id="menuBtn"
-        type="button"
-        aria-label="Open menu"
-        onclick="document.getElementById('nav').classList.toggle('open')"
-      >
-        ☰
-      </button>
-
-      <button
-        class="text-btn"
-        id="cartBtn"
-        type="button"
-        aria-label="Open basket"
-      >
-        🛒
-        <b id="cartCount">
-          0
-        </b>
-      </button>
-
-    </div>
-
-  </header>
-
-
+</header>
+  
   <!-- =====================================================
        MAIN CONTENT
        ===================================================== -->
