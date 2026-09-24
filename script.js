@@ -2847,6 +2847,76 @@ widgetContainer.innerHTML = `
    WINNERS
    ========================================================= */
 
+function publicWinnerName(name) {
+  const cleanName =
+    String(name || 'Winner')
+      .trim()
+      .replace(/\s+/g, ' ');
+
+  const parts =
+    cleanName.split(' ');
+
+  if (parts.length < 2) {
+    return cleanName;
+  }
+
+  return (
+    parts[0] +
+    ' ' +
+    parts[parts.length - 1]
+      .charAt(0)
+      .toUpperCase() +
+    '.'
+  );
+}
+
+
+function renderWinnersTicker(winners = []) {
+  const track =
+    $('#nexaWinnersTrack');
+
+  if (!track) return;
+
+  if (!winners.length) {
+    track.innerHTML = `
+      <span>🏆 WINNERS ANNOUNCED HERE</span>
+      <span>⚡ INSTANT WINNERS COMING SOON</span>
+
+      <span>🏆 WINNERS ANNOUNCED HERE</span>
+      <span>⚡ INSTANT WINNERS COMING SOON</span>
+    `;
+
+    return;
+  }
+
+  const messages =
+    winners.slice(0, 12).map(
+      winner => `
+        <span>
+          🏆
+          ${escapeHtml(
+            publicWinnerName(
+              winner.winner_name
+            )
+          )}
+          WON
+          ${escapeHtml(
+            winner.prize ||
+            'A NEXA DRAW PRIZE'
+          )}
+        </span>
+      `
+    );
+
+  /*
+    Duplicate the messages so the CSS
+    -50% animation loops seamlessly.
+  */
+  track.innerHTML =
+    messages.join('') +
+    messages.join('');
+}
+
 async function renderWinners() {
   const host =
     $('#winnerGrid');
