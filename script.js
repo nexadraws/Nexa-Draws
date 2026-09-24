@@ -2151,6 +2151,76 @@ async function updateAccountLabel() {
    CHECKOUT
    ========================================================= */
 
+async function loadCustomerBillingDetails(userId) {
+  const { data, error } =
+    await supabaseClient
+      .from('customer_billing_details')
+      .select(
+        'given_name,surname,phone,billing_street1,billing_city,billing_postcode'
+      )
+      .eq('user_id', userId)
+      .maybeSingle();
+
+  if (error) {
+    console.error(
+      'Billing details load error:',
+      error
+    );
+
+    return null;
+  }
+
+  return data || null;
+}
+
+
+async function saveCustomerBillingDetails(
+  userId,
+  details
+) {
+  const { error } =
+    await supabaseClient
+      .from('customer_billing_details')
+      .upsert(
+        {
+          user_id: userId,
+
+          given_name:
+            details.given_name,
+
+          surname:
+            details.surname,
+
+          phone:
+            details.phone,
+
+          billing_street1:
+            details.billing_street1,
+
+          billing_city:
+            details.billing_city,
+
+          billing_postcode:
+            details.billing_postcode,
+
+          updated_at:
+            new Date().toISOString()
+        },
+        {
+          onConflict: 'user_id'
+        }
+      );
+
+  if (error) {
+    console.error(
+      'Billing details save error:',
+      error
+    );
+
+    throw error;
+  }
+}
+
 async function checkout() {
   /*
     FREE COMPETITIONS ARE NOT
