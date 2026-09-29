@@ -1,22 +1,26 @@
-# NexaDraw Flight Challenge (development)
-
-This branch isolates the skill-game prototype from the existing draw/instant-win system.
-
-## Security model
-- Browser never writes a verified score.
-- `start-flight-attempt` creates a one-use server-side attempt for the authenticated user.
-- Client records input ticks only.
-- `verify-flight-attempt` re-simulates the fixed-step game and computes the authoritative score.
-- RLS provides no client INSERT/UPDATE access to `skill_attempts`.
-- A consumed attempt cannot be submitted twice.
+# NexaDraw Flight Challenge
 
 ## Current mode
-TEST ONLY. The start function refuses to mint attempts if the competition is changed to `live`. Payment entitlement consumption must be implemented before live paid play.
+TEST MODE remains enabled. Do not set the competition to `live` until Nochex APC/callback confirmation has been tested end-to-end.
 
-## Supabase setup required
-1. Apply `supabase/migrations/20260929_skill_flight.sql`.
-2. Deploy `supabase/functions/start-flight-attempt/index.ts`.
-3. Deploy `supabase/functions/verify-flight-attempt/index.ts`.
-4. Test with an authenticated NexaDraw account.
+## Planned paid product
+- Prize: £150.
+- Closing date: 15 October 2026.
+- £1 purchase grants exactly 2 attempt credits.
+- Each attempt is one-use and server-issued.
+- The leaderboard uses the player's best server-verified score.
 
-Do not put the service-role key in browser code. Supabase provides it to Edge Functions as a server-side environment secret.
+## Payment trust boundary
+The browser/return URL is never proof of payment. A server-side Nochex APC/callback handler must:
+1. identify an existing pending order created for the authenticated user;
+2. verify the APC with Nochex using Nochex's documented verification flow;
+3. require the expected merchant, GBP currency and exact £1.00 amount;
+4. store the provider transaction ID uniquely (idempotency);
+5. mark the purchase `paid` and grant 2 credits only after verification;
+6. handle refund/chargeback/cancel states without minting more credits.
+
+Do not put Nochex secrets or the Supabase service-role key in browser code.
+
+## Deployment
+Apply migrations in timestamp order and deploy Edge Functions from `supabase/functions`.
+The repository contains the paid entitlement data model and live-mode credit consumption, but no live payment is enabled until the Nochex callback details are configured and verified.
