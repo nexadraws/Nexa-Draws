@@ -4131,12 +4131,22 @@ const edit =
         </h2>
       </div>
 
-      <button
-        class="btn outline"
-        id="adminLogout"
-      >
-        LOG OUT
-      </button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+        <a
+          class="btn gold"
+          href="flight-game.html"
+          title="Open the Flight Challenge test game"
+        >
+          FLIGHT GAME
+        </a>
+
+        <button
+          class="btn outline"
+          id="adminLogout"
+        >
+          LOG OUT
+        </button>
+      </div>
     </div>
 
 
