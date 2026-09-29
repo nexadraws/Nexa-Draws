@@ -80,9 +80,9 @@ Deno.serve(async (req) => {
       purchase_id: purchase.id,
       order_reference: purchase.order_reference,
       checkout_id: String(data.id),
-      amount: "1.00",
+      amount: (amountPence / 100).toFixed(2),
       currency: "GBP",
-      attempts: 2,
+      attempts,
       payment_widget_url: `https://eu-prod.oppwa.com/v1/paymentWidgets.js?checkoutId=${encodeURIComponent(String(data.id))}`,
     });
   } catch (e) {
