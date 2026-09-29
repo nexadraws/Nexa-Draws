@@ -5,7 +5,7 @@ const seq=[.42,.56,.35,.61,.47,.31,.53,.39,.58,.44,.34,.50];
 function gateY(i:number){return 92+seq[i%seq.length]*(H-GROUND-184)}
 function simulate(taps:number[],endTick:number){
  let y=H*.48,vy=0,spawn=.75,score=0,gi=0,dead=false; const pipes:any[]=[]; let ti=0;
- for(let tick=0;tick<=endTick&&tick<120*60*20;tick++){
+ for(let tick=0;tick<endTick&&tick<120*60*20;tick++){
   while(ti<taps.length&&taps[ti]===tick){vy=FLAP;ti++}
   vy+=GRAVITY*DT;y+=vy*DT;spawn-=DT;
   if(spawn<=0){pipes.push({x:W+20,cy:gateY(gi++),passed:false});spawn+=SPAWN}
