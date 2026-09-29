@@ -4,7 +4,7 @@
  const SUPABASE_KEY='sb_publishable_kO22Zj703int4nZp8ha9jg_hwgz5f9X';
  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
  const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),scoreEl=document.getElementById('score'),bestEl=document.getElementById('best');
- const leaderboardList=document.getElementById('leaderboardList');
+ const leaderboardList=document.getElementById('leaderboardList'),leaderboardStatus=document.getElementById('leaderboardStatus');
  const overlay=document.getElementById('overlay'),title=document.getElementById('overlayTitle'),copy=document.getElementById('overlayText'),play=document.getElementById('playBtn'),restart=document.getElementById('restartBtn');
  const W=900,H=520,ground=54,DT=1/120,cfg={gravity:1550,flap:-470,speed:220,gap:170,pipeW:86,spawn:1.48,birdX:210,radius:19};
  const seq=[.42,.56,.35,.61,.47,.31,.53,.39,.58,.44,.34,.50];
@@ -22,9 +22,11 @@
  function shortPlayer(id){return id?'Player '+String(id).slice(0,4).toUpperCase():'Player'}
  async function loadLeaderboard(){
    if(!leaderboardList)return;
+   if(leaderboardStatus)leaderboardStatus.textContent='Refreshing…';
    const {data,error}=await sb.from('skill_leaderboard').select('user_id,best_score').eq('competition_slug','flight-challenge-250').order('best_score',{ascending:false}).limit(10);
-   if(error){leaderboardList.innerHTML='<p class="leaderboard-empty">Leaderboard will appear here when available.</p>';return}
-   if(!data?.length){leaderboardList.innerHTML='<p class="leaderboard-empty">No verified scores yet. Set the first one!</p>';return}
+   if(error){leaderboardList.innerHTML='<p class="leaderboard-empty">Leaderboard will appear here when available.</p>';if(leaderboardStatus)leaderboardStatus.textContent='Refresh unavailable.';return}
+   if(!data?.length){leaderboardList.innerHTML='<p class="leaderboard-empty">No verified scores yet. Set the first one!</p>';if(leaderboardStatus)leaderboardStatus.textContent='Updates automatically.';return}
+   if(leaderboardStatus)leaderboardStatus.textContent='Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' · auto-refresh 15s';
    leaderboardList.innerHTML=data.map((row,i)=>'<div class="leaderboard-row"><span class="leaderboard-rank">'+(i<3?['🥇','🥈','🥉'][i]:'#'+(i+1))+'</span><span class="leaderboard-name">'+shortPlayer(row.user_id)+'<small>VERIFIED</small></span><strong class="leaderboard-score">'+Number(row.best_score||0)+'</strong></div>').join('');
  }
  async function countdown(){title.textContent='GET READY';copy.textContent='3';overlay.classList.remove('hidden');for(const n of ['3','2','1']){copy.textContent=n;await wait(700)}copy.textContent='GO!';await wait(350);overlay.classList.add('hidden')}
@@ -83,5 +85,5 @@
  }
  function loop(t){if(!running)return;if(!last)last=t;acc+=Math.min((t-last)/1000,.1);last=t;while(acc>=DT&&running){step();acc-=DT}draw();if(running)requestAnimationFrame(loop)}
  play.addEventListener('click',start);restart.addEventListener('click',()=>{if(!running)start()});canvas.addEventListener('pointerdown',e=>{e.preventDefault();flap()});window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();flap()}});
- setupHD();reset();draw();loadLeaderboard();window.addEventListener('resize',()=>{setupHD();draw()});
+ setupHD();reset();draw();loadLeaderboard();setInterval(()=>{if(!document.hidden)loadLeaderboard()},15000);window.addEventListener('resize',()=>{setupHD();draw()});
 })();
