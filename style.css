@@ -1136,3 +1136,27 @@ body.age-locked {
 .flight-bird:before{content:"";position:absolute;left:20px;bottom:-13px;width:45px;height:29px;border:2px solid #c98b13;border-radius:65% 35% 65% 35%;background:linear-gradient(145deg,#090909,#2d2d2d 45%,#050505);transform:rotate(18deg);box-shadow:0 4px 8px rgba(0,0,0,.45)}
 .flight-bird:after{right:-29px;border-left-color:#f2b52c;filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}
 .flight-bird i{color:#ffd55e;text-shadow:0 2px 4px #000;z-index:3}.flight-bird b{position:relative;z-index:4;color:#f7c638;text-shadow:0 2px 4px #000}
+
+/* Cinematic Flight Challenge homepage showcase */
+.flight-showcase{display:block;min-height:430px;padding:0;background:#050505;border-color:#8a6418}
+.flight-showcase-link{position:relative;display:block;min-height:430px;overflow:hidden;color:inherit;text-decoration:none;background:linear-gradient(90deg,#050607 0%,#080909 39%,rgba(8,8,7,.78) 52%,rgba(18,12,4,.2) 73%),radial-gradient(circle at 86% 44%,#ffd96b 0,#d99017 9%,#5c3608 24%,#11100d 53%,#050505 78%)}
+.flight-showcase-link:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,199,55,.08) 49%,transparent 62%);pointer-events:none}
+.flight-showcase-link:hover .flight-preview-cta{transform:translateY(-2px);box-shadow:0 10px 34px rgba(230,166,38,.3)}
+.flight-showcase-link:hover .flight-bird{transform:translate(8px,-4px) rotate(-7deg)}
+.flight-showcase .flight-coming-copy{position:relative;z-index:8;width:54%;max-width:720px;padding:46px 0 42px 7%}
+.flight-showcase .flight-coming-copy h2{font-size:clamp(48px,6.2vw,82px);letter-spacing:-.045em;text-shadow:0 4px 18px #000}
+.flight-tagline{margin:0 0 17px!important;color:#f1d080!important;font-size:13px!important;font-weight:800;letter-spacing:.34em!important}
+.flight-prize{display:inline-flex;align-items:center;gap:18px;margin:4px 0 13px;padding:10px 20px;border:1px solid #b98925;border-radius:10px;background:linear-gradient(180deg,rgba(50,37,13,.8),rgba(10,9,6,.86));box-shadow:inset 0 0 25px rgba(255,196,55,.08)}
+.flight-prize small{color:#e6d4a1;font-size:10px;font-weight:800;letter-spacing:.14em}.flight-prize strong{font:900 36px/1 Montserrat,sans-serif;color:#ffd35d;text-shadow:0 0 18px rgba(255,196,55,.28)}
+.flight-showcase .flight-coming-meta{margin:14px 0 21px}.flight-showcase .flight-coming-meta span{font-size:10px;background:rgba(0,0,0,.56);backdrop-filter:blur(4px)}
+.flight-preview-cta{display:inline-flex;align-items:center;gap:17px;padding:14px 22px;border:1px solid #ffdc73;border-radius:999px;background:linear-gradient(180deg,#ffd76c,#d99a24);color:#171006;font-size:12px;font-weight:900;letter-spacing:.06em;box-shadow:0 8px 24px rgba(0,0,0,.35);transition:.2s ease}.flight-preview-cta b{font-size:24px;line-height:10px}
+.flight-showcase .flight-coming-art{width:58%;height:100%;opacity:1;background:radial-gradient(ellipse at 72% 94%,rgba(244,171,32,.32),transparent 45%),linear-gradient(180deg,transparent 58%,rgba(0,0,0,.62))}
+.flight-showcase .flight-sun{right:9%;top:14%;width:255px;height:255px;filter:saturate(1.15)}
+.flight-mountain{position:absolute;bottom:0;width:430px;height:250px;background:linear-gradient(135deg,#080909 15%,#33200a 58%,#080807 100%);clip-path:polygon(0 100%,18% 63%,29% 72%,48% 18%,62% 54%,73% 42%,100% 100%);filter:drop-shadow(0 -3px 8px rgba(255,184,44,.15))}
+.fm-one{right:-20px}.fm-two{right:280px;bottom:-35px;transform:scale(.8);opacity:.75}
+.flight-ring{position:absolute;border:7px solid #f7bd3b;border-radius:50%;box-shadow:inset 0 0 12px #fff0a0,0 0 12px #ffd45b,0 0 32px rgba(255,169,21,.75);transform:rotateY(38deg)}
+.fr-one{right:4%;top:17%;width:190px;height:260px}.fr-two{right:29%;top:45%;width:104px;height:142px}.fr-three{right:43%;top:57%;width:62px;height:86px}.fr-four{right:51%;top:64%;width:35px;height:49px;border-width:4px}
+.flight-showcase .flight-bird{right:25%;top:36%;width:112px;height:78px;z-index:6;transition:.25s ease;box-shadow:inset 0 0 16px rgba(255,255,255,.12),0 12px 28px rgba(0,0,0,.55),0 0 38px rgba(255,195,48,.5)}
+.flight-showcase .flight-bird:before{width:65px;height:39px;left:27px;bottom:-18px}.flight-showcase .flight-bird:after{right:-36px;border-left-width:36px;border-top-width:13px;border-bottom-width:13px}
+.flight-speed-line{position:absolute;z-index:4;height:2px;background:linear-gradient(90deg,transparent,#ffd360,transparent);transform:rotate(-10deg);filter:drop-shadow(0 0 5px #ffc43e)}.sl-one{width:230px;right:35%;top:45%}.sl-two{width:160px;right:39%;top:53%}
+@media(max-width:800px){.flight-showcase,.flight-showcase-link{min-height:600px}.flight-showcase .flight-coming-copy{width:100%;padding:32px 6%;text-align:left}.flight-showcase .flight-coming-copy h2{font-size:clamp(43px,14vw,64px)}.flight-showcase .flight-coming-art{width:100%;height:270px;bottom:0;top:auto}.flight-showcase .flight-sun{right:4%;top:5%;width:190px;height:190px}.flight-showcase .flight-bird{right:43%;top:36%;width:86px;height:60px}.fr-one{width:130px;height:185px;right:2%;top:11%}.fr-two{right:32%;top:48%;width:72px;height:100px}.fr-three{right:52%;top:60%}.fr-four{display:none}.flight-prize strong{font-size:31px}}
