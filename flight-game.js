@@ -4,7 +4,7 @@
  const SUPABASE_KEY='sb_publishable_kO22Zj703int4nZp8ha9jg_hwgz5f9X';
  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
  const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),scoreEl=document.getElementById('score'),bestEl=document.getElementById('best');
- const leaderboardList=document.getElementById('leaderboardList'),leaderboardStatus=document.getElementById('leaderboardStatus');
+ const leaderboardList=document.getElementById('leaderboardList'),leaderboardStatus=document.getElementById('leaderboardStatus'),attemptBalance=document.getElementById('attemptBalance');
  const overlay=document.getElementById('overlay'),title=document.getElementById('overlayTitle'),copy=document.getElementById('overlayText'),play=document.getElementById('playBtn'),restart=document.getElementById('restartBtn'),packageBtns=[...document.querySelectorAll('.package-btn')],checkoutStatus=document.getElementById('checkoutStatus'),paymentBox=document.getElementById('flightPayment'),paymentMount=document.getElementById('paymentMount'),closePayment=document.getElementById('closePayment');
  const W=900,H=520,ground=54,DT=1/120,cfg={gravity:1550,flap:-470,speed:220,gap:170,pipeW:86,spawn:1.48,birdX:210,radius:19};
  const seq=[.42,.56,.35,.61,.47,.31,.53,.39,.58,.44,.34,.50];
@@ -27,6 +27,16 @@
    if(!data?.length){leaderboardList.innerHTML='<p class="leaderboard-empty">No verified scores yet. Set the first one!</p>';if(leaderboardStatus)leaderboardStatus.textContent='Updates automatically.';return}
    if(leaderboardStatus)leaderboardStatus.textContent='Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' · auto-refresh 15s';
    leaderboardList.innerHTML=data.map((row,i)=>'<div class="leaderboard-row"><span class="leaderboard-rank">'+(i<3?['🥇','🥈','🥉'][i]:'#'+(i+1))+'</span><span class="leaderboard-name">'+String(row.player_label||'Player')+'<small>VERIFIED</small></span><strong class="leaderboard-score">'+Number(row.best_score||0)+'</strong></div>').join('');
+ }
+ async function loadAttemptBalance(){
+   if(!attemptBalance)return;
+   const {data:{session}}=await sb.auth.getSession();
+   if(!session){attemptBalance.textContent='Sign in to see your attempts.';return}
+   try{
+     const {data,error}=await sb.functions.invoke('get-flight-status',{body:{},headers:{Authorization:`Bearer ${session.access_token}`}});
+     if(error||!data?.success)throw error||new Error(data?.error||'Status unavailable');
+     attemptBalance.textContent=data.mode==='test'?'Unlimited test attempts':data.attempts_remaining+' attempt'+(data.attempts_remaining===1?'':'s')+' remaining';
+   }catch(_){attemptBalance.textContent='Attempt balance unavailable.'}
  }
  async function countdown(){title.textContent='GET READY';copy.textContent='3';overlay.classList.remove('hidden');for(const n of ['3','2','1']){copy.textContent=n;await wait(700)}copy.textContent='GO!';await wait(350);overlay.classList.add('hidden')}
  async function start(){
@@ -55,7 +65,7 @@
      }catch(_){if(!message&&error?.message)message=error.message}
      title.textContent='UNABLE TO START';copy.textContent=message||'The attempt could not be started.';play.textContent='TRY AGAIN';play.disabled=false;return
    }
-   attemptId=data.attempt.id;reset();await countdown();waitingForFirstFlap=true;title.textContent='YOUR TURN';copy.textContent='Click, tap or press Space to make the first move.';overlay.classList.remove('hidden');play.style.display='none';play.disabled=false;
+   attemptId=data.attempt.id;if(data.mode==='test'&&attemptBalance)attemptBalance.textContent='Unlimited test attempts';else if(Number.isFinite(data.attempts_remaining)&&attemptBalance)attemptBalance.textContent=data.attempts_remaining+' attempt'+(data.attempts_remaining===1?'':'s')+' remaining';reset();await countdown();waitingForFirstFlap=true;title.textContent='YOUR TURN';copy.textContent='Click, tap or press Space to make the first move.';overlay.classList.remove('hidden');play.style.display='none';play.disabled=false;
  }
  function flap(){if(waitingForFirstFlap){waitingForFirstFlap=false;overlay.classList.add('hidden');play.style.display='';running=true;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap;requestAnimationFrame(loop);return}if(!running)return;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap}
  function gateY(i){return 92+seq[i%seq.length]*(H-ground-184)}
@@ -148,5 +158,5 @@
  }
  packageBtns.forEach(btn=>btn.addEventListener('click',()=>createPackageCheckout(btn.dataset.package)));if(closePayment)closePayment.addEventListener('click',()=>{paymentBox.hidden=true;paymentMount.innerHTML=''});
  play.addEventListener('click',start);restart.addEventListener('click',()=>{if(!running)start()});overlay.addEventListener('pointerdown',e=>{if(waitingForFirstFlap&&e.target!==play){e.preventDefault();flap()}});canvas.addEventListener('pointerdown',e=>{e.preventDefault();flap()});window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();flap()}});
- setupHD();reset();draw();loadLeaderboard();setInterval(()=>{if(!document.hidden)loadLeaderboard()},15000);window.addEventListener('resize',()=>{setupHD();draw()});
+ setupHD();reset();draw();loadLeaderboard();loadAttemptBalance();sb.auth.onAuthStateChange(()=>loadAttemptBalance());setInterval(()=>{if(!document.hidden)loadLeaderboard()},15000);window.addEventListener('resize',()=>{setupHD();draw()});
 })();
