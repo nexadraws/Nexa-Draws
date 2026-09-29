@@ -1,46 +1,39 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#080808">
-  <title>NexaDraw Flight Challenge — Test</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="flight-game.css">
-</head>
-<body>
-  <main class="game-shell">
-    <header class="game-header">
-      <a href="index.html" class="brand"><img src="logo.png" alt="Nexa Draw"></a>
-      <div class="title"><span>FLIGHT CHALLENGE</span><strong>SKILL COMPETITION — TEST MODE</strong></div>
-      <div class="prize"><span>MAIN PRIZE</span><strong>£250</strong></div>
-    </header>
-
-    <section class="scorebar" aria-label="Game score">
-      <div><span>SCORE</span><strong id="score">0</strong></div>
-      <div><span>BEST</span><strong id="best">0</strong></div>
-      <button id="restartBtn" type="button">RESTART</button>
-    </section>
-
-    <section class="stage-wrap">
-      <canvas id="game" width="900" height="520" aria-label="NexaDraw Flight Challenge game"></canvas>
-      <div class="overlay" id="overlay">
-        <img src="logo.png" alt="" class="overlay-logo">
-        <h1 id="overlayTitle">FLIGHT CHALLENGE</h1>
-        <p id="overlayText">Pass as many gates as you can. Tap, click or press Space to fly.</p>
-        <button id="playBtn" type="button">PLAY TEST</button>
-        <small>Test mode — no payment or prize entry is created.</small>
-      </div>
-    </section>
-
-    <section class="instructions">
-      <div><b>1</b><span><strong>TAP TO FLY</strong>Tap, click or press Space.</span></div>
-      <div><b>2</b><span><strong>PASS THE GATES</strong>Each gate passed adds 1 point.</span></div>
-      <div><b>3</b><span><strong>SET YOUR SCORE</strong>Your local test best is saved on this device.</span></div>
-    </section>
-  </main>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>\n  <script src="flight-game.js"></script>
-</body>
-</html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090603">
+<title>NexaDraw Flight Challenge — Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="flight-game.css?v=3"></head><body>
+<main class="game-shell">
+<header class="game-header">
+<a href="index.html" class="brand"><img src="logo.png" alt="Nexa Draw"><small>PLAY &nbsp;•&nbsp; COMPETE &nbsp;•&nbsp; WIN</small></a>
+<div class="title"><h1>FLIGHT CHALLENGE</h1><strong>SKILL COMPETITION</strong><em>TEST MODE</em></div>
+<div class="prize"><span>MAIN PRIZE</span><strong>£250</strong></div>
+</header>
+<div class="content-grid">
+<section class="left-column">
+<div class="stage-wrap">
+<canvas id="game" width="900" height="520" aria-label="NexaDraw Flight Challenge game"></canvas>
+<div class="hud hud-score"><span>SCORE</span><strong id="score">0</strong></div>
+<div class="hud hud-best"><span>♛ BEST</span><strong id="best">0</strong></div>
+<div class="overlay" id="overlay"><img src="logo.png" alt="" class="overlay-logo"><h1 id="overlayTitle">FLIGHT CHALLENGE</h1><p id="overlayText">Pass as many gates as you can. Tap, click or press Space to fly.</p><button id="playBtn" type="button">▶ PLAY TEST</button><small>Test mode — no payment or prize entry is created.</small></div>
+</div>
+<section class="verify-panel"><h2>HOW A VALID ATTEMPT IS VERIFIED</h2><div class="verify-flow">
+<div><i>£</i><b>1. TEST ATTEMPT</b><span>No payment in test mode.</span></div><mark>➜</mark>
+<div><i>🎮</i><b>2. PLAY GAME</b><span>Your inputs are recorded.</span></div><mark>➜</mark>
+<div><i>▦</i><b>3. SERVER SIMULATION</b><span>The server replays the run.</span></div><mark>➜</mark>
+<div><i>◆</i><b>4. ANTI-CHEAT CHECK</b><span>Replay is validated.</span></div><mark>➜</mark>
+<div><i>●</i><b>5. SCORE RECORDED</b><span>Verified scores are saved.</span></div>
+</div></section>
+</section>
+<aside class="security-panel"><h2>ANTI-CHEAT PROTECTIONS</h2>
+<div class="security-item"><i>▦</i><p><b>SERVER-SIDE VERIFICATION</b><span>Game inputs are replayed server-side before a score is accepted.</span></p></div>
+<div class="security-item"><i>🔒</i><p><b>FIXED GAME BUILD</b><span>Fixed physics and deterministic gate sequence for every attempt.</span></p></div>
+<div class="security-item"><i>▣</i><p><b>REPLAY VALIDATION</b><span>Tap timing and run data must pass server validation.</span></p></div>
+<div class="security-item"><i>✓</i><p><b>VERIFIED SCORES</b><span>Only server-verified results are accepted by the game backend.</span></p></div>
+<div class="security-item"><i>♛</i><p><b>WINNER REVIEW</b><span>Winning-score review can be completed before a prize is awarded.</span></p></div>
+<button id="restartBtn" type="button">↻ NEW TEST ATTEMPT</button>
+</aside></div></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="flight-game.js?v=4"></script>
+</body></html>
