@@ -33,8 +33,28 @@
    play.disabled=true;copy.textContent='Preparing your attempt…';
    const {data:{session}}=await sb.auth.getSession();
    if(!session){title.textContent='SIGN IN REQUIRED';copy.textContent='Please sign in to your NexaDraw account, then return to the Flight Challenge.';play.textContent='TRY AGAIN';play.disabled=false;return}
-   const {data,error}=await sb.functions.invoke('start-flight-attempt',{headers:{Authorization:`Bearer ${session.access_token}`}});
-   if(error||!data?.success){title.textContent='UNABLE TO START';copy.textContent=data?.error||'The attempt could not be started.';play.textContent='TRY AGAIN';play.disabled=false;return}
+   let data=null,error=null;
+   try{
+     const result=await sb.functions.invoke('start-flight-attempt',{body:{},headers:{Authorization:`Bearer ${session.access_token}`}});
+     data=result.data;error=result.error;
+   }catch(e){error=e}
+   if(error||!data?.success){
+     let message=data?.error||'';
+     try{
+       const context=error?.context;
+       if(context instanceof Response){
+         const raw=await context.clone().text();
+         try{const detail=JSON.parse(raw);message=detail?.error||detail?.message||raw||message}catch(_){message=raw||message}
+         if(!message)message='Start request failed (HTTP '+context.status+').';
+       }else if(context?.json){
+         const detail=await context.json();message=detail?.error||detail?.message||message;
+       }else if(context?.text){
+         const detail=await context.text();if(detail)message=detail;
+       }
+       if(!message&&error?.message)message=error.message;
+     }catch(_){if(!message&&error?.message)message=error.message}
+     title.textContent='UNABLE TO START';copy.textContent=message||'The attempt could not be started.';play.textContent='TRY AGAIN';play.disabled=false;return
+   }
    attemptId=data.attempt.id;reset();await countdown();waitingForFirstFlap=true;title.textContent='YOUR TURN';copy.textContent='Click, tap or press Space to make the first move.';overlay.classList.remove('hidden');play.style.display='none';play.disabled=false;
  }
  function flap(){if(waitingForFirstFlap){waitingForFirstFlap=false;overlay.classList.add('hidden');play.style.display='';running=true;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap;requestAnimationFrame(loop);return}if(!running)return;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap}
