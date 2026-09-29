@@ -19,15 +19,14 @@
  }
  function reset(){bird={x:cfg.birdX,y:H*.48,vy:0};pipes=[];spawn=.75;score=0;gateIndex=0;tick=0;taps=[];last=0;acc=0;ending=false;scoreEl.textContent='0'}
  function wait(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
- function shortPlayer(id){return id?'Player '+String(id).slice(0,4).toUpperCase():'Player'}
  async function loadLeaderboard(){
    if(!leaderboardList)return;
    if(leaderboardStatus)leaderboardStatus.textContent='Refreshing…';
-   const {data,error}=await sb.from('skill_leaderboard').select('user_id,best_score').eq('competition_slug','flight-challenge-250').order('best_score',{ascending:false}).limit(10);
+   const {data,error}=await sb.rpc('get_flight_leaderboard');
    if(error){leaderboardList.innerHTML='<p class="leaderboard-empty">Leaderboard will appear here when available.</p>';if(leaderboardStatus)leaderboardStatus.textContent='Refresh unavailable.';return}
    if(!data?.length){leaderboardList.innerHTML='<p class="leaderboard-empty">No verified scores yet. Set the first one!</p>';if(leaderboardStatus)leaderboardStatus.textContent='Updates automatically.';return}
    if(leaderboardStatus)leaderboardStatus.textContent='Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' · auto-refresh 15s';
-   leaderboardList.innerHTML=data.map((row,i)=>'<div class="leaderboard-row"><span class="leaderboard-rank">'+(i<3?['🥇','🥈','🥉'][i]:'#'+(i+1))+'</span><span class="leaderboard-name">'+shortPlayer(row.user_id)+'<small>VERIFIED</small></span><strong class="leaderboard-score">'+Number(row.best_score||0)+'</strong></div>').join('');
+   leaderboardList.innerHTML=data.map((row,i)=>'<div class="leaderboard-row"><span class="leaderboard-rank">'+(i<3?['🥇','🥈','🥉'][i]:'#'+(i+1))+'</span><span class="leaderboard-name">'+String(row.player_label||'Player')+'<small>VERIFIED</small></span><strong class="leaderboard-score">'+Number(row.best_score||0)+'</strong></div>').join('');
  }
  async function countdown(){title.textContent='GET READY';copy.textContent='3';overlay.classList.remove('hidden');for(const n of ['3','2','1']){copy.textContent=n;await wait(700)}copy.textContent='GO!';await wait(350);overlay.classList.add('hidden')}
  async function start(){
