@@ -8,7 +8,7 @@
  const overlay=document.getElementById('overlay'),title=document.getElementById('overlayTitle'),copy=document.getElementById('overlayText'),play=document.getElementById('playBtn'),restart=document.getElementById('restartBtn');
  const W=900,H=520,ground=54,DT=1/120,cfg={gravity:1550,flap:-470,speed:220,gap:170,pipeW:86,spawn:1.48,birdX:210,radius:19};
  const seq=[.42,.56,.35,.61,.47,.31,.53,.39,.58,.44,.34,.50];
- let running=false,last=0,acc=0,spawn=.75,score=0,best=Number(localStorage.getItem('nexa_flight_best')||0),bird,pipes=[],gateIndex=0,tick=0,taps=[],attemptId=null,ending=false;
+ let running=false,waitingForFirstFlap=false,last=0,acc=0,spawn=.75,score=0,best=Number(localStorage.getItem('nexa_flight_best')||0),bird,pipes=[],gateIndex=0,tick=0,taps=[],attemptId=null,ending=false;
  bestEl.textContent=best;
  function setupHD(){
    const dpr=Math.min(window.devicePixelRatio||1,3);
@@ -35,9 +35,9 @@
    if(!session){title.textContent='SIGN IN REQUIRED';copy.textContent='Please sign in through NexaDraw My Account first, then return to the Flight Challenge.';play.textContent='TRY AGAIN';play.disabled=false;return}
    const {data,error}=await sb.functions.invoke('start-flight-attempt');
    if(error||!data?.success){title.textContent='TEST SETUP NEEDED';copy.textContent=data?.error||'The secure test-attempt function is not deployed yet.';play.textContent='TRY AGAIN';play.disabled=false;return}
-   attemptId=data.attempt.id;reset();await countdown();running=true;play.disabled=false;requestAnimationFrame(loop);
+   attemptId=data.attempt.id;reset();await countdown();waitingForFirstFlap=true;title.textContent='YOUR TURN';copy.textContent='Click, tap or press Space to make the first move.';overlay.classList.remove('hidden');play.style.display='none';play.disabled=false;
  }
- function flap(){if(!running)return;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap}
+ function flap(){if(waitingForFirstFlap){waitingForFirstFlap=false;overlay.classList.add('hidden');play.style.display='';running=true;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap;requestAnimationFrame(loop);return}if(!running)return;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap}
  function gateY(i){return 92+seq[i%seq.length]*(H-ground-184)}
  function addPipe(){pipes.push({x:W+20,cy:gateY(gateIndex++),passed:false})}
  function step(){
@@ -50,7 +50,7 @@
    tick++; if(dead)finish();
  }
  async function finish(){
-   if(ending)return;ending=true;running=false;title.textContent='VERIFYING RUN';copy.textContent='NexaDraw is replaying your inputs on the server…';overlay.classList.remove('hidden');play.disabled=true;
+   if(ending)return;ending=true;running=false;waitingForFirstFlap=false;play.style.display='';title.textContent='VERIFYING RUN';copy.textContent='NexaDraw is replaying your inputs on the server…';overlay.classList.remove('hidden');play.disabled=true;
    const {data,error}=await sb.functions.invoke('verify-flight-attempt',{body:{attempt_id:attemptId,taps,end_tick:tick}});
    if(error||!data?.success){title.textContent='RUN NOT VERIFIED';copy.textContent=data?.error||'This run could not be verified.';play.textContent='NEW TEST';play.disabled=false;return}
    score=data.score;scoreEl.textContent=score;if(score>best){best=score;localStorage.setItem('nexa_flight_best',String(best));bestEl.textContent=best}
