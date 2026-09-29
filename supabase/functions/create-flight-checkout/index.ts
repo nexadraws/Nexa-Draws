@@ -37,11 +37,16 @@ Deno.serve(async (req) => {
     // Keep beta free: payment checkout is deliberately unavailable until the competition is switched to live.
     if (comp.status !== "live") return json({ error: "Paid checkout is disabled while the challenge is in test mode" }, 409);
 
-    const amountPence = Number(comp.attempt_price_pence);
-    const attempts = Number(comp.attempts_per_purchase);
-    if (!Number.isInteger(amountPence) || amountPence !== 100 || !Number.isInteger(attempts) || attempts !== 2) {
-      return json({ error: "Unexpected challenge pricing configuration" }, 500);
-    }
+    const body = await req.json().catch(() => ({}));
+    const packageId = String(body?.package_id || "");
+    const packages: Record<string, { amountPence: number; attempts: number }> = {
+      single: { amountPence: 100, attempts: 1 },
+      five: { amountPence: 400, attempts: 5 },
+      ten: { amountPence: 700, attempts: 10 },
+    };
+    const selected = packages[packageId];
+    if (!selected) return json({ error: "Invalid attempt package" }, 400);
+    const { amountPence, attempts } = selected;
 
     const orderReference = crypto.randomUUID();
     const { data: purchase, error: purchaseError } = await admin.from("skill_purchases").insert({
