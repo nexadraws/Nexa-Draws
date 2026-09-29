@@ -4142,6 +4142,15 @@ const edit =
 
         <button
           class="btn outline"
+          id="adminFlightPaymentTest"
+          type="button"
+          title="Check the Flight payment test setup without enabling public payments"
+        >
+          TEST FLIGHT PAYMENT
+        </button>
+
+        <button
+          class="btn outline"
           id="adminLogout"
         >
           LOG OUT
@@ -5011,6 +5020,54 @@ const edit =
           toast(
             'Postal entry failed'
           );
+        }
+      };
+  }
+
+
+  /* FLIGHT PAYMENT TEST */
+  const flightPaymentTestBtn =
+    $('#adminFlightPaymentTest');
+
+  if (flightPaymentTestBtn) {
+    flightPaymentTestBtn.onclick =
+      async () => {
+        if (!(await isAdminSession())) {
+          alert('Administrator access required.');
+          return;
+        }
+
+        flightPaymentTestBtn.disabled = true;
+        flightPaymentTestBtn.textContent = 'CHECKING…';
+
+        try {
+          const { data: comp, error } =
+            await supabaseClient
+              .from('skill_competitions')
+              .select('status')
+              .eq('slug', 'flight-challenge-250')
+              .single();
+
+          if (error) throw error;
+
+          if (comp?.status !== 'test') {
+            alert(
+              'Flight Challenge is not in TEST mode. Payment testing has been stopped.'
+            );
+            return;
+          }
+
+          alert(
+            'Flight Challenge is safely in TEST mode. Public payments remain locked. Next we can run a controlled Nochex test checkout from Admin without changing the public competition to live.'
+          );
+        } catch (error) {
+          console.error('Flight payment test check error:', error);
+          alert(
+            'Unable to confirm the Flight Challenge test status. No payment test was started.'
+          );
+        } finally {
+          flightPaymentTestBtn.disabled = false;
+          flightPaymentTestBtn.textContent = 'TEST FLIGHT PAYMENT';
         }
       };
   }
