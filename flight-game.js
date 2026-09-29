@@ -5,7 +5,7 @@
  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
  const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),scoreEl=document.getElementById('score'),bestEl=document.getElementById('best');
  const leaderboardList=document.getElementById('leaderboardList'),leaderboardStatus=document.getElementById('leaderboardStatus');
- const overlay=document.getElementById('overlay'),title=document.getElementById('overlayTitle'),copy=document.getElementById('overlayText'),play=document.getElementById('playBtn'),restart=document.getElementById('restartBtn'),packageBtns=[...document.querySelectorAll('.package-btn')];
+ const overlay=document.getElementById('overlay'),title=document.getElementById('overlayTitle'),copy=document.getElementById('overlayText'),play=document.getElementById('playBtn'),restart=document.getElementById('restartBtn'),packageBtns=[...document.querySelectorAll('.package-btn')],checkoutStatus=document.getElementById('checkoutStatus'),paymentBox=document.getElementById('flightPayment'),paymentMount=document.getElementById('paymentMount'),closePayment=document.getElementById('closePayment');
  const W=900,H=520,ground=54,DT=1/120,cfg={gravity:1550,flap:-470,speed:220,gap:170,pipeW:86,spawn:1.48,birdX:210,radius:19};
  const seq=[.42,.56,.35,.61,.47,.31,.53,.39,.58,.44,.34,.50];
  let running=false,waitingForFirstFlap=false,last=0,acc=0,spawn=.75,score=0,best=Number(localStorage.getItem('nexa_flight_best')||0),bird,pipes=[],gateIndex=0,tick=0,taps=[],attemptId=null,ending=false;
@@ -83,16 +83,32 @@
    ctx.restore();ctx.restore()
  }
  function loop(t){if(!running)return;if(!last)last=t;acc+=Math.min((t-last)/1000,.1);last=t;while(acc>=DT&&running){step();acc-=DT}draw();if(running)requestAnimationFrame(loop)}
+ function setCheckoutBusy(busy){
+   packageBtns.forEach(btn=>btn.disabled=busy);
+ }
+ function mountPaymentWidget(data){
+   if(!paymentBox||!paymentMount||!data?.checkout_id)return;
+   paymentMount.innerHTML='<form action="flight-game.html?payment=return" class="paymentWidgets" data-brands="VISA MASTER"></form>';
+   paymentBox.hidden=false;
+   document.querySelectorAll('script[data-flight-payment]').forEach(el=>el.remove());
+   const script=document.createElement('script');script.src=data.payment_widget_url;script.async=true;script.dataset.flightPayment='1';
+   script.onerror=()=>{if(checkoutStatus)checkoutStatus.textContent='Secure payment form could not be loaded. Please try again.';setCheckoutBusy(false)};
+   document.body.appendChild(script);paymentBox.scrollIntoView({behavior:'smooth',block:'center'});
+ }
  async function createPackageCheckout(packageId){
    const {data:{session}}=await sb.auth.getSession();
    if(!session){window.location.href='index.html#account';return}
-   const {data,error}=await sb.functions.invoke('create-flight-checkout',{body:{package_id:packageId}});
-   if(error||!data?.success){alert(data?.error||'Checkout is unavailable.');return}
-   // The payment widget is intentionally not mounted during TEST MODE.
-   // When live, this response provides the verified package checkout ID/widget URL.
-   return data;
+   setCheckoutBusy(true);if(checkoutStatus)checkoutStatus.textContent='Preparing secure checkout…';
+   const {data,error}=await sb.functions.invoke('create-flight-checkout',{body:{package_id:packageId},headers:{Authorization:`Bearer ${session.access_token}`}});
+   if(error||!data?.success){
+     const message=data?.error||error?.context?.error||'Checkout is unavailable.';
+     if(checkoutStatus)checkoutStatus.textContent=message;
+     setCheckoutBusy(false);return
+   }
+   if(checkoutStatus)checkoutStatus.textContent=data.attempts+' attempt'+(data.attempts===1?'':'s')+' · £'+data.amount+' · Secure payment';
+   mountPaymentWidget(data);setCheckoutBusy(false);
  }
- packageBtns.forEach(btn=>btn.addEventListener('click',()=>createPackageCheckout(btn.dataset.package)));
+ packageBtns.forEach(btn=>btn.addEventListener('click',()=>createPackageCheckout(btn.dataset.package)));if(closePayment)closePayment.addEventListener('click',()=>{paymentBox.hidden=true;paymentMount.innerHTML=''});
  play.addEventListener('click',start);restart.addEventListener('click',()=>{if(!running)start()});overlay.addEventListener('pointerdown',e=>{if(waitingForFirstFlap&&e.target!==play){e.preventDefault();flap()}});canvas.addEventListener('pointerdown',e=>{e.preventDefault();flap()});window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();flap()}});
  setupHD();reset();draw();loadLeaderboard();setInterval(()=>{if(!document.hidden)loadLeaderboard()},15000);window.addEventListener('resize',()=>{setupHD();draw()});
 })();
