@@ -31,5 +31,5 @@ Deno.serve(async(req)=>{
    throw error;
   }
   return Response.json({success:true,attempt,mode:'paid',attempts_remaining:purchase.attempts_total-(purchase.attempts_used+1)},{headers:cors});
- }catch(e){return Response.json({success:false,error:e.message},{status:400,headers:cors})}
+ }catch(e){const message=e instanceof Error?e.message:String(e);console.error('start-flight-attempt error:',message,e);return Response.json({success:false,error:message},{status:400,headers:cors})}
 });
