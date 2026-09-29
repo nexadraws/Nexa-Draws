@@ -5038,32 +5038,87 @@ const edit =
         }
 
         flightPaymentTestBtn.disabled = true;
-        flightPaymentTestBtn.textContent = 'CHECKING…';
+        flightPaymentTestBtn.textContent = 'PREPARING TEST…';
 
         try {
-          const { data: comp, error } =
+          const {
+            data: { session }
+          } = await supabaseClient.auth.getSession();
+
+          if (!session) {
+            throw new Error('Admin session expired. Please sign in again.');
+          }
+
+          const { data: comp, error: compError } =
             await supabaseClient
               .from('skill_competitions')
               .select('status')
               .eq('slug', 'flight-challenge-250')
               .single();
 
-          if (error) throw error;
+          if (compError) throw compError;
 
           if (comp?.status !== 'test') {
-            alert(
-              'Flight Challenge is not in TEST mode. Payment testing has been stopped.'
+            throw new Error(
+              'Flight Challenge is not in TEST mode. Test checkout stopped.'
             );
-            return;
           }
 
-          alert(
-            'Flight Challenge is safely in TEST mode. Public payments remain locked. Next we can run a controlled Nochex test checkout from Admin without changing the public competition to live.'
-          );
+          const { data, error } =
+            await supabaseClient.functions.invoke(
+              'create-flight-test-checkout',
+              {
+                body: { package_id: 'single' },
+                headers: {
+                  Authorization:
+                    `Bearer ${session.access_token}`
+                }
+              }
+            );
+
+          if (error || !data?.success) {
+            let message = data?.error || error?.message || 'Unable to create Nochex test checkout.';
+            try {
+              if (error?.context instanceof Response) {
+                const detail = await error.context.clone().json();
+                message = detail?.error || detail?.message || message;
+              }
+            } catch (_) {}
+            throw new Error(message);
+          }
+
+          document.querySelector('#flightAdminTestModal')?.remove();
+
+          const modal = document.createElement('div');
+          modal.id = 'flightAdminTestModal';
+          modal.className = 'modal show';
+          modal.innerHTML = `
+            <div class="modal-card" style="max-width:620px">
+              <button class="modal-close" id="closeFlightAdminTest" type="button" aria-label="Close">×</button>
+              <p class="eyebrow">ADMIN · NOCHEX TEST ENVIRONMENT</p>
+              <h2>Flight £1 Test Checkout</h2>
+              <p class="muted">This uses the gateway test environment. It does not switch the public Flight Challenge to live.</p>
+              <form action="index.html?flightTestPayment=return" class="paymentWidgets" data-brands="VISA MASTER"></form>
+            </div>
+          `;
+          document.body.appendChild(modal);
+          $('#closeFlightAdminTest').onclick = () => modal.remove();
+
+          document.querySelectorAll('script[data-flight-admin-test]').forEach(el => el.remove());
+          const script = document.createElement('script');
+          script.src = data.payment_widget_url;
+          script.async = true;
+          script.dataset.flightAdminTest = '1';
+          script.onerror = () => {
+            alert('Nochex test payment form could not be loaded.');
+          };
+          document.body.appendChild(script);
         } catch (error) {
-          console.error('Flight payment test check error:', error);
+          console.error('Flight payment test error:', error);
           alert(
-            'Unable to confirm the Flight Challenge test status. No payment test was started.'
+            error instanceof Error
+              ? error.message
+              : 'Unable to start the Flight payment test.'
           );
         } finally {
           flightPaymentTestBtn.disabled = false;
@@ -5071,7 +5126,6 @@ const edit =
         }
       };
   }
-
 
   /* ADMIN LOGOUT */
    
