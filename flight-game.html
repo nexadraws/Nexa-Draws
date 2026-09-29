@@ -4,14 +4,14 @@
 <title>NexaDraw Flight Challenge — Test</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="flight-game.css?v=8"></head><body>
+<link rel="stylesheet" href="flight-game.css?v=9"></head><body>
 <main class="game-shell">
 <header class="game-header">
 <a href="index.html" class="brand"><img src="logo.png" alt="Nexa Draw"><small>PLAY &nbsp;•&nbsp; COMPETE &nbsp;•&nbsp; WIN</small></a>
 <div class="title"><h1>FLIGHT CHALLENGE</h1><strong>SKILL COMPETITION</strong><em>TEST MODE</em></div>
 <div class="prize"><span>MAIN PRIZE</span><strong>£150</strong></div><div class="deadline"><span>COMPETITION CLOSES</span><strong>15 OCTOBER 2026</strong></div>
 </header>
-<div class="beta-banner"><strong>🧪 BETA TEST</strong><span>Free testing only — no payment is taken and no test score creates a £150 prize entry.</span></div><section class="entry-card" aria-label="Flight Challenge entry"><div><small>LIVE ENTRY FORMAT</small><strong>£1 = 2 ATTEMPTS</strong><span>When the competition goes live, your highest server-verified score counts.</span></div><button id="buyAttemptsBtn" type="button" disabled>🔒 PAYMENTS OFF IN TEST MODE</button></section><div class="content-grid">
+<div class="beta-banner"><strong>🧪 BETA TEST</strong><span>Free testing only — no payment is taken and no test score creates a £150 prize entry.</span></div><section class="entry-card" aria-label="Flight Challenge entry"><div class="entry-intro"><small>LIVE ENTRY PACKAGES</small><strong>CHOOSE YOUR ATTEMPTS</strong><span>When live, your highest server-verified score counts.</span></div><div class="entry-packages"><button type="button" disabled><b>1 ATTEMPT</b><strong>£1</strong><span>£1.00 each</span></button><button type="button" disabled><b>5 ATTEMPTS</b><strong>£4</strong><span>80p each · Save £1</span></button><button type="button" disabled><b>10 ATTEMPTS</b><strong>£7</strong><span>70p each · Save £3</span></button></div><small class="payments-off">🔒 PAYMENTS OFF IN TEST MODE</small></section><div class="content-grid">
 <section class="left-column">
 <div class="stage-wrap">
 <canvas id="game" width="900" height="520" aria-label="NexaDraw Flight Challenge game"></canvas>
@@ -20,7 +20,7 @@
 <div class="overlay" id="overlay"><img src="logo.png" alt="" class="overlay-logo"><h1 id="overlayTitle">FLIGHT CHALLENGE</h1><p id="overlayText">Pass as many gates as you can. Tap, click or press Space to fly.</p><button id="playBtn" type="button">▶ PLAY TEST</button><small>Test mode — no payment or prize entry is created.</small></div>
 </div>
 <section class="verify-panel"><h2>HOW A VALID ATTEMPT IS VERIFIED</h2><div class="verify-flow">
-<div><i>£</i><b>1. £1 ENTRY</b><span>2 attempts when live.</span></div><mark>➜</mark>
+<div><i>£</i><b>1. CHOOSE PACKAGE</b><span>1, 5 or 10 attempts when live.</span></div><mark>➜</mark>
 <div><i>🎮</i><b>2. PLAY GAME</b><span>Your inputs are recorded.</span></div><mark>➜</mark>
 <div><i>▦</i><b>3. SERVER SIMULATION</b><span>The server replays the run.</span></div><mark>➜</mark>
 <div><i>◆</i><b>4. ANTI-CHEAT CHECK</b><span>Replay is validated.</span></div><mark>➜</mark>
