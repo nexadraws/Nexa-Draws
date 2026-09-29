@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
     params.set("amount", (amountPence / 100).toFixed(2));
     params.set("currency", "GBP");
     params.set("paymentType", "DB");
-    params.set("merchantTransactionId", "flight:" + purchase.id);
+    params.set("merchantTransactionId", "flight:" + purchase.id);\n    params.set("notificationUrl", supabaseUrl + "/functions/v1/verify-flight-payment");\n    params.set("merchant.url", "https://nexadraw.co.uk/");
 
     const response = await fetch("https://eu-prod.oppwa.com/v1/checkouts", {
       method: "POST",
