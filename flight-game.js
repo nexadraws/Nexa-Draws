@@ -10,13 +10,15 @@
  let running=false,last=0,acc=0,spawn=.75,score=0,best=Number(localStorage.getItem('nexa_flight_best')||0),bird,pipes=[],gateIndex=0,tick=0,taps=[],attemptId=null,ending=false;
  bestEl.textContent=best;
  function reset(){bird={x:cfg.birdX,y:H*.48,vy:0};pipes=[];spawn=.75;score=0;gateIndex=0;tick=0;taps=[];last=0;acc=0;ending=false;scoreEl.textContent='0'}
+ function wait(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+ async function countdown(){title.textContent='GET READY';copy.textContent='3';overlay.classList.remove('hidden');for(const n of ['3','2','1']){copy.textContent=n;await wait(700)}copy.textContent='GO!';await wait(350);overlay.classList.add('hidden')}
  async function start(){
    play.disabled=true;copy.textContent='Creating secure test attempt…';
    const {data:{session}}=await sb.auth.getSession();
    if(!session){title.textContent='SIGN IN REQUIRED';copy.textContent='Please sign in through NexaDraw My Account first, then return to the Flight Challenge.';play.textContent='TRY AGAIN';play.disabled=false;return}
    const {data,error}=await sb.functions.invoke('start-flight-attempt');
    if(error||!data?.success){title.textContent='TEST SETUP NEEDED';copy.textContent=data?.error||'The secure test-attempt function is not deployed yet.';play.textContent='TRY AGAIN';play.disabled=false;return}
-   attemptId=data.attempt.id;reset();running=true;overlay.classList.add('hidden');play.disabled=false;requestAnimationFrame(loop);
+   attemptId=data.attempt.id;reset();await countdown();running=true;play.disabled=false;requestAnimationFrame(loop);
  }
  function flap(){if(!running)return;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap}
  function gateY(i){return 92+seq[i%seq.length]*(H-ground-184)}
