@@ -5037,93 +5037,154 @@ const edit =
           return;
         }
 
-        flightPaymentTestBtn.disabled = true;
-        flightPaymentTestBtn.textContent = 'PREPARING TEST…';
+        const { data: { session } } =
+          await supabaseClient.auth.getSession();
 
-        try {
-          const {
-            data: { session }
-          } = await supabaseClient.auth.getSession();
-
-          if (!session) {
-            throw new Error('Admin session expired. Please sign in again.');
-          }
-
-          const { data: comp, error: compError } =
-            await supabaseClient
-              .from('skill_competitions')
-              .select('status')
-              .eq('slug', 'flight-challenge-250')
-              .single();
-
-          if (compError) throw compError;
-
-          if (comp?.status !== 'test') {
-            throw new Error(
-              'Flight Challenge is not in TEST mode. Test checkout stopped.'
-            );
-          }
-
-          const { data, error } =
-            await supabaseClient.functions.invoke(
-              'create-flight-test-checkout',
-              {
-                body: { package_id: 'single' },
-                headers: {
-                  Authorization:
-                    `Bearer ${session.access_token}`
-                }
-              }
-            );
-
-          if (error || !data?.success) {
-            let message = data?.error || error?.message || 'Unable to create Nochex test checkout.';
-            try {
-              if (error?.context instanceof Response) {
-                const detail = await error.context.clone().json();
-                message = detail?.error || detail?.message || message;
-              }
-            } catch (_) {}
-            throw new Error(message);
-          }
-
-          document.querySelector('#flightAdminTestModal')?.remove();
-
-          const modal = document.createElement('div');
-          modal.id = 'flightAdminTestModal';
-          modal.className = 'modal show';
-          modal.innerHTML = `
-            <div class="modal-card" style="max-width:620px">
-              <button class="modal-close" id="closeFlightAdminTest" type="button" aria-label="Close">×</button>
-              <p class="eyebrow">ADMIN · NOCHEX TEST ENVIRONMENT</p>
-              <h2>Flight £1 Test Checkout</h2>
-              <p class="muted">This uses the gateway test environment. It does not switch the public Flight Challenge to live.</p>
-              <form action="index.html?flightTestPayment=return" class="paymentWidgets" data-brands="VISA MASTER"></form>
-            </div>
-          `;
-          document.body.appendChild(modal);
-          $('#closeFlightAdminTest').onclick = () => modal.remove();
-
-          document.querySelectorAll('script[data-flight-admin-test]').forEach(el => el.remove());
-          const script = document.createElement('script');
-          script.src = data.payment_widget_url;
-          script.async = true;
-          script.dataset.flightAdminTest = '1';
-          script.onerror = () => {
-            alert('Nochex test payment form could not be loaded.');
-          };
-          document.body.appendChild(script);
-        } catch (error) {
-          console.error('Flight payment test error:', error);
-          alert(
-            error instanceof Error
-              ? error.message
-              : 'Unable to start the Flight payment test.'
-          );
-        } finally {
-          flightPaymentTestBtn.disabled = false;
-          flightPaymentTestBtn.textContent = 'TEST FLIGHT PAYMENT';
+        if (!session) {
+          alert('Admin session expired. Please sign in again.');
+          return;
         }
+
+        const { data: comp, error: compError } =
+          await supabaseClient
+            .from('skill_competitions')
+            .select('status')
+            .eq('slug', 'flight-challenge-250')
+            .single();
+
+        if (compError || comp?.status !== 'test') {
+          alert('Flight Challenge must remain in TEST mode for this controlled payment test.');
+          return;
+        }
+
+        const saved =
+          await loadCustomerBillingDetails(session.user.id);
+
+        document.querySelector('#flightAdminTestModal')?.remove();
+
+        const modal = document.createElement('div');
+        modal.id = 'flightAdminTestModal';
+        modal.className = 'modal show';
+        modal.innerHTML = `
+          <div class="modal-card" style="max-width:620px">
+            <button class="modal-close" id="closeFlightAdminTest" type="button" aria-label="Close">×</button>
+            <p class="eyebrow">ADMIN · CONTROLLED LIVE PAYMENT</p>
+            <h2>Flight £1 Payment Test</h2>
+            <p class="muted"><strong>This uses the live Nochex gateway and can charge £1.</strong> The public Flight Challenge remains in TEST mode.</p>
+            <form id="flightAdminBillingForm" class="nochex-billing-form">
+              <label>First name<input id="flightGivenName" autocomplete="given-name" required></label>
+              <label>Surname<input id="flightSurname" autocomplete="family-name" required></label>
+              <label>Phone number<input id="flightPhone" type="tel" autocomplete="tel" required></label>
+              <label>Address line 1<input id="flightStreet1" autocomplete="address-line1" required></label>
+              <label>City<input id="flightCity" autocomplete="address-level2" required></label>
+              <label>Postcode<input id="flightPostcode" autocomplete="postal-code" required></label>
+              <button class="btn primary" id="continueFlightAdminPayment" type="submit">CONTINUE TO £1 PAYMENT</button>
+            </form>
+            <div id="flightAdminWidget" hidden></div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+
+        const setValue = (selector, value) => {
+          const el = $(selector);
+          if (el && value) el.value = value;
+        };
+        setValue('#flightGivenName', saved?.given_name);
+        setValue('#flightSurname', saved?.surname);
+        setValue('#flightPhone', saved?.phone);
+        setValue('#flightStreet1', saved?.billing_street1);
+        setValue('#flightCity', saved?.billing_city);
+        setValue('#flightPostcode', saved?.billing_postcode);
+
+        $('#closeFlightAdminTest').onclick = () => modal.remove();
+
+        $('#flightAdminBillingForm').addEventListener('submit', async event => {
+          event.preventDefault();
+
+          const details = {
+            given_name: $('#flightGivenName')?.value.trim(),
+            surname: $('#flightSurname')?.value.trim(),
+            phone: $('#flightPhone')?.value.trim(),
+            billing_street1: $('#flightStreet1')?.value.trim(),
+            billing_city: $('#flightCity')?.value.trim(),
+            billing_postcode: $('#flightPostcode')?.value.trim().toUpperCase()
+          };
+
+          if (Object.values(details).some(value => !value)) {
+            alert('Please complete all billing details.');
+            return;
+          }
+
+          const continueButton = $('#continueFlightAdminPayment');
+          continueButton.disabled = true;
+          continueButton.textContent = 'CREATING £1 CHECKOUT…';
+
+          try {
+            await saveCustomerBillingDetails(session.user.id, details);
+
+            const { data, error } =
+              await supabaseClient.functions.invoke(
+                'create-flight-test-checkout',
+                {
+                  body: {
+                    package_id: 'single',
+                    ...details
+                  },
+                  headers: {
+                    Authorization: `Bearer ${session.access_token}`
+                  }
+                }
+              );
+
+            if (error || !data?.success || !data?.checkout_id) {
+              let message = data?.error || error?.message || 'Unable to create the Flight £1 checkout.';
+              try {
+                if (error?.context instanceof Response) {
+                  const detail = await error.context.clone().json();
+                  message = detail?.error || detail?.message || message;
+                }
+              } catch (_) {}
+              throw new Error(message);
+            }
+
+            window.wpwlOptions = {
+              applePay: {
+                buttonStyle: 'white-outline',
+                buttonSource: 'js',
+                supportedNetworks: ['masterCard', 'visa'],
+                total: { label: 'Nexa Draw' }
+              }
+            };
+
+            const widget = $('#flightAdminWidget');
+            widget.hidden = false;
+            widget.innerHTML = `
+              <p class="micro"><strong>REAL £1 PAYMENT</strong> · Visa, Mastercard or Apple Pay (when supported by the device/browser).</p>
+              <form
+                action="${window.location.origin}/?flightTestPayment=return"
+                class="paymentWidgets"
+                data-brands="VISA MASTER APPLEPAY"
+              ></form>
+            `;
+
+            $('#flightAdminBillingForm').style.display = 'none';
+            document.querySelectorAll('script[data-flight-admin-test]').forEach(el => el.remove());
+
+            const script = document.createElement('script');
+            script.src = data.payment_widget_url;
+            script.async = true;
+            script.dataset.flightAdminTest = '1';
+            script.onerror = () => {
+              alert('The Nochex payment form could not be loaded.');
+            };
+            document.body.appendChild(script);
+          } catch (error) {
+            console.error('Flight payment test error:', error);
+            alert(error instanceof Error ? error.message : 'Unable to start the Flight £1 payment.');
+            continueButton.disabled = false;
+            continueButton.textContent = 'CONTINUE TO £1 PAYMENT';
+          }
+        });
       };
   }
 
