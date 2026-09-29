@@ -71,8 +71,26 @@
  }
  async function finish(){
    if(ending)return;ending=true;running=false;waitingForFirstFlap=false;play.style.display='';title.textContent='VERIFYING RUN';copy.textContent='NexaDraw is replaying your inputs on the server…';overlay.classList.remove('hidden');play.disabled=true;
-   const {data,error}=await sb.functions.invoke('verify-flight-attempt',{body:{attempt_id:attemptId,taps,end_tick:tick}});
-   if(error||!data?.success){title.textContent='RUN NOT VERIFIED';copy.textContent=data?.error||'This run could not be verified.';play.textContent='NEW TEST';play.disabled=false;return}
+   const {data:{session}}=await sb.auth.getSession();
+   if(!session){title.textContent='RUN NOT VERIFIED';copy.textContent='Your login session expired. Please sign in again.';play.textContent='TRY AGAIN';play.disabled=false;return}
+   const payload={attempt_id:attemptId,taps:[...taps],end_tick:tick};
+   let data=null,error=null;
+   try{
+     const result=await sb.functions.invoke('verify-flight-attempt',{body:payload,headers:{Authorization:`Bearer ${session.access_token}`}});
+     data=result.data;error=result.error;
+   }catch(e){error=e}
+   if(error||!data?.success){
+     let message=data?.error||'';
+     try{
+       const context=error?.context;
+       if(context instanceof Response){
+         const raw=await context.clone().text();
+         try{const detail=JSON.parse(raw);message=detail?.error||detail?.message||raw||message}catch(_){message=raw||message}
+         if(!message)message='Verification request failed (HTTP '+context.status+').';
+       }else if(error?.message)message=error.message;
+     }catch(_){if(!message&&error?.message)message=error.message}
+     title.textContent='RUN NOT VERIFIED';copy.textContent=message||'This run could not be verified.';play.textContent='NEW TEST';play.disabled=false;return
+   }
    score=data.score;scoreEl.textContent=score;if(score>best){best=score;localStorage.setItem('nexa_flight_best',String(best));bestEl.textContent=best}
    title.textContent='VERIFIED SCORE';copy.textContent='Server-verified score: '+score+' — Best on this device: '+best+'.';play.textContent='PLAY AGAIN';play.disabled=false;loadLeaderboard();
  }
