@@ -9,11 +9,27 @@ Deno.serve(async(req)=>{
   const admin=createClient(url,service);
   const {data:comp,error:ce}=await admin.from('skill_competitions').select('*').eq('slug','flight-challenge-250').in('status',['test','live']).single();
   if(ce||!comp) throw new Error('Challenge unavailable');
-  // TEST ONLY. Live mode must consume a paid entitlement instead of minting attempts here.
-  if(comp.status!=='test') throw new Error('Paid attempt issuance is not enabled yet');
-  const seed=1; // v1 uses a fixed deterministic course for equal conditions.
-  const {data:attempt,error}=await admin.from('skill_attempts').insert({competition_id:comp.id,user_id:user.id,entitlement_source:'test',status:'started',game_version:comp.game_version,seed,started_at:new Date().toISOString()}).select('id,game_version,seed').single();
-  if(error) throw error;
-  return Response.json({success:true,attempt},{headers:cors});
+  if(comp.closes_at && new Date(comp.closes_at).getTime()<=Date.now()) throw new Error('Challenge closed');
+  const seed=1;
+  if(comp.status==='test'){
+   const {data:attempt,error}=await admin.from('skill_attempts').insert({competition_id:comp.id,user_id:user.id,entitlement_source:'test',status:'started',game_version:comp.game_version,seed,started_at:new Date().toISOString()}).select('id,game_version,seed').single();
+   if(error) throw error;
+   return Response.json({success:true,attempt,mode:'test'},{headers:cors});
+  }
+  // Live mode consumes one server-confirmed paid credit. The browser cannot create/mark purchases paid.
+  const {data:purchases,error:pe}=await admin.from('skill_purchases').select('id,order_reference,attempts_total,attempts_used').eq('competition_id',comp.id).eq('user_id',user.id).eq('status','paid').order('paid_at',{ascending:true});
+  if(pe) throw pe;
+  const purchase=(purchases||[]).find((p:any)=>p.attempts_used<p.attempts_total);
+  if(!purchase) throw new Error('No paid attempts available');
+  // Optimistic atomic claim: only one concurrent request can advance this exact attempts_used value.
+  const {data:claimed,error:claimError}=await admin.from('skill_purchases').update({attempts_used:purchase.attempts_used+1,updated_at:new Date().toISOString()}).eq('id',purchase.id).eq('attempts_used',purchase.attempts_used).select('id,order_reference').maybeSingle();
+  if(claimError) throw claimError;
+  if(!claimed) throw new Error('Attempt credit already being used; please try again');
+  const {data:attempt,error}=await admin.from('skill_attempts').insert({competition_id:comp.id,user_id:user.id,entitlement_source:'payment',payment_reference:claimed.order_reference,status:'started',game_version:comp.game_version,seed,started_at:new Date().toISOString()}).select('id,game_version,seed').single();
+  if(error){
+   await admin.from('skill_purchases').update({attempts_used:purchase.attempts_used,updated_at:new Date().toISOString()}).eq('id',purchase.id).eq('attempts_used',purchase.attempts_used+1);
+   throw error;
+  }
+  return Response.json({success:true,attempt,mode:'paid',attempts_remaining:purchase.attempts_total-(purchase.attempts_used+1)},{headers:cors});
  }catch(e){return Response.json({success:false,error:e.message},{status:400,headers:cors})}
 });
