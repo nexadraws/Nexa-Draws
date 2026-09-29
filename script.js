@@ -5120,7 +5120,14 @@ const edit =
           continueButton.textContent = 'CREATING £1 CHECKOUT…';
 
           try {
-            await saveCustomerBillingDetails(session.user.id, details);
+            try {
+              await saveCustomerBillingDetails(session.user.id, details);
+            } catch (billingSaveError) {
+              console.warn(
+                'Flight billing details could not be saved:',
+                billingSaveError
+              );
+            }
 
             const { data, error } =
               await supabaseClient.functions.invoke(
