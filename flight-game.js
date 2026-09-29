@@ -31,7 +31,9 @@
  async function countdown(){title.textContent='GET READY';copy.textContent='3';overlay.classList.remove('hidden');for(const n of ['3','2','1']){copy.textContent=n;await wait(700)}copy.textContent='GO!';await wait(350);overlay.classList.add('hidden')}
  async function start(){
    play.disabled=true;copy.textContent='Preparing your attempt…';
-   const {data,error}=await sb.functions.invoke('start-flight-attempt');
+   const {data:{session}}=await sb.auth.getSession();
+   if(!session){title.textContent='SIGN IN REQUIRED';copy.textContent='Please sign in to your NexaDraw account, then return to the Flight Challenge.';play.textContent='TRY AGAIN';play.disabled=false;return}
+   const {data,error}=await sb.functions.invoke('start-flight-attempt',{headers:{Authorization:`Bearer ${session.access_token}`}});
    if(error||!data?.success){title.textContent='UNABLE TO START';copy.textContent=data?.error||'The attempt could not be started.';play.textContent='TRY AGAIN';play.disabled=false;return}
    attemptId=data.attempt.id;reset();await countdown();waitingForFirstFlap=true;title.textContent='YOUR TURN';copy.textContent='Click, tap or press Space to make the first move.';overlay.classList.remove('hidden');play.style.display='none';play.disabled=false;
  }
