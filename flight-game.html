@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <title>NexaDraw Flight Challenge — Test</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="flight-game.css">
+</head>
+<body>
+  <main class="game-shell">
+    <header class="game-header">
+      <a href="index.html" class="brand"><img src="logo.png" alt="Nexa Draw"></a>
+      <div class="title"><span>FLIGHT CHALLENGE</span><strong>SKILL COMPETITION — TEST MODE</strong></div>
+      <div class="prize"><span>MAIN PRIZE</span><strong>£250</strong></div>
+    </header>
+
+    <section class="scorebar" aria-label="Game score">
+      <div><span>SCORE</span><strong id="score">0</strong></div>
+      <div><span>BEST</span><strong id="best">0</strong></div>
+      <button id="restartBtn" type="button">RESTART</button>
+    </section>
+
+    <section class="stage-wrap">
+      <canvas id="game" width="900" height="520" aria-label="NexaDraw Flight Challenge game"></canvas>
+      <div class="overlay" id="overlay">
+        <img src="logo.png" alt="" class="overlay-logo">
+        <h1 id="overlayTitle">FLIGHT CHALLENGE</h1>
+        <p id="overlayText">Pass as many gates as you can. Tap, click or press Space to fly.</p>
+        <button id="playBtn" type="button">PLAY TEST</button>
+        <small>Test mode — no payment or prize entry is created.</small>
+      </div>
+    </section>
+
+    <section class="instructions">
+      <div><b>1</b><span><strong>TAP TO FLY</strong>Tap, click or press Space.</span></div>
+      <div><b>2</b><span><strong>PASS THE GATES</strong>Each gate passed adds 1 point.</span></div>
+      <div><b>3</b><span><strong>SET YOUR SCORE</strong>Your local test best is saved on this device.</span></div>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>\n  <script src="flight-game.js"></script>
+</body>
+</html>
