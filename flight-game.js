@@ -5,7 +5,7 @@
  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
  const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),scoreEl=document.getElementById('score'),bestEl=document.getElementById('best');
  const leaderboardList=document.getElementById('leaderboardList'),leaderboardStatus=document.getElementById('leaderboardStatus');
- const overlay=document.getElementById('overlay'),title=document.getElementById('overlayTitle'),copy=document.getElementById('overlayText'),play=document.getElementById('playBtn'),restart=document.getElementById('restartBtn');
+ const overlay=document.getElementById('overlay'),title=document.getElementById('overlayTitle'),copy=document.getElementById('overlayText'),play=document.getElementById('playBtn'),restart=document.getElementById('restartBtn'),packageBtns=[...document.querySelectorAll('.package-btn')];
  const W=900,H=520,ground=54,DT=1/120,cfg={gravity:1550,flap:-470,speed:220,gap:170,pipeW:86,spawn:1.48,birdX:210,radius:19};
  const seq=[.42,.56,.35,.61,.47,.31,.53,.39,.58,.44,.34,.50];
  let running=false,waitingForFirstFlap=false,last=0,acc=0,spawn=.75,score=0,best=Number(localStorage.getItem('nexa_flight_best')||0),bird,pipes=[],gateIndex=0,tick=0,taps=[],attemptId=null,ending=false;
@@ -83,6 +83,16 @@
    ctx.restore();ctx.restore()
  }
  function loop(t){if(!running)return;if(!last)last=t;acc+=Math.min((t-last)/1000,.1);last=t;while(acc>=DT&&running){step();acc-=DT}draw();if(running)requestAnimationFrame(loop)}
+ async function createPackageCheckout(packageId){
+   const {data:{session}}=await sb.auth.getSession();
+   if(!session){window.location.href='index.html#account';return}
+   const {data,error}=await sb.functions.invoke('create-flight-checkout',{body:{package_id:packageId}});
+   if(error||!data?.success){alert(data?.error||'Checkout is unavailable.');return}
+   // The payment widget is intentionally not mounted during TEST MODE.
+   // When live, this response provides the verified package checkout ID/widget URL.
+   return data;
+ }
+ packageBtns.forEach(btn=>btn.addEventListener('click',()=>createPackageCheckout(btn.dataset.package)));
  play.addEventListener('click',start);restart.addEventListener('click',()=>{if(!running)start()});canvas.addEventListener('pointerdown',e=>{e.preventDefault();flap()});window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();flap()}});
  setupHD();reset();draw();loadLeaderboard();setInterval(()=>{if(!document.hidden)loadLeaderboard()},15000);window.addEventListener('resize',()=>{setupHD();draw()});
 })();
