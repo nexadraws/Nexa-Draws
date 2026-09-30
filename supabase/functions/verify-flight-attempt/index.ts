@@ -8,8 +8,12 @@ function simulate(taps:number[],endTick:number){
  for(let tick=0;tick<endTick&&tick<120*60*20;tick++){
   while(ti<taps.length&&taps[ti]===tick){vy=FLAP;ti++}
   vy+=GRAVITY*DT;y+=vy*DT;spawn-=DT;
-  if(spawn<=0){pipes.push({x:W+20,cy:gateY(gi++),passed:false});spawn+=SPAWN}
-  for(const p of pipes){p.x-=SPEED*DT;if(!p.passed&&p.x+PIPE_W<BIRD_X){p.passed=true;score++}}
+  if(spawn<=0){pipes.push({x:W+20,cy:gateY(gi++),passed:false,coin:true});spawn+=SPAWN}
+  for(const p of pipes){
+   p.x-=SPEED*DT;
+   if(p.coin){const cx=p.x+PIPE_W/2,cy=p.cy,dx=BIRD_X-cx,dy=y-cy;if(dx*dx+dy*dy<(R+14)*(R+14)){p.coin=false;score+=2}}
+   if(!p.passed&&p.x+PIPE_W<BIRD_X){p.passed=true;score++}
+  }
   if(y-R<0||y+R>H-GROUND){dead=true;break}
   for(const p of pipes){const within=BIRD_X+R>p.x&&BIRD_X-R<p.x+PIPE_W,top=p.cy-GAP/2,bottom=p.cy+GAP/2;if(within&&(y-R<top||y+R>bottom)){dead=true;break}}
   if(dead)break;
