@@ -69,14 +69,20 @@
  }
  function flap(){if(waitingForFirstFlap){waitingForFirstFlap=false;overlay.classList.add('hidden');play.style.display='';running=true;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap;requestAnimationFrame(loop);return}if(!running)return;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap}
  function gateY(i){return 92+seq[i%seq.length]*(H-ground-184)}
- function addPipe(){pipes.push({x:W+20,cy:gateY(gateIndex++),passed:false,coin:true})}
+ function coinY(cy,i){
+   const margin=cfg.radius+17;
+   const reach=cfg.gap/2-margin;
+   const offsets=[-.78,.72,-.58,.84,-.88,.62,.76,-.69,.9,-.52,.67,-.82];
+   return cy+offsets[i%offsets.length]*reach;
+ }
+ function addPipe(){const i=gateIndex,cy=gateY(gateIndex++);pipes.push({x:W+20,cy,coinY:coinY(cy,i),passed:false,coin:true})}
  function step(){
    bird.vy+=cfg.gravity*DT;bird.y+=bird.vy*DT;spawn-=DT;
    if(spawn<=0){addPipe();spawn+=cfg.spawn}
    for(const p of pipes){
      p.x-=cfg.speed*DT;
      if(p.coin){
-       const cx=p.x+cfg.pipeW/2,cy=p.cy,dx=bird.x-cx,dy=bird.y-cy;
+       const cx=p.x+cfg.pipeW/2,cy=p.coinY,dx=bird.x-cx,dy=bird.y-cy;
        if(dx*dx+dy*dy<(cfg.radius+14)*(cfg.radius+14)){p.coin=false;score+=2;scoreEl.textContent=score}
      }
      if(!p.passed&&p.x+cfg.pipeW<bird.x){p.passed=true;score++;scoreEl.textContent=score}
@@ -139,7 +145,7 @@
    for(const p of pipes){
      const top=p.cy-cfg.gap/2,bottom=p.cy+cfg.gap/2;pipe(p.x,0,top,false);pipe(p.x,bottom,H-ground-bottom,true);
      if(p.coin){
-       const cx=p.x+cfg.pipeW/2,cy=p.cy;
+       const cx=p.x+cfg.pipeW/2,cy=p.coinY;
        ctx.save();ctx.shadowColor='#ffe45c';ctx.shadowBlur=18;
        const cg=ctx.createRadialGradient(cx-5,cy-6,2,cx,cy,15);cg.addColorStop(0,'#fff8b0');cg.addColorStop(.35,'#ffd83d');cg.addColorStop(1,'#a96000');
        ctx.fillStyle=cg;ctx.strokeStyle='#fff079';ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,cy,14,0,Math.PI*2);ctx.fill();ctx.stroke();
