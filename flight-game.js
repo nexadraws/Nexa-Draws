@@ -5,7 +5,6 @@
  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
  const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),scoreEl=document.getElementById('score'),bestEl=document.getElementById('best');
  const leaderboardList=document.getElementById('leaderboardList'),leaderboardStatus=document.getElementById('leaderboardStatus'),attemptBalance=document.getElementById('attemptBalance');
- let testCreditBalance=null,isAdminCreditTester=false;
  const overlay=document.getElementById('overlay'),title=document.getElementById('overlayTitle'),copy=document.getElementById('overlayText'),play=document.getElementById('playBtn'),restart=document.getElementById('restartBtn'),packageBtns=[...document.querySelectorAll('.package-btn')],checkoutStatus=document.getElementById('checkoutStatus'),paymentBox=document.getElementById('flightPayment'),paymentMount=document.getElementById('paymentMount'),closePayment=document.getElementById('closePayment');
  const W=900,H=520,ground=54,DT=1/120,cfg={gravity:1550,flap:-470,speed:220,gap:170,pipeW:86,spawn:1.48,birdX:210,radius:19};
  const seq=[.42,.56,.35,.61,.47,.31,.53,.39,.58,.44,.34,.50];
@@ -32,13 +31,9 @@
  async function loadAttemptBalance(){
    if(!attemptBalance)return;
    const {data:{session}}=await sb.auth.getSession();
-   if(!session){attemptBalance.textContent='Sign in to see your attempts.';return}
-   try{
-     const {data,error}=await sb.functions.invoke('get-flight-status',{body:{},headers:{Authorization:`Bearer ${session.access_token}`}});
-     if(error||!data?.success)throw error||new Error(data?.error||'Status unavailable');
-     if(data.mode==='test'){attemptBalance.textContent='Unlimited test attempts';testCreditBalance=null}else{attemptBalance.textContent=data.attempts_remaining+' attempt'+(data.attempts_remaining===1?'':'s')+' remaining';}
-     try{const {data:credit}=await sb.rpc('get_my_flight_test_credit');if(Number.isFinite(Number(credit))&&Number(credit)>0){testCreditBalance=Number(credit);isAdminCreditTester=true;attemptBalance.textContent+=' · SITE CREDIT £'+(testCreditBalance/100).toFixed(2);if(checkoutStatus)checkoutStatus.textContent='Site credit available — choose a package.'}}catch(_){}
-   }catch(_){attemptBalance.textContent='Attempt balance unavailable.'}
+   if(!session){attemptBalance.textContent='Sign in to play for free.';return}
+   attemptBalance.textContent='Unlimited free attempts';
+   if(checkoutStatus)checkoutStatus.textContent='Free play is open · Click PLAY to start.';
  }
  async function countdown(){title.textContent='GET READY';copy.textContent='3';overlay.classList.remove('hidden');for(const n of ['3','2','1']){copy.textContent=n;await wait(700)}copy.textContent='GO!';await wait(350);overlay.classList.add('hidden')}
  async function start(){
@@ -67,7 +62,7 @@
      }catch(_){if(!message&&error?.message)message=error.message}
      title.textContent='UNABLE TO START';copy.textContent=message||'The attempt could not be started.';play.textContent='TRY AGAIN';play.disabled=false;return
    }
-   attemptId=data.attempt.id;if(data.mode==='test'&&attemptBalance)attemptBalance.textContent='Unlimited test attempts';else if(Number.isFinite(data.attempts_remaining)&&attemptBalance)attemptBalance.textContent=data.attempts_remaining+' attempt'+(data.attempts_remaining===1?'':'s')+' remaining';reset();await countdown();waitingForFirstFlap=true;title.textContent='YOUR TURN';copy.textContent='Click, tap or press Space to make the first move.';overlay.classList.remove('hidden');play.style.display='none';play.disabled=false;
+   attemptId=data.attempt.id;if(attemptBalance)attemptBalance.textContent='Unlimited free attempts';reset();await countdown();waitingForFirstFlap=true;title.textContent='YOUR TURN';copy.textContent='Click, tap or press Space to make the first move.';overlay.classList.remove('hidden');play.style.display='none';play.disabled=false;
  }
  function flap(){if(waitingForFirstFlap){waitingForFirstFlap=false;overlay.classList.add('hidden');play.style.display='';running=true;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap;requestAnimationFrame(loop);return}if(!running)return;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap}
  function gateY(i){return 92+seq[i%seq.length]*(H-ground-184)}
@@ -182,31 +177,7 @@
    script.onerror=()=>{if(checkoutStatus)checkoutStatus.textContent='Secure payment form could not be loaded. Please try again.';setCheckoutBusy(false)};
    document.body.appendChild(script);paymentBox.scrollIntoView({behavior:'smooth',block:'center'});
  }
- async function createPackageCheckout(packageId){
-   const {data:{session}}=await sb.auth.getSession();
-   if(!session){window.location.href='index.html#account';return}
-   setCheckoutBusy(true);
-   if(isAdminCreditTester&&testCreditBalance!==null&&testCreditBalance>0){
-     if(checkoutStatus)checkoutStatus.textContent='Using SITE CREDIT…';
-     const {data,error}=await sb.functions.invoke('buy-flight-with-test-credit',{body:{package_id:packageId},headers:{Authorization:`Bearer ${session.access_token}`}});
-     if(error||!data?.success){
-       if(checkoutStatus)checkoutStatus.textContent=data?.error||'Test-credit purchase could not be completed.';
-       setCheckoutBusy(false);return
-     }
-     testCreditBalance=Number(data.balance_pence);
-     if(checkoutStatus)checkoutStatus.textContent=data.attempts+' attempt'+(data.attempts===1?'':'s')+' added · SITE CREDIT remaining £'+(testCreditBalance/100).toFixed(2);
-     await loadAttemptBalance();setCheckoutBusy(false);return
-   }
-   if(checkoutStatus)checkoutStatus.textContent='Preparing secure checkout…';
-   const {data,error}=await sb.functions.invoke('create-flight-checkout',{body:{package_id:packageId},headers:{Authorization:`Bearer ${session.access_token}`}});
-   if(error||!data?.success){
-     const message=data?.error||error?.context?.error||'Checkout is unavailable.';
-     if(checkoutStatus)checkoutStatus.textContent=message;
-     setCheckoutBusy(false);return
-   }
-   if(checkoutStatus)checkoutStatus.textContent=data.attempts+' attempt'+(data.attempts===1?'':'s')+' · £'+data.amount+' · Secure payment';
-   mountPaymentWidget(data);setCheckoutBusy(false);
- }
+ async function createPackageCheckout(){ return; }
  packageBtns.forEach(btn=>btn.addEventListener('click',()=>createPackageCheckout(btn.dataset.package)));if(closePayment)closePayment.addEventListener('click',()=>{paymentBox.hidden=true;paymentMount.innerHTML=''});
  play.addEventListener('click',start);restart.addEventListener('click',()=>{if(!running)start()});overlay.addEventListener('pointerdown',e=>{if(waitingForFirstFlap&&e.target!==play){e.preventDefault();flap()}});canvas.addEventListener('pointerdown',e=>{e.preventDefault();flap()});window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();flap()}});
  setupHD();reset();draw();loadLeaderboard();loadAttemptBalance();sb.auth.onAuthStateChange(()=>loadAttemptBalance());setInterval(()=>{if(!document.hidden)loadLeaderboard()},15000);window.addEventListener('resize',()=>{setupHD();draw()});
