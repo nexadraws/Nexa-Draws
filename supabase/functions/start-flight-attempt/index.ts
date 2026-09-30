@@ -13,9 +13,9 @@ Deno.serve(async(req)=>{
   if(comp.closes_at && new Date(comp.closes_at).getTime()<=Date.now()) throw new Error('Challenge closed');
   const seed=1;
 
-  // TEST mode is unlimited beta play for signed-in users, including the admin.
-  // Paid entitlement is enforced automatically when the competition is switched LIVE.
-  const usePaidEntitlement=comp.status==='live';
+  // Controlled production test: in TEST mode only the configured admin uses paid entitlements.
+  // Other signed-in testers remain unlimited; LIVE enforces paid entitlements for everyone.
+  const usePaidEntitlement=comp.status==='live'||(comp.status==='test'&&!!adminUid&&user.id===adminUid);
   if(!usePaidEntitlement){
    const {data:attempt,error}=await admin.from('skill_attempts').insert({competition_id:comp.id,user_id:user.id,entitlement_source:'test',status:'started',game_version:comp.game_version,seed,started_at:new Date().toISOString()}).select('id,game_version,seed').single();
    if(error) throw error;
