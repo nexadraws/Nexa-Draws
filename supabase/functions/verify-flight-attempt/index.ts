@@ -3,15 +3,16 @@ const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'au
 const DT=1/120, GRAVITY=1550, FLAP=-470, SPEED=220, GAP=170, PIPE_W=86, BIRD_X=210, R=19, W=900, H=520, GROUND=54, SPAWN=1.48;
 const seq=[.42,.56,.35,.61,.47,.31,.53,.39,.58,.44,.34,.50];
 function gateY(i:number){return 92+seq[i%seq.length]*(H-GROUND-184)}
+function coinY(cy:number,i:number){const margin=R+17,reach=GAP/2-margin,offsets=[-.78,.72,-.58,.84,-.88,.62,.76,-.69,.9,-.52,.67,-.82];return cy+offsets[i%offsets.length]*reach}
 function simulate(taps:number[],endTick:number){
  let y=H*.48,vy=0,spawn=.75,score=0,gi=0,dead=false; const pipes:any[]=[]; let ti=0;
  for(let tick=0;tick<endTick&&tick<120*60*20;tick++){
   while(ti<taps.length&&taps[ti]===tick){vy=FLAP;ti++}
   vy+=GRAVITY*DT;y+=vy*DT;spawn-=DT;
-  if(spawn<=0){pipes.push({x:W+20,cy:gateY(gi++),passed:false,coin:true});spawn+=SPAWN}
+  if(spawn<=0){{const i=gi,cy=gateY(gi++);pipes.push({x:W+20,cy,coinY:coinY(cy,i),passed:false,coin:true})};spawn+=SPAWN}
   for(const p of pipes){
    p.x-=SPEED*DT;
-   if(p.coin){const cx=p.x+PIPE_W/2,cy=p.cy,dx=BIRD_X-cx,dy=y-cy;if(dx*dx+dy*dy<(R+14)*(R+14)){p.coin=false;score+=2}}
+   if(p.coin){const cx=p.x+PIPE_W/2,cy=p.coinY,dx=BIRD_X-cx,dy=y-cy;if(dx*dx+dy*dy<(R+14)*(R+14)){p.coin=false;score+=2}}
    if(!p.passed&&p.x+PIPE_W<BIRD_X){p.passed=true;score++}
   }
   if(y-R<0||y+R>H-GROUND){dead=true;break}
