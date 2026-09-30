@@ -69,13 +69,15 @@
  }
  function flap(){if(waitingForFirstFlap){waitingForFirstFlap=false;overlay.classList.add('hidden');play.style.display='';running=true;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap;requestAnimationFrame(loop);return}if(!running)return;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap}
  function gateY(i){return 92+seq[i%seq.length]*(H-ground-184)}
- function coinY(cy,i){
-   const margin=cfg.radius+17;
-   const reach=cfg.gap/2-margin;
-   const offsets=[-.78,.72,-.58,.84,-.88,.62,.76,-.69,.9,-.52,.67,-.82];
-   return cy+offsets[i%offsets.length]*reach;
+ function coinSpec(cy,i){
+   // Deterministic "random" course pattern: only some gates carry a coin,
+   // with deliberately awkward high/low placements that the verifier can replay.
+   const show=[false,true,false,false,true,false,true,false,false,true,false,false];
+   const offsets=[0,-.86,0,0,.82,0,-.72,0,0,.9,0,0];
+   const margin=cfg.radius+17,reach=cfg.gap/2-margin;
+   return {show:show[i%show.length],y:cy+offsets[i%offsets.length]*reach};
  }
- function addPipe(){const i=gateIndex,cy=gateY(gateIndex++);pipes.push({x:W+20,cy,coinY:coinY(cy,i),passed:false,coin:true})}
+ function addPipe(){const i=gateIndex,cy=gateY(gateIndex++),coin=coinSpec(cy,i);pipes.push({x:W+20,cy,coinY:coin.y,passed:false,coin:coin.show})}
  function step(){
    bird.vy+=cfg.gravity*DT;bird.y+=bird.vy*DT;spawn-=DT;
    if(spawn<=0){addPipe();spawn+=cfg.spawn}
