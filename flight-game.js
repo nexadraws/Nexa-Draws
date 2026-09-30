@@ -70,21 +70,23 @@
  function flap(){if(waitingForFirstFlap){waitingForFirstFlap=false;overlay.classList.add('hidden');play.style.display='';running=true;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap;requestAnimationFrame(loop);return}if(!running)return;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap}
  function gateY(i){return 92+seq[i%seq.length]*(H-ground-184)}
  function coinSpec(cy,i){
-   // Deterministic "random" course pattern: only some gates carry a coin,
-   // with deliberately awkward high/low placements that the verifier can replay.
-   const show=[false,true,false,false,true,false,true,false,false,true,false,false];
-   const offsets=[0,-.86,0,0,.82,0,-.72,0,0,.9,0,0];
-   const margin=cfg.radius+17,reach=cfg.gap/2-margin;
-   return {show:show[i%show.length],y:cy+offsets[i%offsets.length]*reach};
+   // Rare deterministic ring: roughly one every 13 gates, but its location varies.
+   // xOffset moves it before/inside/after the pipe opening; yOffset makes it high,
+   // low or central while keeping it physically collectible.
+   const cycle=Math.floor(i/13),show=i%13===((cycle*5+4)%13);
+   const yOffsets=[-.88,.76,-.62,.9,-.78,.54,.84,-.7];
+   const xOffsets=[-118,0,112,-64,72,0,-96,96];
+   const margin=cfg.radius+17,reach=cfg.gap/2-margin,k=cycle%yOffsets.length;
+   return {show,y:cy+yOffsets[k]*reach,xOffset:xOffsets[k]};
  }
- function addPipe(){const i=gateIndex,cy=gateY(gateIndex++),coin=coinSpec(cy,i);pipes.push({x:W+20,cy,coinY:coin.y,passed:false,coin:coin.show})}
+ function addPipe(){const i=gateIndex,cy=gateY(gateIndex++),coin=coinSpec(cy,i);pipes.push({x:W+20,cy,coinY:coin.y,coinXOffset:coin.xOffset,passed:false,coin:coin.show})}
  function step(){
    bird.vy+=cfg.gravity*DT;bird.y+=bird.vy*DT;spawn-=DT;
    if(spawn<=0){addPipe();spawn+=cfg.spawn}
    for(const p of pipes){
      p.x-=cfg.speed*DT;
      if(p.coin){
-       const cx=p.x+cfg.pipeW/2,cy=p.coinY,dx=bird.x-cx,dy=bird.y-cy;
+       const cx=p.x+cfg.pipeW/2+p.coinXOffset,cy=p.coinY,dx=bird.x-cx,dy=bird.y-cy;
        if(dx*dx+dy*dy<(cfg.radius+14)*(cfg.radius+14)){p.coin=false;score+=2;scoreEl.textContent=score}
      }
      if(!p.passed&&p.x+cfg.pipeW<bird.x){p.passed=true;score++;scoreEl.textContent=score}
@@ -147,7 +149,7 @@
    for(const p of pipes){
      const top=p.cy-cfg.gap/2,bottom=p.cy+cfg.gap/2;pipe(p.x,0,top,false);pipe(p.x,bottom,H-ground-bottom,true);
      if(p.coin){
-       const cx=p.x+cfg.pipeW/2,cy=p.coinY;
+       const cx=p.x+cfg.pipeW/2+p.coinXOffset,cy=p.coinY;
        ctx.save();ctx.shadowColor='#ffe45c';ctx.shadowBlur=18;
        const cg=ctx.createRadialGradient(cx-5,cy-6,2,cx,cy,15);cg.addColorStop(0,'#fff8b0');cg.addColorStop(.35,'#ffd83d');cg.addColorStop(1,'#a96000');
        ctx.fillStyle=cg;ctx.strokeStyle='#fff079';ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,cy,14,0,Math.PI*2);ctx.fill();ctx.stroke();
