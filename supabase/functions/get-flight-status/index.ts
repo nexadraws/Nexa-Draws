@@ -12,7 +12,7 @@ Deno.serve(async(req)=>{
   const {data:comp,error:compError}=await admin.from('skill_competitions').select('id,status,closes_at').eq('slug','flight-challenge-250').in('status',['test','live']).single();
   if(compError||!comp) throw new Error('Challenge unavailable');
 
-  const usePaidEntitlement=comp.status==='live'||(comp.status==='test'&&!!adminUid&&user.id===adminUid);
+  const usePaidEntitlement=comp.status==='live';
   if(!usePaidEntitlement) return Response.json({success:true,mode:'test',attempts_remaining:null},{headers:cors});
 
   const {data:purchases,error:purchaseError}=await admin.from('skill_purchases').select('attempts_total,attempts_used').eq('competition_id',comp.id).eq('user_id',user.id).eq('status','paid');
