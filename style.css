@@ -1160,3 +1160,173 @@ body.age-locked {
 .flight-showcase .flight-bird:before{width:65px;height:39px;left:27px;bottom:-18px}.flight-showcase .flight-bird:after{right:-36px;border-left-width:36px;border-top-width:13px;border-bottom-width:13px}
 .flight-speed-line{position:absolute;z-index:4;height:2px;background:linear-gradient(90deg,transparent,#ffd360,transparent);transform:rotate(-10deg);filter:drop-shadow(0 0 5px #ffc43e)}.sl-one{width:230px;right:35%;top:45%}.sl-two{width:160px;right:39%;top:53%}
 @media(max-width:800px){.flight-showcase,.flight-showcase-link{min-height:600px}.flight-showcase .flight-coming-copy{width:100%;padding:32px 6%;text-align:left}.flight-showcase .flight-coming-copy h2{font-size:clamp(43px,14vw,64px)}.flight-showcase .flight-coming-art{width:100%;height:270px;bottom:0;top:auto}.flight-showcase .flight-sun{right:4%;top:5%;width:190px;height:190px}.flight-showcase .flight-bird{right:43%;top:36%;width:86px;height:60px}.fr-one{width:130px;height:185px;right:2%;top:11%}.fr-two{right:32%;top:48%;width:72px;height:100px}.fr-three{right:52%;top:60%}.fr-four{display:none}.flight-prize strong{font-size:31px}}
+
+
+/* Mobile Flight Challenge hero — compact, cinematic and action-first */
+@media (max-width: 600px) {
+  .flight-showcase,
+  .flight-showcase-link {
+    min-height: 520px;
+  }
+
+  .flight-showcase-link {
+    background:
+      linear-gradient(180deg,#050607 0%,#080807 42%,rgba(7,7,6,.72) 62%,rgba(5,5,5,.18) 100%),
+      radial-gradient(circle at 78% 72%,#e5a329 0,#7b490d 15%,#171109 38%,#050505 68%);
+  }
+
+  .flight-showcase .flight-coming-copy {
+    width: 100%;
+    padding: 24px 20px 0;
+    text-align: center;
+  }
+
+  .flight-showcase .flight-coming-copy .eyebrow {
+    margin: 0 0 8px;
+    font-size: 11px;
+    letter-spacing: .24em;
+  }
+
+  .flight-showcase .flight-coming-copy h2 {
+    margin: 0 auto 8px;
+    font-size: clamp(40px, 12.7vw, 55px);
+    line-height: .88;
+    letter-spacing: -.055em;
+  }
+
+  .flight-tagline {
+    margin: 13px 0 14px!important;
+    font-size: 11px!important;
+    letter-spacing: .3em!important;
+  }
+
+  .flight-prize {
+    display: flex;
+    width: min(100%, 330px);
+    margin: 0 auto 12px;
+    padding: 10px 16px;
+    justify-content: space-between;
+    border-radius: 13px;
+    background: linear-gradient(180deg,rgba(60,42,12,.92),rgba(12,10,6,.92));
+  }
+
+  .flight-prize small {
+    font-size: 9px;
+  }
+
+  .flight-prize strong {
+    font-size: 31px;
+  }
+
+  .flight-showcase .flight-coming-meta {
+    justify-content: center;
+    gap: 6px;
+    margin: 0 auto 14px;
+  }
+
+  .flight-showcase .flight-coming-meta span {
+    padding: 6px 8px;
+    font-size: 8px;
+    letter-spacing: .025em;
+  }
+
+  .flight-preview-cta {
+    position: relative;
+    z-index: 10;
+    width: min(100%, 330px);
+    justify-content: center;
+    gap: 12px;
+    padding: 13px 15px;
+    font-size: 11px;
+    box-shadow: 0 8px 28px rgba(225,161,35,.28);
+  }
+
+  .flight-showcase .flight-coming-art {
+    height: 190px;
+    opacity: .98;
+  }
+
+  .flight-showcase .flight-sun {
+    width: 155px;
+    height: 155px;
+    right: 3%;
+    top: 12px;
+  }
+
+  .flight-showcase .flight-bird {
+    width: 74px;
+    height: 51px;
+    right: 45%;
+    top: 34%;
+  }
+
+  .flight-showcase .flight-bird b {
+    font-size: 21px;
+  }
+
+  .flight-showcase .flight-bird i {
+    top: -20px;
+    font-size: 20px;
+  }
+
+  .flight-showcase .flight-bird:before {
+    width: 48px;
+    height: 28px;
+    left: 20px;
+    bottom: -14px;
+  }
+
+  .flight-showcase .flight-bird:after {
+    right: -27px;
+    border-left-width: 28px;
+    border-top-width: 10px;
+    border-bottom-width: 10px;
+  }
+
+  .fr-one {
+    width: 105px;
+    height: 145px;
+    right: 2%;
+    top: 8%;
+    border-width: 6px;
+  }
+
+  .fr-two {
+    width: 62px;
+    height: 86px;
+    right: 31%;
+    top: 47%;
+    border-width: 5px;
+  }
+
+  .fr-three {
+    width: 40px;
+    height: 58px;
+    right: 51%;
+    top: 61%;
+    border-width: 4px;
+  }
+
+  .fm-one {
+    right: -125px;
+    transform: scale(.78);
+  }
+
+  .fm-two {
+    right: 125px;
+    bottom: -85px;
+    transform: scale(.58);
+  }
+
+  .sl-one {
+    width: 145px;
+    right: 39%;
+    top: 43%;
+  }
+
+  .sl-two {
+    width: 105px;
+    right: 43%;
+    top: 54%;
+  }
+}
