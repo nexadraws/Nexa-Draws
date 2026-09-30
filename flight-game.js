@@ -5,6 +5,7 @@
  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
  const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),scoreEl=document.getElementById('score'),bestEl=document.getElementById('best');
  const leaderboardList=document.getElementById('leaderboardList'),leaderboardStatus=document.getElementById('leaderboardStatus'),attemptBalance=document.getElementById('attemptBalance');
+ let testCreditBalance=null;
  const overlay=document.getElementById('overlay'),title=document.getElementById('overlayTitle'),copy=document.getElementById('overlayText'),play=document.getElementById('playBtn'),restart=document.getElementById('restartBtn'),packageBtns=[...document.querySelectorAll('.package-btn')],checkoutStatus=document.getElementById('checkoutStatus'),paymentBox=document.getElementById('flightPayment'),paymentMount=document.getElementById('paymentMount'),closePayment=document.getElementById('closePayment');
  const W=900,H=520,ground=54,DT=1/120,cfg={gravity:1550,flap:-470,speed:220,gap:170,pipeW:86,spawn:1.48,birdX:210,radius:19};
  const seq=[.42,.56,.35,.61,.47,.31,.53,.39,.58,.44,.34,.50];
@@ -35,7 +36,8 @@
    try{
      const {data,error}=await sb.functions.invoke('get-flight-status',{body:{},headers:{Authorization:`Bearer ${session.access_token}`}});
      if(error||!data?.success)throw error||new Error(data?.error||'Status unavailable');
-     attemptBalance.textContent=data.mode==='test'?'Unlimited test attempts':data.attempts_remaining+' attempt'+(data.attempts_remaining===1?'':'s')+' remaining';
+     if(data.mode==='test'){attemptBalance.textContent='Unlimited test attempts';testCreditBalance=null}else{attemptBalance.textContent=data.attempts_remaining+' attempt'+(data.attempts_remaining===1?'':'s')+' remaining';}
+     try{const {data:credit}=await sb.rpc('get_my_flight_test_credit');if(Number.isFinite(Number(credit))&&Number(credit)>0){testCreditBalance=Number(credit);attemptBalance.textContent+=' · TEST CREDIT £'+(testCreditBalance/100).toFixed(2);if(checkoutStatus)checkoutStatus.textContent='Admin test credit available — choose a package to test without a real payment.'}}catch(_){}
    }catch(_){attemptBalance.textContent='Attempt balance unavailable.'}
  }
  async function countdown(){title.textContent='GET READY';copy.textContent='3';overlay.classList.remove('hidden');for(const n of ['3','2','1']){copy.textContent=n;await wait(700)}copy.textContent='GO!';await wait(350);overlay.classList.add('hidden')}
@@ -183,7 +185,19 @@
  async function createPackageCheckout(packageId){
    const {data:{session}}=await sb.auth.getSession();
    if(!session){window.location.href='index.html#account';return}
-   setCheckoutBusy(true);if(checkoutStatus)checkoutStatus.textContent='Preparing secure checkout…';
+   setCheckoutBusy(true);
+   if(testCreditBalance!==null&&testCreditBalance>0){
+     if(checkoutStatus)checkoutStatus.textContent='Using TEST CREDIT…';
+     const {data,error}=await sb.functions.invoke('buy-flight-with-test-credit',{body:{package_id:packageId},headers:{Authorization:`Bearer ${session.access_token}`}});
+     if(error||!data?.success){
+       if(checkoutStatus)checkoutStatus.textContent=data?.error||'Test-credit purchase could not be completed.';
+       setCheckoutBusy(false);return
+     }
+     testCreditBalance=Number(data.balance_pence);
+     if(checkoutStatus)checkoutStatus.textContent=data.attempts+' attempt'+(data.attempts===1?'':'s')+' added · TEST CREDIT remaining £'+(testCreditBalance/100).toFixed(2);
+     await loadAttemptBalance();setCheckoutBusy(false);return
+   }
+   if(checkoutStatus)checkoutStatus.textContent='Preparing secure checkout…';
    const {data,error}=await sb.functions.invoke('create-flight-checkout',{body:{package_id:packageId},headers:{Authorization:`Bearer ${session.access_token}`}});
    if(error||!data?.success){
      const message=data?.error||error?.context?.error||'Checkout is unavailable.';
