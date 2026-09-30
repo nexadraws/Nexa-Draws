@@ -22,7 +22,7 @@ Deno.serve(async(req)=>{
 
   const admin=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
   const {data:comp,error:ce}=await admin.from("skill_competitions").select("id,status,closes_at").eq("slug","flight-challenge-250").single();
-  if(ce||!comp||comp.status!=="test") return json({success:false,error:"Test credit is available only while Flight is in test mode"},409);
+  if(ce||!comp||!["test","live"].includes(comp.status)) return json({success:false,error:"Flight Challenge is unavailable"},409);
   if(comp.closes_at&&new Date(comp.closes_at).getTime()<=Date.now()) return json({success:false,error:"Challenge closed"},409);
 
   const {data:remaining,error:spendError}=await admin.rpc("spend_flight_test_credit",{p_user_id:user.id,p_amount_pence:selected.amountPence});
