@@ -1330,3 +1330,124 @@ body.age-locked {
     top: 54%;
   }
 }
+
+
+/* Mobile Flight preview v2 — balanced composition */
+@media (max-width: 600px) {
+  .flight-showcase,
+  .flight-showcase-link {
+    min-height: 455px;
+  }
+
+  .flight-showcase .flight-coming-copy {
+    padding: 20px 18px 0;
+    text-align: left;
+  }
+
+  .flight-showcase .flight-coming-copy .eyebrow {
+    max-width: 270px;
+    margin-bottom: 7px;
+    font-size: 9px;
+    line-height: 1.35;
+  }
+
+  .flight-showcase .flight-coming-copy h2 {
+    margin: 0;
+    max-width: 330px;
+    font-size: clamp(34px, 10.8vw, 47px);
+    line-height: .9;
+  }
+
+  .flight-tagline {
+    margin: 10px 0 11px!important;
+    font-size: 9px!important;
+  }
+
+  .flight-prize {
+    width: 245px;
+    margin: 0 0 10px;
+    padding: 8px 13px;
+  }
+
+  .flight-prize strong {
+    font-size: 26px;
+  }
+
+  .flight-showcase .flight-coming-meta {
+    width: 250px;
+    justify-content: flex-start;
+    gap: 5px;
+    margin: 0 0 11px;
+  }
+
+  .flight-showcase .flight-coming-meta span {
+    padding: 5px 7px;
+    font-size: 7px;
+  }
+
+  .flight-preview-cta {
+    width: 265px;
+    padding: 11px 13px;
+    font-size: 9px;
+  }
+
+  .flight-showcase .flight-coming-art {
+    width: 62%;
+    height: 255px;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    overflow: hidden;
+  }
+
+  .flight-showcase .flight-sun {
+    width: 150px;
+    height: 150px;
+    right: -15px;
+    top: 22px;
+  }
+
+  .flight-showcase .flight-bird {
+    width: 67px;
+    height: 47px;
+    right: 47%;
+    top: 43%;
+  }
+
+  .fr-one {
+    width: 92px;
+    height: 132px;
+    right: -4%;
+    top: 18%;
+  }
+
+  .fr-two {
+    width: 55px;
+    height: 78px;
+    right: 35%;
+    top: 55%;
+  }
+
+  .fr-three {
+    width: 31px;
+    height: 45px;
+    right: 59%;
+    top: 68%;
+  }
+
+  .flight-mountain {
+    opacity: .72;
+  }
+
+  .fm-one {
+    right: -180px;
+    bottom: -60px;
+    transform: scale(.68);
+  }
+
+  .fm-two {
+    right: 40px;
+    bottom: -105px;
+    transform: scale(.5);
+  }
+}
