@@ -7496,6 +7496,61 @@ document.addEventListener(
   handleNochexReturn
 );
 
+document.addEventListener(
+  'DOMContentLoaded',
+  handleFlightPaymentReturn
+);
+
+async function handleFlightPaymentReturn() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('flightTestPayment') !== 'return') return;
+
+  const resourcePath = params.get('resourcePath');
+  const clearReturnUrl = () => {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  };
+
+  if (!resourcePath || !resourcePath.startsWith('/v1/checkouts/')) {
+    clearReturnUrl();
+    alert(
+      'Flight payment received — verification is still pending.\n\n' +
+      'Please do not make another payment.'
+    );
+    return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient.functions.invoke(
+      'verify-flight-payment',
+      { body: { resourcePath } }
+    );
+
+    if (error) throw error;
+
+    clearReturnUrl();
+
+    if (data?.success || data?.verified) {
+      alert(
+        'Flight payment confirmed!\n\n' +
+        'Your paid Flight attempt has been securely recorded.'
+      );
+      return;
+    }
+
+    alert(
+      'Flight payment received — verification is still pending.\n\n' +
+      'Please do not make another payment.'
+    );
+  } catch (error) {
+    console.error('Flight payment verification error:', error);
+    clearReturnUrl();
+    alert(
+      'Flight payment received — verification is still pending.\n\n' +
+      'Please do not make another payment.'
+    );
+  }
+}
+
 async function handleNochexReturn() {
   const params =
     new URLSearchParams(
