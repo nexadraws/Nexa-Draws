@@ -4,7 +4,6 @@ Deno.serve(async(req)=>{
  if(req.method==='OPTIONS') return new Response('ok',{headers:cors});
  try{
   const url=Deno.env.get('SUPABASE_URL')!, anon=Deno.env.get('SUPABASE_ANON_KEY')!, service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  const adminUid=Deno.env.get('FLIGHT_ADMIN_UID');
   const auth=createClient(url,anon,{global:{headers:{Authorization:req.headers.get('Authorization')||''}}});
   const {data:{user}}=await auth.auth.getUser(); if(!user) throw new Error('Sign in required');
   const admin=createClient(url,service);
@@ -13,10 +12,8 @@ Deno.serve(async(req)=>{
   if(comp.closes_at && new Date(comp.closes_at).getTime()<=Date.now()) throw new Error('Challenge closed');
   const seed=1;
 
-  // Controlled production test: in TEST mode only the configured admin uses paid entitlements.
-  // Other signed-in testers remain unlimited; LIVE enforces paid entitlements for everyone.
-  const usePaidEntitlement=comp.status==='live'||(comp.status==='test'&&!!adminUid&&user.id===adminUid);
-  if(!usePaidEntitlement){
+  // TEST is unlimited free play for every signed-in user. LIVE consumes paid entitlements.
+  if(comp.status!=='live'){
    const {data:attempt,error}=await admin.from('skill_attempts').insert({competition_id:comp.id,user_id:user.id,entitlement_source:'test',status:'started',game_version:comp.game_version,seed,started_at:new Date().toISOString()}).select('id,game_version,seed').single();
    if(error) throw error;
    return Response.json({success:true,attempt,mode:'test'},{headers:cors});
