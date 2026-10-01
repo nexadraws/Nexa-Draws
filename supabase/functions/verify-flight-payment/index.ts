@@ -1,9 +1,11 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const SUCCESS_CODES = ["000.000.000", "000.100.110"];
+const corsHeaders = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS"};
 
 Deno.serve(async (req) => {
   try {
+    if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
     if (req.method !== "POST") return response({ error: "Method not allowed" }, 405);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
@@ -52,7 +54,9 @@ Deno.serve(async (req) => {
       return response({ success: true, state: "success", duplicate: true, purchase_id: purchase.id });
     }
     if (purchase.status !== "pending" || purchase.provider_transaction_id) return response({ error: "Purchase already processed" }, 409);
-    if (purchase.currency !== "GBP" || purchase.amount_pence !== 100 || purchase.attempts_total !== 2 || paidAmount.toFixed(2) !== "1.00") {
+    const packages = new Map([["100:1","1.00"],["400:5","4.00"],["700:10","7.00"]]);
+    const expectedAmount = packages.get(String(purchase.amount_pence)+":"+String(purchase.attempts_total));
+    if (purchase.currency !== "GBP" || !expectedAmount || paidAmount.toFixed(2) !== expectedAmount) {
       return response({ error: "Payment amount or entitlement mismatch" }, 409);
     }
 
@@ -78,7 +82,7 @@ Deno.serve(async (req) => {
       return response({ error: "Purchase changed during verification" }, 409);
     }
 
-    return response({ success: true, state: "success", duplicate: false, purchase_id: purchase.id, attempts_granted: paid.attempts_total });
+    return response({ success: true, state: "success", duplicate: false, purchase_id: purchase.id, attempts_granted: paid.attempts_total, attempts_remaining: Math.max(0, Number(paid.attempts_total)-Number(paid.attempts_used||0)) });
   } catch (e) {
     console.error("verify-flight-payment error", e);
     return response({ error: "Unexpected server error" }, 500);
@@ -98,5 +102,5 @@ function normaliseResourcePath(input: string) {
 }
 
 function response(body: Record<string, unknown>, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+  return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 }
