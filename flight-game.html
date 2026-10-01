@@ -4,14 +4,14 @@
 <title>NexaDraw Flight Challenge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="flight-game.css?v=12"></head><body>
+<link rel="stylesheet" href="flight-game.css?v=13"></head><body>
 <main class="game-shell">
 <header class="game-header">
 <a href="index.html" class="brand"><img src="logo.png" alt="Nexa Draw"><small>PLAY &nbsp;•&nbsp; COMPETE &nbsp;•&nbsp; WIN</small></a>
 <div class="title"><h1>FLIGHT CHALLENGE</h1><strong>SKILL COMPETITION</strong></div>
 <div class="prize"><span>MAIN PRIZE</span><strong>£150</strong></div><div class="deadline"><span>COMPETITION CLOSES</span><strong>15 OCTOBER 2026</strong></div>
 </header>
-<div class="beta-banner"><strong>FLIGHT CHALLENGE · FREE PLAY</strong><span>Unlimited entries are open now · Sign in and play as many times as you like.</span></div>\n<section class="entry-card" aria-label="Flight Challenge entry"><div class="entry-intro"><small>FREE ENTRY</small><strong>UNLIMITED ATTEMPTS</strong><span>Your highest server-verified score counts.</span><span id="attemptBalance" class="attempt-balance">Sign in to play for free.</span></div><div class="entry-packages"><button type="button" class="package-btn" data-package="single"><b>1 ATTEMPT</b><strong>£1</strong><span>£1.00 each</span></button><button type="button" class="package-btn" data-package="five"><b>5 ATTEMPTS</b><strong>£4</strong><span>80p each · Save £1</span></button><button type="button" class="package-btn" data-package="ten"><b>10 ATTEMPTS</b><strong>£7</strong><span>70p each · Save £3</span></button></div><p id="checkoutStatus" class="checkout-status">Sign in to play for free · Unlimited attempts.</p><div id="flightPayment" class="flight-payment" hidden><div class="payment-head"><strong>SECURE CHECKOUT</strong><button id="closePayment" type="button" aria-label="Close checkout">×</button></div><div id="paymentMount"></div></div></section><div class="content-grid">
+<div id="flightModeBanner" class="beta-banner"><strong>FLIGHT CHALLENGE · FREE PLAY</strong><span>Unlimited entries are open now · Sign in and play as many times as you like.</span></div><section class="entry-card" aria-label="Flight Challenge entry"><div class="entry-intro"><small id="entryModeLabel">FREE ENTRY</small><strong id="entryModeTitle">UNLIMITED ATTEMPTS</strong><span id="entryModeCopy">Your highest server-verified score counts.</span><span id="attemptBalance" class="attempt-balance">Sign in to play for free.</span></div><div class="entry-packages"><button type="button" class="package-btn" data-package="single"><b>1 ATTEMPT</b><strong>£1</strong><span>£1.00 each</span></button><button type="button" class="package-btn" data-package="five"><b>5 ATTEMPTS</b><strong>£4</strong><span>80p each · Save £1</span></button><button type="button" class="package-btn" data-package="ten"><b>10 ATTEMPTS</b><strong>£7</strong><span>70p each · Save £3</span></button></div><div id="flightBilling" class="flight-billing" hidden><strong>PAYMENT DETAILS</strong><div class="flight-billing-grid"><input id="flightGivenName" autocomplete="given-name" placeholder="First name"><input id="flightSurname" autocomplete="family-name" placeholder="Surname"><input id="flightPhone" autocomplete="tel" placeholder="Phone"><input id="flightStreet" autocomplete="address-line1" placeholder="Billing address"><input id="flightCity" autocomplete="address-level2" placeholder="City"><input id="flightPostcode" autocomplete="postal-code" placeholder="Postcode"></div></div><p id="checkoutStatus" class="checkout-status">Sign in to play for free · Unlimited attempts.</p><div id="flightPayment" class="flight-payment" hidden><div class="payment-head"><strong>SECURE CHECKOUT</strong><button id="closePayment" type="button" aria-label="Close checkout">×</button></div><div id="paymentMount"></div></div></section><div class="content-grid">
 <section class="left-column">
 <div class="stage-wrap">
 <canvas id="game" width="900" height="520" aria-label="NexaDraw Flight Challenge game"></canvas>
@@ -20,7 +20,7 @@
 <div class="overlay" id="overlay"><img src="logo.png" alt="" class="overlay-logo"><h1 id="overlayTitle">FLIGHT CHALLENGE</h1><p id="overlayText">Pass as many gates as you can. Tap, click or press Space to fly.</p><button id="playBtn" type="button">▶ PLAY</button></div>
 </div>
 <section class="verify-panel"><h2>HOW A VALID ATTEMPT IS VERIFIED</h2><div class="verify-flow">
-<div><i>£</i><b>1. CHOOSE PACKAGE</b><span>Choose 1, 5 or 10 attempts.</span></div><mark>➜</mark>
+<div><i>▶</i><b>1. START ATTEMPT</b><span id="verifyEntryCopy">Sign in and play while free mode is open.</span></div><mark>➜</mark>
 <div><i>🎮</i><b>2. PLAY GAME</b><span>Your inputs are recorded.</span></div><mark>➜</mark>
 <div><i>▦</i><b>3. SERVER SIMULATION</b><span>The server replays the run.</span></div><mark>➜</mark>
 <div><i>◆</i><b>4. ANTI-CHEAT CHECK</b><span>Replay is validated.</span></div><mark>➜</mark>
@@ -35,5 +35,5 @@
 <div class="security-item"><i>♛</i><p><b>WINNER REVIEW</b><span>Winning-score review can be completed before a prize is awarded.</span></p></div>
 <button id="restartBtn" type="button">↻ NEW ATTEMPT</button>
 </section><a class="login-btn" href="index.html#account">👤 LOG IN / MY ACCOUNT</a></aside></div></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="flight-game.js?v=23"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="flight-game.js?v=24"></script>
 </body></html>
