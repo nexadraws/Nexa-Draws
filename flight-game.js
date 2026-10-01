@@ -7,6 +7,7 @@
  const leaderboardList=document.getElementById('leaderboardList'),leaderboardStatus=document.getElementById('leaderboardStatus'),attemptBalance=document.getElementById('attemptBalance');
  const overlay=document.getElementById('overlay'),title=document.getElementById('overlayTitle'),copy=document.getElementById('overlayText'),play=document.getElementById('playBtn'),restart=document.getElementById('restartBtn'),packageBtns=[...document.querySelectorAll('.package-btn')],checkoutStatus=document.getElementById('checkoutStatus'),paymentBox=document.getElementById('flightPayment'),paymentMount=document.getElementById('paymentMount'),closePayment=document.getElementById('closePayment');
  const modeBanner=document.getElementById('flightModeBanner'),entryModeLabel=document.getElementById('entryModeLabel'),entryModeTitle=document.getElementById('entryModeTitle'),entryModeCopy=document.getElementById('entryModeCopy'),verifyEntryCopy=document.getElementById('verifyEntryCopy'),billingBox=document.getElementById('flightBilling');
+ const saveBilling=document.getElementById('flightSaveBilling');
  const billing={given_name:document.getElementById('flightGivenName'),surname:document.getElementById('flightSurname'),phone:document.getElementById('flightPhone'),billing_street1:document.getElementById('flightStreet'),billing_city:document.getElementById('flightCity'),billing_postcode:document.getElementById('flightPostcode')};
  let flightMode='test';
  const W=900,H=520,ground=54,DT=1/120,cfg={gravity:1550,flap:-470,speed:220,gap:170,pipeW:86,spawn:1.48,birdX:210,radius:19};
@@ -65,7 +66,7 @@
  async function loadBilling(userId){
    try{
      const {data}=await sb.from('customer_billing_details').select('given_name,surname,phone,billing_street1,billing_city,billing_postcode').eq('user_id',userId).maybeSingle();
-     if(data)Object.keys(billing).forEach(k=>{if(billing[k]&&data[k])billing[k].value=data[k]});
+     if(data){Object.keys(billing).forEach(k=>{if(billing[k]&&data[k])billing[k].value=data[k]});if(saveBilling)saveBilling.checked=true}
    }catch(_){}
  }
  async function countdown(){title.textContent='GET READY';copy.textContent='3';overlay.classList.remove('hidden');for(const n of ['3','2','1']){copy.textContent=n;await wait(700)}copy.textContent='GO!';await wait(350);overlay.classList.add('hidden')}
@@ -220,7 +221,7 @@
    if(missing){if(checkoutStatus)checkoutStatus.textContent='Complete your payment details, then tap the package again.';billingBox?.scrollIntoView({behavior:'smooth',block:'center'});return}
    setCheckoutBusy(true);if(checkoutStatus)checkoutStatus.textContent='Preparing secure checkout…';
    try{
-     await sb.from('customer_billing_details').upsert({user_id:session.user.id,...details,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+     if(saveBilling?.checked){await sb.from('customer_billing_details').upsert({user_id:session.user.id,...details,updated_at:new Date().toISOString()},{onConflict:'user_id'});}else{await sb.from('customer_billing_details').delete().eq('user_id',session.user.id);}
      const {data,error}=await sb.functions.invoke('create-flight-checkout',{body:{package_id:packageId,...details},headers:{Authorization:`Bearer ${session.access_token}`}});
      if(error||!data?.success)throw error||new Error(data?.error||'Checkout is unavailable.');
      if(checkoutStatus)checkoutStatus.textContent=data.attempts+' attempt'+(data.attempts===1?'':'s')+' · £'+data.amount+' · Secure payment';
