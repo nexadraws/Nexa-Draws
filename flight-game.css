@@ -36,3 +36,8 @@ body.flight-paid .flight-payment:not([hidden]){display:block!important}
 .leaderboard-prizes b{font:800 10px/1.1 Montserrat,Arial,sans-serif;letter-spacing:.04em}
 .leaderboard-prizes strong{margin-top:5px;font:900 14px/1.1 Montserrat,Arial,sans-serif}
 @media(max-width:560px){.leaderboard-prizes{grid-template-columns:1fr}.leaderboard-prizes span{min-height:48px}}
+
+
+.save-billing{display:flex;align-items:center;gap:9px;margin-top:11px;cursor:pointer;font:700 12px/1.3 Inter,Arial,sans-serif}
+.save-billing input{width:18px;height:18px;accent-color:#e7ad25;cursor:pointer;flex:0 0 auto}
+.save-billing span{opacity:.9}
