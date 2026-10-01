@@ -1493,3 +1493,13 @@ body.age-locked {
  .flight-showcase .flight-coming-meta span{font-size:8px;padding:7px 8px}
  .flight-preview-cta{min-width:0;width:min(100%,340px);font-size:10px;padding:14px 16px}
 }
+
+
+/* Flight Challenge homepage prize podium */
+.flight-prize-all{max-width:440px}
+.flight-home-prizes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:7px}
+.flight-home-prizes span{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 6px;border:1px solid rgba(255,210,70,.38);border-radius:10px;background:rgba(0,0,0,.2)}
+.flight-home-prizes b{font:800 10px/1 Montserrat,Arial,sans-serif;letter-spacing:.08em}
+.flight-home-prizes strong{font:900 20px/1.15 Montserrat,Arial,sans-serif}
+.flight-home-prizes em{display:block;margin-top:2px;font:800 8px/1.1 Montserrat,Arial,sans-serif;font-style:normal;letter-spacing:.04em}
+@media(max-width:560px){.flight-home-prizes{gap:5px}.flight-home-prizes span{padding:7px 3px}.flight-home-prizes strong{font-size:17px}}
