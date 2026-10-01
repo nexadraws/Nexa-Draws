@@ -6051,7 +6051,7 @@ const legalPages = {
     </h2>
 
     <p>
-      <strong>Last updated: 15 September 2026</strong>
+      <strong>Last updated: 1 October 2026</strong>
     </p>
 
     <p>
@@ -6230,6 +6230,85 @@ const legalPages = {
     <p>
       Nexa Draw will maintain appropriate records of competition results
       and winning entries.
+    </p>
+
+    <h3>9A. Flight Challenge Skill Competition</h3>
+
+    <p>
+      The Flight Challenge is a paid skill competition. It is not a random
+      draw. Entrants control the game by choosing when to make the bird fly,
+      and rankings are determined by server-verified gameplay performance.
+    </p>
+
+    <p>
+      Entry packages are <strong>£1 for 1 attempt, £4 for 5 attempts and
+      £7 for 10 attempts</strong>. An attempt is consumed when a paid
+      attempt is successfully started. Purchased attempts must be used
+      before the competition closes and have no cash value.
+    </p>
+
+    <p>
+      The Flight Challenge closes at <strong>22:59:59 UTC on 15 October
+      2026</strong>. No new attempts may be started after the closing time.
+    </p>
+
+    <p>
+      Each attempt uses the published Flight Challenge game build. Player
+      inputs are recorded and replayed by Nexa Draw's server. Only a run
+      accepted by the server verification process is a valid scored attempt.
+      The score calculated by the server is the official score.
+    </p>
+
+    <p>
+      A player's highest valid server-verified score is used for the
+      leaderboard. Lower scores by the same player do not replace that
+      player's highest score.
+    </p>
+
+    <p>
+      Subject to eligibility and verification, the prizes are:
+    </p>
+
+    <ul>
+      <li><strong>1st place: £100 cash.</strong></li>
+      <li><strong>2nd place: £50 cash.</strong></li>
+      <li><strong>3rd place: £25 Nexa Draw site credit.</strong></li>
+    </ul>
+
+    <p>
+      Site credit is account credit for use on eligible Nexa Draw purchases,
+      is not transferable and is not redeemable for cash.
+    </p>
+
+    <p>
+      Rankings are determined by the highest valid server-verified score.
+      If two or more eligible players finish with the same prize-winning
+      score, Nexa Draw will compare the server records for those tied runs
+      and the earlier valid verified score will rank ahead of a later score.
+    </p>
+
+    <p>
+      Nexa Draw may review the replay, account, payment and technical records
+      associated with a potential prize-winning score before confirming a
+      prize. A run may be rejected where the records reasonably demonstrate
+      tampering, automation, exploitation of a software defect, falsified
+      replay data or another breach of these Terms.
+    </p>
+
+    <p>
+      A technical failure that prevents a run from being server verified
+      does not create a valid score. Where Nexa Draw's systems have consumed
+      a paid attempt but a genuine technical failure attributable to Nexa
+      Draw prevents the attempt from being played or submitted for
+      verification, Nexa Draw may restore that attempt or provide an
+      equivalent remedy.
+    </p>
+
+    <p>
+      These Flight Challenge provisions apply in addition to the general
+      Terms. If there is a direct conflict concerning the Flight Challenge,
+      this section and the specific information displayed on the Flight
+      Challenge entry page take precedence.
     </p>
 
     <h3>10. Winner Notification</h3>
