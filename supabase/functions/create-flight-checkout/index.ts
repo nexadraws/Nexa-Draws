@@ -39,6 +39,13 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const packageId = String(body?.package_id || "");
+    const givenName = String(body?.given_name || "").trim();
+    const surname = String(body?.surname || "").trim();
+    const phone = String(body?.phone || "").trim();
+    const street = String(body?.billing_street1 || "").trim();
+    const city = String(body?.billing_city || "").trim();
+    const postcode = String(body?.billing_postcode || "").trim();
+    if (!givenName || !surname || !phone || !street || !city || !postcode) return json({ error: "Billing details are required" }, 400);
     const packages: Record<string, { amountPence: number; attempts: number }> = {
       single: { amountPence: 100, attempts: 1 },
       five: { amountPence: 400, attempts: 5 },
@@ -67,7 +74,17 @@ Deno.serve(async (req) => {
     params.set("amount", (amountPence / 100).toFixed(2));
     params.set("currency", "GBP");
     params.set("paymentType", "DB");
-    params.set("merchantTransactionId", "flight:" + purchase.id);\n    params.set("notificationUrl", supabaseUrl + "/functions/v1/verify-flight-payment");\n    params.set("merchant.url", "https://nexadraw.co.uk/");
+    params.set("merchantTransactionId", "flight:" + purchase.id);
+    params.set("customer.givenName", givenName);
+    params.set("customer.surname", surname);
+    params.set("customer.email", user.email || "");
+    params.set("customer.mobile", phone);
+    params.set("billing.street1", street);
+    params.set("billing.city", city);
+    params.set("billing.postcode", postcode);
+    params.set("billing.country", "GB");
+    params.set("notificationUrl", supabaseUrl + "/functions/v1/verify-flight-payment");
+    params.set("merchant.url", "https://nexadraw.co.uk/flight-game.html?payment=return");
 
     const response = await fetch("https://eu-prod.oppwa.com/v1/checkouts", {
       method: "POST",
