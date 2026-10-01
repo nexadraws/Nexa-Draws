@@ -6,6 +6,9 @@
  const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),scoreEl=document.getElementById('score'),bestEl=document.getElementById('best');
  const leaderboardList=document.getElementById('leaderboardList'),leaderboardStatus=document.getElementById('leaderboardStatus'),attemptBalance=document.getElementById('attemptBalance');
  const overlay=document.getElementById('overlay'),title=document.getElementById('overlayTitle'),copy=document.getElementById('overlayText'),play=document.getElementById('playBtn'),restart=document.getElementById('restartBtn'),packageBtns=[...document.querySelectorAll('.package-btn')],checkoutStatus=document.getElementById('checkoutStatus'),paymentBox=document.getElementById('flightPayment'),paymentMount=document.getElementById('paymentMount'),closePayment=document.getElementById('closePayment');
+ const modeBanner=document.getElementById('flightModeBanner'),entryModeLabel=document.getElementById('entryModeLabel'),entryModeTitle=document.getElementById('entryModeTitle'),entryModeCopy=document.getElementById('entryModeCopy'),verifyEntryCopy=document.getElementById('verifyEntryCopy'),billingBox=document.getElementById('flightBilling');
+ const billing={given_name:document.getElementById('flightGivenName'),surname:document.getElementById('flightSurname'),phone:document.getElementById('flightPhone'),billing_street1:document.getElementById('flightStreet'),billing_city:document.getElementById('flightCity'),billing_postcode:document.getElementById('flightPostcode')};
+ let flightMode='test';
  const W=900,H=520,ground=54,DT=1/120,cfg={gravity:1550,flap:-470,speed:220,gap:170,pipeW:86,spawn:1.48,birdX:210,radius:19};
  const seq=[.42,.56,.35,.61,.47,.31,.53,.39,.58,.44,.34,.50];
  let running=false,waitingForFirstFlap=false,last=0,acc=0,spawn=.75,score=0,best=Number(localStorage.getItem('nexa_flight_best')||0),bird,pipes=[],gateIndex=0,tick=0,taps=[],attemptId=null,ending=false;
@@ -31,9 +34,39 @@
  async function loadAttemptBalance(){
    if(!attemptBalance)return;
    const {data:{session}}=await sb.auth.getSession();
-   if(!session){attemptBalance.textContent='Sign in to play for free.';return}
-   attemptBalance.textContent='Unlimited free attempts';
-   if(checkoutStatus)checkoutStatus.textContent='Free play is open · Click PLAY to start.';
+   if(!session){attemptBalance.textContent='Sign in to continue.';document.body.classList.remove('flight-paid');return}
+   try{
+     const {data,error}=await sb.functions.invoke('get-flight-status',{body:{},headers:{Authorization:`Bearer ${session.access_token}`}});
+     if(error||!data?.success)throw error||new Error(data?.error||'Status unavailable');
+     flightMode=data.mode||'test';
+     const paid=flightMode==='paid';
+     document.body.classList.toggle('flight-paid',paid);
+     if(paid){
+       attemptBalance.textContent=Number(data.attempts_remaining||0)+' paid attempt'+(Number(data.attempts_remaining||0)===1?'':'s')+' remaining';
+       if(modeBanner)modeBanner.innerHTML='<strong>FLIGHT CHALLENGE · LIVE</strong><span>Paid skill competition · Highest verified score wins.</span>';
+       if(entryModeLabel)entryModeLabel.textContent='LIVE ENTRY';
+       if(entryModeTitle)entryModeTitle.textContent='CHOOSE YOUR ATTEMPTS';
+       if(entryModeCopy)entryModeCopy.textContent='1 attempt £1 · 5 attempts £4 · 10 attempts £7';
+       if(verifyEntryCopy)verifyEntryCopy.textContent='Buy an attempt package, then start your run.';
+       if(checkoutStatus)checkoutStatus.textContent='Choose a package to enter.';
+       await loadBilling(session.user.id);
+     }else{
+       attemptBalance.textContent='Unlimited free attempts';
+       if(modeBanner)modeBanner.innerHTML='<strong>FLIGHT CHALLENGE · FREE PLAY</strong><span>Unlimited entries are open now · Sign in and play as many times as you like.</span>';
+       if(entryModeLabel)entryModeLabel.textContent='FREE ENTRY';
+       if(entryModeTitle)entryModeTitle.textContent='UNLIMITED ATTEMPTS';
+       if(entryModeCopy)entryModeCopy.textContent='Your highest server-verified score counts.';
+       if(verifyEntryCopy)verifyEntryCopy.textContent='Sign in and play while free mode is open.';
+       if(checkoutStatus)checkoutStatus.textContent='Free play is open · Click PLAY to start.';
+       if(billingBox)billingBox.hidden=true;
+     }
+   }catch(_){attemptBalance.textContent='Entry status unavailable.'}
+ }
+ async function loadBilling(userId){
+   try{
+     const {data}=await sb.from('customer_billing_details').select('given_name,surname,phone,billing_street1,billing_city,billing_postcode').eq('user_id',userId).maybeSingle();
+     if(data)Object.keys(billing).forEach(k=>{if(billing[k]&&data[k])billing[k].value=data[k]});
+   }catch(_){}
  }
  async function countdown(){title.textContent='GET READY';copy.textContent='3';overlay.classList.remove('hidden');for(const n of ['3','2','1']){copy.textContent=n;await wait(700)}copy.textContent='GO!';await wait(350);overlay.classList.add('hidden')}
  async function start(){
@@ -62,7 +95,7 @@
      }catch(_){if(!message&&error?.message)message=error.message}
      title.textContent='UNABLE TO START';copy.textContent=message||'The attempt could not be started.';play.textContent='TRY AGAIN';play.disabled=false;return
    }
-   attemptId=data.attempt.id;if(attemptBalance)attemptBalance.textContent='Unlimited free attempts';reset();await countdown();waitingForFirstFlap=true;title.textContent='YOUR TURN';copy.textContent='Click, tap or press Space to make the first move.';overlay.classList.remove('hidden');play.style.display='none';play.disabled=false;
+   attemptId=data.attempt.id;if(attemptBalance){if(data.mode==='paid')attemptBalance.textContent=Number(data.attempts_remaining||0)+' paid attempt'+(Number(data.attempts_remaining||0)===1?'':'s')+' remaining';else attemptBalance.textContent='Unlimited free attempts';}reset();await countdown();waitingForFirstFlap=true;title.textContent='YOUR TURN';copy.textContent='Click, tap or press Space to make the first move.';overlay.classList.remove('hidden');play.style.display='none';play.disabled=false;
  }
  function flap(){if(waitingForFirstFlap){waitingForFirstFlap=false;overlay.classList.add('hidden');play.style.display='';running=true;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap;requestAnimationFrame(loop);return}if(!running)return;if(taps[taps.length-1]!==tick)taps.push(tick);bird.vy=cfg.flap}
  function gateY(i){return 92+seq[i%seq.length]*(H-ground-184)}
@@ -177,8 +210,41 @@
    script.onerror=()=>{if(checkoutStatus)checkoutStatus.textContent='Secure payment form could not be loaded. Please try again.';setCheckoutBusy(false)};
    document.body.appendChild(script);paymentBox.scrollIntoView({behavior:'smooth',block:'center'});
  }
- async function createPackageCheckout(){ return; }
+ async function createPackageCheckout(packageId){
+   const {data:{session}}=await sb.auth.getSession();
+   if(!session){window.location.href='index.html#account';return}
+   if(flightMode!=='paid'){if(checkoutStatus)checkoutStatus.textContent='Free play is currently open — no payment is required.';return}
+   if(billingBox)billingBox.hidden=false;
+   const details={};let missing=false;
+   Object.keys(billing).forEach(k=>{details[k]=String(billing[k]?.value||'').trim();if(!details[k])missing=true});
+   if(missing){if(checkoutStatus)checkoutStatus.textContent='Complete your payment details, then tap the package again.';billingBox?.scrollIntoView({behavior:'smooth',block:'center'});return}
+   setCheckoutBusy(true);if(checkoutStatus)checkoutStatus.textContent='Preparing secure checkout…';
+   try{
+     await sb.from('customer_billing_details').upsert({user_id:session.user.id,...details,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+     const {data,error}=await sb.functions.invoke('create-flight-checkout',{body:{package_id:packageId,...details},headers:{Authorization:`Bearer ${session.access_token}`}});
+     if(error||!data?.success)throw error||new Error(data?.error||'Checkout is unavailable.');
+     if(checkoutStatus)checkoutStatus.textContent=data.attempts+' attempt'+(data.attempts===1?'':'s')+' · £'+data.amount+' · Secure payment';
+     mountPaymentWidget(data);
+   }catch(error){
+     let message=error?.message||'Checkout is unavailable.';
+     try{if(error?.context instanceof Response){const x=await error.context.clone().json();message=x?.error||message}}catch(_){}
+     if(checkoutStatus)checkoutStatus.textContent=message;setCheckoutBusy(false);
+   }
+ }
+ async function handlePaymentReturn(){
+   const params=new URLSearchParams(location.search),resourcePath=params.get('resourcePath');
+   if(params.get('payment')!=='return')return;
+   history.replaceState({},document.title,location.pathname);
+   if(!resourcePath){if(checkoutStatus)checkoutStatus.textContent='Payment received — verification is pending. Do not pay again.';return}
+   try{
+     const {data,error}=await sb.functions.invoke('verify-flight-payment',{body:{resourcePath}});
+     if(error||!data?.success)throw error||new Error('Verification pending');
+     if(checkoutStatus)checkoutStatus.textContent='Payment confirmed · Your attempts are ready.';
+     await loadAttemptBalance();
+   }catch(_){if(checkoutStatus)checkoutStatus.textContent='Payment received — verification is pending. Do not pay again.'}
+ }
+
  packageBtns.forEach(btn=>btn.addEventListener('click',()=>createPackageCheckout(btn.dataset.package)));if(closePayment)closePayment.addEventListener('click',()=>{paymentBox.hidden=true;paymentMount.innerHTML=''});
  play.addEventListener('click',start);restart.addEventListener('click',()=>{if(!running)start()});overlay.addEventListener('pointerdown',e=>{if(waitingForFirstFlap&&e.target!==play){e.preventDefault();flap()}});canvas.addEventListener('pointerdown',e=>{e.preventDefault();flap()});window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();flap()}});
- setupHD();reset();draw();loadLeaderboard();loadAttemptBalance();sb.auth.onAuthStateChange(()=>loadAttemptBalance());setInterval(()=>{if(!document.hidden)loadLeaderboard()},15000);window.addEventListener('resize',()=>{setupHD();draw()});
+ setupHD();reset();draw();loadLeaderboard();loadAttemptBalance();handlePaymentReturn();sb.auth.onAuthStateChange(()=>loadAttemptBalance());setInterval(()=>{if(!document.hidden)loadLeaderboard()},15000);window.addEventListener('resize',()=>{setupHD();draw()});
 })();
