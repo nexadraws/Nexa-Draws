@@ -28,3 +28,11 @@ body.flight-paid .flight-payment:not([hidden]){display:block!important}
 .flight-billing-grid input{min-width:0;padding:11px 12px;border:1px solid #70551e;border-radius:8px;background:#090806;color:#fff;font:600 13px Inter,Arial;outline:none}
 .flight-billing-grid input:focus{border-color:#e5a82d;box-shadow:0 0 0 2px rgba(229,168,45,.12)}
 @media(max-width:650px){.flight-billing-grid{grid-template-columns:1fr 1fr}.flight-billing-grid input:nth-child(4){grid-column:1/-1}}
+
+
+/* Flight Challenge prize breakdown */
+.leaderboard-prizes{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:0 0 12px}
+.leaderboard-prizes span{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:62px;padding:8px 5px;border:1px solid rgba(255,205,64,.3);border-radius:10px;background:rgba(255,190,30,.07);text-align:center}
+.leaderboard-prizes b{font:800 10px/1.1 Montserrat,Arial,sans-serif;letter-spacing:.04em}
+.leaderboard-prizes strong{margin-top:5px;font:900 14px/1.1 Montserrat,Arial,sans-serif}
+@media(max-width:560px){.leaderboard-prizes{grid-template-columns:1fr}.leaderboard-prizes span{min-height:48px}}
