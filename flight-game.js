@@ -203,7 +203,7 @@
  }
  function mountPaymentWidget(data){
    if(!paymentBox||!paymentMount||!data?.checkout_id)return;
-   paymentMount.innerHTML='<form action="flight-game.html?payment=return" class="paymentWidgets" data-brands="VISA MASTER"></form>';
+   paymentMount.innerHTML='<form action="flight-game.html?payment=return" class="paymentWidgets" data-brands="APPLEPAY VISA MASTER"></form>';
    paymentBox.hidden=false;
    document.querySelectorAll('script[data-flight-payment]').forEach(el=>el.remove());
    const script=document.createElement('script');script.src=data.payment_widget_url;script.async=true;script.dataset.flightPayment='1';
