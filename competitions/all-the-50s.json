@@ -1,0 +1,32 @@
+{
+  "slug": "all-the-50s",
+  "competition": {
+    "title": "All the 50’s",
+    "price": 0.5,
+    "max_entries": 1000,
+    "closes_at": "2026-10-19T19:00:00Z",
+    "description": "All the 50’s: 1,000 tickets, four £50 cash instant wins and a £100 main prize. Tickets cost 50p each. Closes 19 October 2026 at 8pm UK time.",
+    "status": "paused"
+  },
+  "prizes": {
+    "main": {
+      "type": "cash",
+      "amount_gbp": 100
+    },
+    "instant": {
+      "count": 4,
+      "type": "cash",
+      "amount_gbp": 50
+    }
+  },
+  "timezone": "Europe/London",
+  "activation": {
+    "state": "pending_database_setup",
+    "requirements": [
+      "Verify existing instant-win database schema and server allocation logic.",
+      "Create a paused competition with image and approved skill question.",
+      "Configure four distinct £50 instant-win tickets using the existing server system; keep ticket numbers private.",
+      "Verify purchases, instant-win claims and main-prize eligibility before activation."
+    ]
+  }
+}
