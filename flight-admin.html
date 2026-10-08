@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NexaDraw · Flight Admin</title>
+<style>
+:root{font-family:Inter,system-ui,sans-serif;color:#f5f5f5;background:#090603}*{box-sizing:border-box}body{margin:0;background:#090603}.wrap{max-width:760px;margin:40px auto;padding:20px}.brand{display:flex;align-items:center;gap:14px;margin-bottom:28px}.brand img{width:130px}.card{background:#15100b;border:1px solid #49331d;border-radius:18px;padding:24px}.eyebrow{color:#e5a840;font-weight:800;font-size:12px;letter-spacing:.12em}h1{margin:8px 0 6px;font-size:30px}p{color:#bdb6ae;line-height:1.5}.grid{display:grid;grid-template-columns:1fr 150px;gap:14px;margin-top:22px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}label{font-size:13px;font-weight:800}input,textarea{width:100%;border:1px solid #4b3a29;border-radius:10px;background:#0c0906;color:#fff;padding:13px;font:inherit}textarea{min-height:88px;resize:vertical}button{margin-top:18px;width:100%;border:0;border-radius:11px;background:#e5a840;color:#171008;padding:14px;font-weight:900;font-size:16px;cursor:pointer}button:disabled{opacity:.55;cursor:wait}.status{margin-top:16px;padding:13px;border-radius:10px;background:#0c0906;border:1px solid #33271c;min-height:48px}.ok{border-color:#3d704b;color:#bce8c5}.err{border-color:#8d3d3d;color:#ffbaba}.warning{margin-top:18px;font-size:12px;color:#968d83}@media(max-width:600px){.wrap{margin:12px auto;padding:14px}.grid{grid-template-columns:1fr}.field.full{grid-column:auto}}
+</style></head><body>
+<div class="wrap"><div class="brand"><a href="index.html"><img src="logo.png" alt="Nexa Draw"></a><span>ADMIN</span></div>
+<section class="card"><div class="eyebrow">FLIGHT CHALLENGE</div><h1>Grant complimentary entries</h1><p>Add free Flight Game attempts to an existing NexaDraw account. Every grant is recorded in the admin audit log.</p>
+<form id="grantForm"><div class="grid">
+<div class="field"><label for="email">Customer email</label><input id="email" type="email" autocomplete="off" required placeholder="customer@example.com"></div>
+<div class="field"><label for="attempts">Entries</label><input id="attempts" type="number" min="1" max="100" step="1" value="3" required></div>
+<div class="field full"><label for="reason">Reason</label><textarea id="reason" maxlength="500">Complimentary Flight Game entries</textarea></div>
+</div><button id="grantBtn" type="submit">GRANT ENTRIES</button></form>
+<div id="status" class="status" role="status" aria-live="polite">Sign in with the configured Flight admin account before using this page.</div>
+<p class="warning">Admin-only tool. The backend independently verifies your signed-in account before granting entries.</p></section></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+'use strict';
+const sb=window.supabase.createClient('https://hkxegnjlxuscusygckqm.supabase.co','sb_publishable_kO22Zj703int4nZp8ha9jg_hwgz5f9X');
+const form=document.getElementById('grantForm'),btn=document.getElementById('grantBtn'),statusEl=document.getElementById('status');
+const show=(msg,kind='')=>{statusEl.textContent=msg;statusEl.className='status '+kind};
+form.addEventListener('submit',async(e)=>{
+ e.preventDefault(); btn.disabled=true; show('Checking admin session and granting entries…');
+ try{
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session) throw new Error('You are not signed in. Sign in through My Account first.');
+  const email=document.getElementById('email').value.trim();
+  const attempts=Number(document.getElementById('attempts').value);
+  const reason=document.getElementById('reason').value.trim()||'Complimentary Flight Game entries';
+  if(!Number.isInteger(attempts)||attempts<1||attempts>100) throw new Error('Entries must be between 1 and 100.');
+  const {data,error}=await sb.functions.invoke('grant-flight-attempts',{body:{email,attempts,reason},headers:{Authorization:'Bearer '+session.access_token}});
+  if(error) throw new Error(data?.error||error.message||'Grant failed');
+  if(!data?.success) throw new Error(data?.error||'Grant failed');
+  show('Success — '+attempts+' free entr'+(attempts===1?'y':'ies')+' added to '+email+'.','ok');
+  form.reset(); document.getElementById('attempts').value='3';document.getElementById('reason').value='Complimentary Flight Game entries';
+ }catch(err){show(err instanceof Error?err.message:String(err),'err')}
+ finally{btn.disabled=false}
+});
+</script></body></html>
