@@ -30,7 +30,7 @@
    if(error){leaderboardList.innerHTML='<p class="leaderboard-empty">Leaderboard will appear here when available.</p>';if(leaderboardStatus)leaderboardStatus.textContent='Refresh unavailable.';return}
    if(!data?.length){leaderboardList.innerHTML='<p class="leaderboard-empty">No verified scores yet. Set the first one!</p>';if(leaderboardStatus)leaderboardStatus.textContent='Updates automatically.';return}
    if(leaderboardStatus)leaderboardStatus.textContent='Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' · auto-refresh 15s';
-   leaderboardList.innerHTML=data.map((row,i)=>'<div class="leaderboard-row"><span class="leaderboard-rank">'+(i<3?['🥇','🥈','🥉'][i]:'#'+(i+1))+'</span><span class="leaderboard-name">'+String(row.player_label||'Player')+'<small>VERIFIED</small></span><strong class="leaderboard-score">'+Number(row.best_score||0)+'</strong></div>').join('');
+   leaderboardList.innerHTML=data.map((row,i)=>'<div class="leaderboard-row"><span class="leaderboard-rank">'+(i<3?['🥇','🥈','🥉'][i]:'#'+(i+1))+'</span><span class="leaderboard-name">'+String(row.player_label||'Player')+'<small>'+ (row.verification_label==='VERIFIED'?'VERIFIED':'OWNER APPROVED · UNVERIFIED') +'</small></span><strong class="leaderboard-score">'+Number(row.best_score||0)+'</strong></div>').join('');
  }
  async function loadAttemptBalance(){
    if(!attemptBalance)return;
