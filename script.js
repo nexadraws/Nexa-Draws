@@ -214,7 +214,7 @@ function renderFeaturedDraw() {
   if (!host) return;
 
   const competition = competitions.find(
-    item => item.status === 'live'
+    item => item.status === 'live' && (!item.closes || new Date(item.closes).getTime() > Date.now()) && (!item.max || item.sold < item.max)
   );
 
   if (!competition) {
@@ -300,7 +300,7 @@ function renderDraws() {
   if (!host) return;
 
   const live = competitions.filter(
-    competition => competition.status === 'live'
+    competition => competition.status === 'live' && (!competition.closes || new Date(competition.closes).getTime() > Date.now()) && (!competition.max || competition.sold < competition.max)
   );
 
   if (!live.length) {
